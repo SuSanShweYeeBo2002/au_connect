@@ -33,7 +33,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
   String _result = '0';
   void _onPressed(String value) {
     setState(() {
-      if (value == 'AC') {
+      if (value == 'AC' || value == 'C') {
         _expression = '';
         _result = '0';
       } else if (value == '=') {
@@ -154,141 +154,188 @@ class _CalculatorPageState extends State<CalculatorPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Button layout: each row contains exactly 4 buttons
     final buttonLabels = [
-      ['AC', '%', '√', 'π', 'e'],
-      ['x²', 'x³', 'sin', 'cos', 'tan'],
-      ['cos⁻¹', 'tan⁻¹', 'eˣ', '1/x', 'sin⁻¹'],
-      ['7', '8', '9', '(', ')'],
-      ['4', '5', '6', '÷', '⌫'],
-      ['1', '2', '3', '×', '-'],
-      ['0', '.', '=', '+', 'n!'],
+      ['sin', 'cos', 'tan', '()'],
+      ['deg', 'in', 'log', 'e'],
+      ['π', 'xʸ', '√', '!'],
+      ['C', '%', '÷', '⌫'],
+      ['7', '8', '9', '×'],
+      ['4', '5', '6', '-'],
+      ['1', '2', '3', '+'],
+      ['00', '0', '.', '='],
     ];
     final media = MediaQuery.of(context);
     final screenWidth = media.size.width;
-    final isWide = screenWidth > 600;
-    final maxWidth = isWide ? 420.0 : screenWidth * 0.98;
-    final buttonFontSize = isWide ? 26.0 : screenWidth * 0.045;
-    final resultFontSize = isWide ? 48.0 : screenWidth * 0.09;
-    final exprFontSize = isWide ? 24.0 : screenWidth * 0.045;
-    final gridSpacing = isWide ? 18.0 : 10.0;
-    final gridPadding = isWide ? 12.0 : 4.0;
-    final resultPadding = isWide ? 28.0 : 18.0;
-    final resultVertical = isWide ? 28.0 : 18.0;
+    final maxWidth = 360.0;
+    final buttonFontSize = 22.0;
+    final resultFontSize = 28.0;
+    final exprFontSize = 32.0;
+    final gridSpacing = 8.0;
+    final gridPadding = 16.0;
+    final resultPadding = 0.0;
+    final resultVertical = 0.0;
     return Scaffold(
-      backgroundColor: Color(0xFFE3F2FD),
-      appBar: AppBar(
-        backgroundColor: Color(0xFF64B5F6),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.close),
-            onPressed: () => Navigator.pop(context),
+      backgroundColor: Colors.transparent,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFFFA726), Color(0xFFFF7043)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-        ],
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return Center(
-            child: Container(
-              width: maxWidth,
-              child: Column(
-                children: [
-                  SizedBox(height: isWide ? 36 : 18),
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: gridPadding),
-                    padding: EdgeInsets.symmetric(
-                      vertical: resultVertical,
-                      horizontal: resultPadding,
+        ),
+        child: Center(
+          child: Container(
+            width: maxWidth,
+            margin: EdgeInsets.symmetric(vertical: 24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(32),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 18,
+                  offset: Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: 18,
+                    left: 18,
+                    right: 18,
+                    bottom: 0,
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Scientific Calculator',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 12,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
+                  ),
+                ),
+                // Expression/result
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 8,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        reverse: true,
+                        child: Text(
                           _expression,
                           style: TextStyle(
-                            color: Colors.grey[700],
+                            color: Colors.black87,
                             fontSize: exprFontSize,
+                            fontWeight: FontWeight.w500,
                           ),
                           textAlign: TextAlign.right,
                         ),
-                        SizedBox(height: 8),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            _result,
-                            style: TextStyle(
-                              color: Color(0xFF1976D2),
-                              fontSize: resultFontSize,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.right,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: isWide ? 36 : 18),
-                  Expanded(
-                    child: GridView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: gridPadding),
-                      itemCount: buttonLabels.expand((e) => e).length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 5,
-                        childAspectRatio: 1,
-                        crossAxisSpacing: gridSpacing,
-                        mainAxisSpacing: gridSpacing,
                       ),
-                      itemBuilder: (context, index) {
-                        final btn = buttonLabels
-                            .expand((e) => e)
-                            .toList()[index];
-                        if (btn.isEmpty) return SizedBox.shrink();
-                        final isAction = btn == 'AC';
-                        return ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isAction
-                                ? Colors.yellow[700]
-                                : Colors.white,
-                            foregroundColor: isAction
-                                ? Colors.black
-                                : Color(0xFF1976D2),
-                            elevation: isAction ? 2 : 1,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            padding: EdgeInsets.zero,
-                          ),
-                          onPressed: () => _onPressed(btn),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              btn,
-                              style: TextStyle(
-                                fontSize: buttonFontSize,
-                                fontWeight: FontWeight.bold,
+                      SizedBox(height: 4),
+                      Text(
+                        _result,
+                        style: TextStyle(
+                          color: Color(0xFFFF7043),
+                          fontSize: resultFontSize,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ],
+                  ),
+                ),
+                // Buttons
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: gridPadding,
+                    vertical: 8,
+                  ),
+                  child: Column(
+                    children: buttonLabels.map((row) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: row.map((btn) {
+                          if (btn.isEmpty)
+                            return Expanded(child: SizedBox.shrink());
+                          final isOrange = [
+                            'C',
+                            '%',
+                            '÷',
+                            '×',
+                            '-',
+                            '+',
+                            '=',
+                            'sin',
+                            'cos',
+                            'tan',
+                            'deg',
+                            'in',
+                            'log',
+                            'e',
+                            'π',
+                            'xʸ',
+                            '√',
+                            '!',
+                          ].contains(btn);
+                          return Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.all(gridSpacing / 2),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(32),
+                                  onTap: () => _onPressed(btn),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: isOrange
+                                          ? Color(
+                                              0xFFFFA726,
+                                            ).withOpacity(btn == '=' ? 1 : 0.15)
+                                          : Color(0xFFF5F5F5),
+                                      borderRadius: BorderRadius.circular(32),
+                                    ),
+                                    alignment: Alignment.center,
+                                    height: 56,
+                                    child: Text(
+                                      btn,
+                                      style: TextStyle(
+                                        fontSize: buttonFontSize,
+                                        fontWeight: FontWeight.w600,
+                                        color: isOrange
+                                            ? Color(0xFFFF7043)
+                                            : Colors.black87,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
+                          );
+                        }).toList(),
+                      );
+                    }).toList(),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
