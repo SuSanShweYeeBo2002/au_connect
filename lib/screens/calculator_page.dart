@@ -175,18 +175,17 @@ class _CalculatorPageState extends State<CalculatorPage> {
     final gridPadding = 16.0;
     final resultPadding = 0.0;
     final resultVertical = 0.0;
+    // Campus page background color
+    const campusBg = Color(0xFFE3F2FD);
+    const buttonBg = Color(0xFFE1F5FE);
+    const buttonAccent = Color(0xFF0288D1);
+    const resultColor = Color(0xFF0288D1);
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFFFA726), Color(0xFFFF7043)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+        color: campusBg,
         child: Center(
           child: Container(
             width: maxWidth,
@@ -251,7 +250,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
                       Text(
                         _result,
                         style: TextStyle(
-                          color: Color(0xFFFF7043),
+                          color: resultColor,
                           fontSize: resultFontSize,
                           fontWeight: FontWeight.w600,
                         ),
@@ -273,7 +272,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
                         children: row.map((btn) {
                           if (btn.isEmpty)
                             return Expanded(child: SizedBox.shrink());
-                          final isOrange = [
+                          final isAccent = [
                             'C',
                             '%',
                             '÷',
@@ -303,11 +302,11 @@ class _CalculatorPageState extends State<CalculatorPage> {
                                   onTap: () => _onPressed(btn),
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: isOrange
-                                          ? Color(
-                                              0xFFFFA726,
-                                            ).withOpacity(btn == '=' ? 1 : 0.15)
-                                          : Color(0xFFF5F5F5),
+                                      color: isAccent
+                                          ? buttonAccent.withOpacity(
+                                              btn == '=' ? 1 : 0.12,
+                                            )
+                                          : buttonBg,
                                       borderRadius: BorderRadius.circular(32),
                                     ),
                                     alignment: Alignment.center,
@@ -317,8 +316,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
                                       style: TextStyle(
                                         fontSize: buttonFontSize,
                                         fontWeight: FontWeight.w600,
-                                        color: isOrange
-                                            ? Color(0xFFFF7043)
+                                        color: isAccent
+                                            ? Colors.white
                                             : Colors.black87,
                                       ),
                                     ),
