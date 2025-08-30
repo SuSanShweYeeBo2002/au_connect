@@ -165,7 +165,6 @@ class _CalculatorPageState extends State<CalculatorPage> {
     ];
     final media = MediaQuery.of(context);
     final screenWidth = media.size.width;
-    final screenHeight = media.size.height;
     final isWide = screenWidth > 600;
     final maxWidth = isWide ? 420.0 : screenWidth * 0.98;
     final buttonFontSize = isWide ? 26.0 : screenWidth * 0.045;
