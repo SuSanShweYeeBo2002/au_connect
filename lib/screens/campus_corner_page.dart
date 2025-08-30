@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'pomodoro_timer_page.dart';
 import 'calculator_page.dart';
+import 'idea_cloud_page.dart';
 
 class CampusCornerPage extends StatelessWidget {
   @override
@@ -141,9 +142,19 @@ class CampusCornerPage extends StatelessWidget {
                             title: '🏪 Campus Market',
                             color: Colors.blue[100],
                           ),
-                          _CampusTile(
-                            title: '☁️ Idea Cloud',
-                            color: Colors.blue[200],
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => IdeaCloudPage(),
+                                ),
+                              );
+                            },
+                            child: _CampusTile(
+                              title: '☁️ Idea Cloud',
+                              color: Colors.blue[200],
+                            ),
                           ),
                           _CampusTile(
                             title: ' Future Activity',
