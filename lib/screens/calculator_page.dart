@@ -291,6 +291,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
                             'xʸ',
                             '√',
                             '!',
+                            '()',
                           ].contains(btn);
                           return Expanded(
                             child: Padding(
@@ -302,10 +303,23 @@ class _CalculatorPageState extends State<CalculatorPage> {
                                   onTap: () => _onPressed(btn),
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: isAccent
-                                          ? buttonAccent.withOpacity(
-                                              btn == '=' ? 1 : 0.12,
-                                            )
+                                      color:
+                                          (![
+                                                '0',
+                                                '1',
+                                                '2',
+                                                '3',
+                                                '4',
+                                                '5',
+                                                '6',
+                                                '7',
+                                                '8',
+                                                '9',
+                                                '00',
+                                                '.',
+                                              ].contains(btn) &&
+                                              btn.isNotEmpty)
+                                          ? buttonAccent
                                           : buttonBg,
                                       borderRadius: BorderRadius.circular(32),
                                     ),
