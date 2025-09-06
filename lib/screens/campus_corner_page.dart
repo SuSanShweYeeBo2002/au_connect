@@ -106,8 +106,9 @@ class CampusCornerPage extends StatelessWidget {
                         crossAxisSpacing: 16,
                         children: [
                           _CampusTile(
-                            title: '📚 Learning Hub',
+                            title: 'Learning Hub',
                             color: Colors.white,
+                            icon: Icons.school,
                           ),
                           GestureDetector(
                             onTap: () {
@@ -119,8 +120,9 @@ class CampusCornerPage extends StatelessWidget {
                               );
                             },
                             child: _CampusTile(
-                              title: '⏲️ Pomodoro Study Timer',
+                              title: 'Pomodoro Study Timer',
                               color: Colors.blue[200],
+                              icon: Icons.timer,
                             ),
                           ),
                           GestureDetector(
@@ -133,11 +135,16 @@ class CampusCornerPage extends StatelessWidget {
                               );
                             },
                             child: _CampusTile(
-                              title: '🧮 Calculator',
+                              title: 'Calculator',
                               color: Colors.blue[100],
+                              icon: Icons.calculate,
                             ),
                           ),
-                          _CampusTile(title: '🎮 Games', color: Colors.white),
+                          _CampusTile(
+                            title: 'Games',
+                            color: Colors.white,
+                            icon: Icons.games,
+                          ),
                           GestureDetector(
                             onTap: () {
                               Navigator.push(
@@ -148,13 +155,15 @@ class CampusCornerPage extends StatelessWidget {
                               );
                             },
                             child: _CampusTile(
-                              title: '📅 Events',
+                              title: 'Events',
                               color: Colors.white,
+                              icon: Icons.event,
                             ),
                           ),
                           _CampusTile(
-                            title: '🏪 Campus Market',
+                            title: 'Campus Market',
                             color: Colors.blue[100],
+                            icon: Icons.store,
                           ),
                           GestureDetector(
                             onTap: () {
@@ -166,12 +175,13 @@ class CampusCornerPage extends StatelessWidget {
                               );
                             },
                             child: _CampusTile(
-                              title: '☁️ Idea Cloud',
+                              title: 'Idea Cloud',
                               color: Colors.blue[200],
+                              icon: Icons.cloud,
                             ),
                           ),
                           _CampusTile(
-                            title: ' Future Activity',
+                            title: 'Future Activity',
                             color: Colors.white,
                             icon: Icons.help_outline,
                           ),
