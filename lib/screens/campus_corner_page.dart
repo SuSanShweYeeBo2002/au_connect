@@ -64,7 +64,7 @@ class CampusCornerPage extends StatelessWidget {
                             ),
                           ),
                           IconButton(
-                            icon: Icon(Icons.settings, color: Colors.grey[700]),
+                            icon: Icon(Icons.settings, color: Colors.grey[800]),
                             onPressed: () {},
                           ),
                         ],
@@ -82,7 +82,7 @@ class CampusCornerPage extends StatelessWidget {
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.search, color: Colors.grey[400]),
+                              Icon(Icons.search, color: Colors.grey[600]),
                               SizedBox(width: 8),
                               Expanded(
                                 child: TextField(
@@ -254,7 +254,7 @@ class _CampusTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (icon != null) Icon(icon, color: Colors.blue[700]),
+          if (icon != null) Icon(icon, color: Colors.grey[800]),
           if (icon != null) SizedBox(width: 8),
           Expanded(
             child: Column(
