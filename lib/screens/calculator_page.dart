@@ -7,6 +7,11 @@ class CalculatorPage extends StatefulWidget {
 }
 
 class _CalculatorPageState extends State<CalculatorPage> {
+  String _result = '0';
+  String _expression = '';
+  bool _isDegreeMode = true; // true for degrees, false for radians
+  bool _isInverseMode = false; // true when Inv is active
+
   // Replace all factorials in the expression
   String _replaceFactorials(String expr) {
     // Handles numbers and parenthesized expressions before '!'
@@ -30,10 +35,9 @@ class _CalculatorPageState extends State<CalculatorPage> {
     return expr;
   }
 
-  String _result = '0';
   void _onPressed(String value) {
     setState(() {
-      if (value == 'AC' || value == 'C') {
+      if (value == 'CE' || value == 'C') {
         _expression = '';
         _result = '0';
       } else if (value == '=') {
@@ -46,7 +50,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
         if (_expression.isNotEmpty) {
           _expression = _expression.substring(0, _expression.length - 1);
         }
-      } else if (value == 'n!') {
+      } else if (value == 'x!') {
         // Insert factorial operator
         if (_expression.isNotEmpty && !_expression.endsWith('!')) {
           _expression += '!';
@@ -56,13 +60,58 @@ class _CalculatorPageState extends State<CalculatorPage> {
         if (_expression.isNotEmpty && !_expression.endsWith('^')) {
           _expression += '^';
         }
+      } else if (value == 'Rad' || value == '●Rad') {
+        _isDegreeMode = false; // Switch to radians
+      } else if (value == 'Deg' || value == '●Deg') {
+        _isDegreeMode = true; // Switch to degrees
+      } else if (value == 'Inv') {
+        _isInverseMode = !_isInverseMode; // Toggle inverse mode
+      } else if (value == 'Ans') {
+        // Insert previous answer
+        _expression += _result;
+      } else if (value == 'EXP') {
+        // Insert scientific notation 'E'
+        if (_expression.isNotEmpty && !_expression.endsWith('E')) {
+          _expression += 'E';
+        }
+      } else if (value == '(') {
+        _expression += '(';
+      } else if (value == ')') {
+        _expression += ')';
+      } else if (value == 'sin' ||
+          value == 'cos' ||
+          value == 'tan' ||
+          value == 'sin⁻¹' ||
+          value == 'cos⁻¹' ||
+          value == 'tan⁻¹') {
+        // Handle trigonometric functions with inverse
+        if (value.contains('⁻¹')) {
+          String baseFunc = value.replaceAll('⁻¹', '');
+          _expression += 'a$baseFunc';
+        } else {
+          String func = _isInverseMode ? 'a$value' : value;
+          _expression += func;
+        }
+        if (_isInverseMode) _isInverseMode = false; // Reset after use
+      } else if (value == 'ln' || value == 'eˣ') {
+        if (value == 'eˣ') {
+          _expression += 'exp';
+        } else {
+          _expression += _isInverseMode ? 'exp' : 'ln';
+        }
+        if (_isInverseMode) _isInverseMode = false;
+      } else if (value == 'log' || value == '10ˣ') {
+        if (value == '10ˣ') {
+          _expression += '10^';
+        } else {
+          _expression += _isInverseMode ? '10^' : 'log';
+        }
+        if (_isInverseMode) _isInverseMode = false;
       } else {
         _expression += value;
       }
     });
   }
-
-  String _expression = '';
   // ...existing code...
 
   String _evaluate(String expr) {
@@ -72,19 +121,47 @@ class _CalculatorPageState extends State<CalculatorPage> {
       expr = _replaceFactorials(expr);
       // Handle power operations (xʸ becomes ^)
       expr = expr.replaceAll('xʸ', '^');
-      // For scientific functions
-      if (expr.contains('sin')) {
+
+      // Handle scientific notation (E notation)
+      if (expr.contains('E')) {
+        // Parse scientific notation like 1.5E3 = 1500
+        return double.parse(expr).toString();
+      }
+
+      // Handle scientific functions with degree/radian conversion
+      if (expr.contains('sin') && !expr.contains('asin')) {
         final val = double.parse(expr.replaceAll('sin', ''));
-        return sin(val * pi / 180).toString();
-      } else if (expr.contains('cos')) {
+        final angle = _isDegreeMode ? val * pi / 180 : val;
+        return sin(angle).toString();
+      } else if (expr.contains('cos') && !expr.contains('acos')) {
         final val = double.parse(expr.replaceAll('cos', ''));
-        return cos(val * pi / 180).toString();
-      } else if (expr.contains('tan')) {
+        final angle = _isDegreeMode ? val * pi / 180 : val;
+        return cos(angle).toString();
+      } else if (expr.contains('tan') && !expr.contains('atan')) {
         final val = double.parse(expr.replaceAll('tan', ''));
-        return tan(val * pi / 180).toString();
+        final angle = _isDegreeMode ? val * pi / 180 : val;
+        return tan(angle).toString();
+      } else if (expr.contains('asin')) {
+        final val = double.parse(expr.replaceAll('asin', ''));
+        final result = asin(val);
+        return (_isDegreeMode ? result * 180 / pi : result).toString();
+      } else if (expr.contains('acos')) {
+        final val = double.parse(expr.replaceAll('acos', ''));
+        final result = acos(val);
+        return (_isDegreeMode ? result * 180 / pi : result).toString();
+      } else if (expr.contains('atan')) {
+        final val = double.parse(expr.replaceAll('atan', ''));
+        final result = atan(val);
+        return (_isDegreeMode ? result * 180 / pi : result).toString();
       } else if (expr.contains('ln')) {
         final val = double.parse(expr.replaceAll('ln', ''));
         return log(val).toString();
+      } else if (expr.contains('exp')) {
+        final val = double.parse(expr.replaceAll('exp', ''));
+        return exp(val).toString();
+      } else if (expr.contains('log')) {
+        final val = double.parse(expr.replaceAll('log', ''));
+        return (log(val) / log(10)).toString(); // log base 10
       } else if (expr.contains('π')) {
         return pi.toString();
       } else if (expr.contains('e')) {
@@ -92,13 +169,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
       } else if (expr.contains('√')) {
         final val = double.parse(expr.replaceAll('√', ''));
         return sqrt(val).toString();
-      } else if (expr.contains('x²')) {
-        final val = double.parse(expr.replaceAll('x²', ''));
-        return pow(val, 2).toString();
-      } else if (expr.contains('x³')) {
-        final val = double.parse(expr.replaceAll('x³', ''));
-        return pow(val, 3).toString();
       }
+
       // Basic arithmetic with parentheses and power operations
       final res = _parenthesesEval(expr);
       return res.toString();
@@ -109,6 +181,15 @@ class _CalculatorPageState extends State<CalculatorPage> {
   // ...existing code...
 
   num _basicEval(String expr) {
+    // Handle scientific notation first
+    if (expr.contains('E')) {
+      try {
+        return double.parse(expr);
+      } catch (e) {
+        // If parsing fails, continue with other operations
+      }
+    }
+
     // Handle power operations first (right-to-left associativity)
     if (expr.contains('^')) {
       return _handlePower(expr);
@@ -122,11 +203,12 @@ class _CalculatorPageState extends State<CalculatorPage> {
         .where((t) => t.isNotEmpty)
         .toList();
     List<String> ops = expr
-        .split(RegExp(r'[0-9.]+'))
+        .split(RegExp(r'[0-9.E]+'))
         .where((t) => t.isNotEmpty)
         .toList();
+
     num result = double.tryParse(tokens[0]) ?? 0;
-    for (int i = 0; i < ops.length; i++) {
+    for (int i = 0; i < ops.length && i < tokens.length - 1; i++) {
       num next = double.tryParse(tokens[i + 1]) ?? 0;
       switch (ops[i]) {
         case '+':
@@ -187,26 +269,34 @@ class _CalculatorPageState extends State<CalculatorPage> {
   Widget build(BuildContext context) {
     // Button layout: each row contains exactly 4 buttons
     final buttonLabels = [
-      ['sin', 'cos', 'tan', '()'],
-      ['deg', 'ln', 'log', 'e'],
-      ['π', 'xʸ', '√', '!'],
-      ['C', '%', '÷', '⌫'],
+      [
+        _isDegreeMode ? 'Rad' : '●Rad',
+        _isDegreeMode ? '●Deg' : 'Deg',
+        'x!',
+        'CE',
+      ],
+      [
+        'Inv',
+        _isInverseMode ? 'sin⁻¹' : 'sin',
+        _isInverseMode ? 'cos⁻¹' : 'cos',
+        _isInverseMode ? 'tan⁻¹' : 'tan',
+      ],
+      [_isInverseMode ? 'eˣ' : 'ln', _isInverseMode ? '10ˣ' : 'log', '√', 'xʸ'],
+      ['π', 'e', '(', ')'],
+      ['Ans', 'EXP', '%', '÷'],
       ['7', '8', '9', '×'],
       ['4', '5', '6', '-'],
       ['1', '2', '3', '+'],
-      ['00', '0', '.', '='],
+      ['0', '.', '⌫', '='],
     ];
-    final maxWidth = 360.0;
-    final buttonFontSize = 22.0;
-    final resultFontSize = 28.0;
-    final exprFontSize = 32.0;
-    final gridSpacing = 8.0;
+    final maxWidth = 380.0;
+    final buttonFontSize = 20.0;
+    final gridSpacing = 6.0;
     final gridPadding = 16.0;
     // Campus page background color
     const campusBg = Color(0xFFE3F2FD);
     const buttonBg = Color(0xFFE1F5FE);
     const buttonAccent = Color(0xFF0288D1);
-    const resultColor = Color(0xFF0288D1);
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
@@ -257,119 +347,160 @@ class _CalculatorPageState extends State<CalculatorPage> {
                     horizontal: 18,
                     vertical: 8,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        reverse: true,
-                        child: Text(
-                          _expression,
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontSize: exprFontSize,
-                            fontWeight: FontWeight.w500,
+                  child: Container(
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Ans display
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Icon(Icons.refresh, color: Colors.grey),
+                            Text(
+                              'Ans = ${_result != '0' ? _result : '0'}',
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                        // Current result
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          reverse: true,
+                          child: Text(
+                            _expression.isEmpty ? '0' : _expression,
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 36,
+                              fontWeight: FontWeight.w300,
+                            ),
+                            textAlign: TextAlign.right,
                           ),
-                          textAlign: TextAlign.right,
                         ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        _result,
-                        style: TextStyle(
-                          color: resultColor,
-                          fontSize: resultFontSize,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 // Buttons
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: gridPadding,
-                    vertical: 8,
-                  ),
-                  child: Column(
-                    children: buttonLabels.map((row) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: row.map((btn) {
-                          if (btn.isEmpty)
-                            return Expanded(child: SizedBox.shrink());
-                          final isAccent = [
-                            'C',
-                            '%',
-                            '÷',
-                            '×',
-                            '-',
-                            '+',
-                            '=',
-                            'sin',
-                            'cos',
-                            'tan',
-                            'deg',
-                            'ln',
-                            'log',
-                            'e',
-                            'π',
-                            'xʸ',
-                            '√',
-                            '!',
-                            '()',
-                          ].contains(btn);
-                          return Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.all(gridSpacing / 2),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(32),
-                                  onTap: () => _onPressed(btn),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color:
-                                          (![
-                                                '0',
-                                                '1',
-                                                '2',
-                                                '3',
-                                                '4',
-                                                '5',
-                                                '6',
-                                                '7',
-                                                '8',
-                                                '9',
-                                                '00',
-                                                '.',
-                                              ].contains(btn) &&
-                                              btn.isNotEmpty)
-                                          ? buttonAccent
-                                          : buttonBg,
-                                      borderRadius: BorderRadius.circular(32),
-                                    ),
-                                    alignment: Alignment.center,
-                                    height: 56,
-                                    child: Text(
-                                      btn,
-                                      style: TextStyle(
-                                        fontSize: buttonFontSize,
-                                        fontWeight: FontWeight.w600,
-                                        color: isAccent
-                                            ? Colors.white
-                                            : Colors.black87,
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: gridPadding,
+                        vertical: 8,
+                      ),
+                      child: Column(
+                        children: buttonLabels.map((row) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(vertical: 2),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: row.map((btn) {
+                                if (btn.isEmpty)
+                                  return Expanded(child: SizedBox.shrink());
+                                final isAccent = [
+                                  'CE',
+                                  '%',
+                                  '÷',
+                                  '×',
+                                  '-',
+                                  '+',
+                                  '=',
+                                  '⌫',
+                                  'sin',
+                                  'cos',
+                                  'tan',
+                                  'sin⁻¹',
+                                  'cos⁻¹',
+                                  'tan⁻¹',
+                                  'Rad',
+                                  '●Rad',
+                                  'Deg',
+                                  '●Deg',
+                                  'Inv',
+                                  'ln',
+                                  'eˣ',
+                                  'log',
+                                  '10ˣ',
+                                  'e',
+                                  'π',
+                                  'xʸ',
+                                  '√',
+                                  'x!',
+                                  '(',
+                                  ')',
+                                  'Ans',
+                                  'EXP',
+                                ].contains(btn);
+                                return Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(gridSpacing / 2),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(32),
+                                        onTap: () => _onPressed(btn),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color:
+                                                (btn == '●Rad' || btn == '●Deg')
+                                                ? Color(
+                                                    0xFF4CAF50,
+                                                  ) // Green for active mode
+                                                : (![
+                                                        '0',
+                                                        '1',
+                                                        '2',
+                                                        '3',
+                                                        '4',
+                                                        '5',
+                                                        '6',
+                                                        '7',
+                                                        '8',
+                                                        '9',
+                                                        '.',
+                                                      ].contains(btn) &&
+                                                      btn.isNotEmpty)
+                                                ? buttonAccent
+                                                : buttonBg,
+                                            borderRadius: BorderRadius.circular(
+                                              32,
+                                            ),
+                                          ),
+                                          alignment: Alignment.center,
+                                          height: 50,
+                                          child: Text(
+                                            btn,
+                                            style: TextStyle(
+                                              fontSize: buttonFontSize,
+                                              fontWeight: FontWeight.w600,
+                                              color: isAccent
+                                                  ? Colors.white
+                                                  : Colors.black87,
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
+                                );
+                              }).toList(),
                             ),
                           );
                         }).toList(),
-                      );
-                    }).toList(),
+                      ),
+                    ),
                   ),
                 ),
               ],
