@@ -51,6 +51,11 @@ class _CalculatorPageState extends State<CalculatorPage> {
         if (_expression.isNotEmpty && !_expression.endsWith('!')) {
           _expression += '!';
         }
+      } else if (value == 'xʸ') {
+        // Insert power operator
+        if (_expression.isNotEmpty && !_expression.endsWith('^')) {
+          _expression += '^';
+        }
       } else {
         _expression += value;
       }
@@ -65,6 +70,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
     try {
       // Handle factorials for numbers and parenthesized expressions
       expr = _replaceFactorials(expr);
+      // Handle power operations (xʸ becomes ^)
+      expr = expr.replaceAll('xʸ', '^');
       // For scientific functions
       if (expr.contains('sin')) {
         final val = double.parse(expr.replaceAll('sin', ''));
@@ -75,6 +82,9 @@ class _CalculatorPageState extends State<CalculatorPage> {
       } else if (expr.contains('tan')) {
         final val = double.parse(expr.replaceAll('tan', ''));
         return tan(val * pi / 180).toString();
+      } else if (expr.contains('ln')) {
+        final val = double.parse(expr.replaceAll('ln', ''));
+        return log(val).toString();
       } else if (expr.contains('π')) {
         return pi.toString();
       } else if (expr.contains('e')) {
@@ -89,7 +99,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
         final val = double.parse(expr.replaceAll('x³', ''));
         return pow(val, 3).toString();
       }
-      // Basic arithmetic with parentheses
+      // Basic arithmetic with parentheses and power operations
       final res = _parenthesesEval(expr);
       return res.toString();
     } catch (e) {
@@ -99,6 +109,11 @@ class _CalculatorPageState extends State<CalculatorPage> {
   // ...existing code...
 
   num _basicEval(String expr) {
+    // Handle power operations first (right-to-left associativity)
+    if (expr.contains('^')) {
+      return _handlePower(expr);
+    }
+
     // Only supports +, -, *, /
     // This is a simple parser, not for complex expressions
     expr = expr.replaceAll('--', '+');
@@ -131,6 +146,22 @@ class _CalculatorPageState extends State<CalculatorPage> {
     return result;
   }
 
+  num _handlePower(String expr) {
+    // Handle power operations (^) with right-to-left associativity
+    int lastPowerIndex = expr.lastIndexOf('^');
+    if (lastPowerIndex == -1) {
+      return double.tryParse(expr) ?? 0;
+    }
+
+    String leftPart = expr.substring(0, lastPowerIndex);
+    String rightPart = expr.substring(lastPowerIndex + 1);
+
+    num base = _basicEval(leftPart);
+    num exponent = _handlePower(rightPart); // Recursive for right associativity
+
+    return pow(base, exponent);
+  }
+
   int _factorial(int n) {
     if (n <= 1) return 1;
     return n * _factorial(n - 1);
@@ -157,7 +188,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
     // Button layout: each row contains exactly 4 buttons
     final buttonLabels = [
       ['sin', 'cos', 'tan', '()'],
-      ['deg', 'in', 'log', 'e'],
+      ['deg', 'ln', 'log', 'e'],
       ['π', 'xʸ', '√', '!'],
       ['C', '%', '÷', '⌫'],
       ['7', '8', '9', '×'],
@@ -280,7 +311,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
                             'cos',
                             'tan',
                             'deg',
-                            'in',
+                            'ln',
                             'log',
                             'e',
                             'π',
