@@ -165,16 +165,12 @@ class _CalculatorPageState extends State<CalculatorPage> {
       ['1', '2', '3', '+'],
       ['00', '0', '.', '='],
     ];
-    final media = MediaQuery.of(context);
-    final screenWidth = media.size.width;
     final maxWidth = 360.0;
     final buttonFontSize = 22.0;
     final resultFontSize = 28.0;
     final exprFontSize = 32.0;
     final gridSpacing = 8.0;
     final gridPadding = 16.0;
-    final resultPadding = 0.0;
-    final resultVertical = 0.0;
     // Campus page background color
     const campusBg = Color(0xFFE3F2FD);
     const buttonBg = Color(0xFFE1F5FE);

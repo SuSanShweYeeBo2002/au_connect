@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'pomodoro_timer_page.dart';
 import 'calculator_page.dart';
 import 'idea_cloud_page.dart';
+import 'upcoming_event_page.dart';
 
 class CampusCornerPage extends StatelessWidget {
   @override
@@ -137,7 +138,20 @@ class CampusCornerPage extends StatelessWidget {
                             ),
                           ),
                           _CampusTile(title: '🎮 Games', color: Colors.white),
-                          _CampusTile(title: '📅 Events', color: Colors.white),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => UpcomingEventPage(),
+                                ),
+                              );
+                            },
+                            child: _CampusTile(
+                              title: '📅 Events',
+                              color: Colors.white,
+                            ),
+                          ),
                           _CampusTile(
                             title: '🏪 Campus Market',
                             color: Colors.blue[100],
