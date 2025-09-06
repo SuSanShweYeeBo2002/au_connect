@@ -35,6 +35,56 @@ class _CalculatorPageState extends State<CalculatorPage> {
     return expr;
   }
 
+  // Handle percentage calculations
+  String _handlePercentage(String expr) {
+    // Handle different percentage scenarios
+    // 1. Simple percentage: 50% -> 0.5
+    // 2. Percentage of number: 20*50% -> 20*0.5 = 10
+    // 3. Addition/subtraction with percentage: 100+20% -> 100+20 = 120
+    // 4. Before number: 1000%10 -> 10% of 1000 = 100
+
+    // Look for patterns like number%number (e.g., 1000%10)
+    final percentBeforeNumber = RegExp(r'(\d+(?:\.\d+)?)%(\d+(?:\.\d+)?)');
+    expr = expr.replaceAllMapped(percentBeforeNumber, (match) {
+      double baseNumber = double.parse(match.group(1)!);
+      double percentage = double.parse(match.group(2)!);
+      double result = (percentage / 100) * baseNumber;
+      return result.toString();
+    });
+
+    // Handle simple percentage patterns like 50%
+    final percentPattern = RegExp(
+      r'(\d+(?:\.\d+)?)%(?!\d)',
+    ); // Negative lookahead to avoid matching number%number
+
+    expr = expr.replaceAllMapped(percentPattern, (match) {
+      double percentage = double.parse(match.group(1)!);
+
+      // Check if there's an operator before the percentage
+      int matchStart = match.start;
+      if (matchStart > 0) {
+        String beforePercent = expr.substring(0, matchStart);
+
+        // If preceded by + or -, treat as percentage of the preceding number
+        if (beforePercent.endsWith('+') || beforePercent.endsWith('-')) {
+          // Find the number before the operator
+          RegExp numberPattern = RegExp(r'(\d+(?:\.\d+)?)[\+\-]$');
+          Match? numberMatch = numberPattern.firstMatch(beforePercent);
+          if (numberMatch != null) {
+            double baseNumber = double.parse(numberMatch.group(1)!);
+            double percentValue = (percentage / 100) * baseNumber;
+            return percentValue.toString();
+          }
+        }
+      }
+
+      // Default: convert percentage to decimal
+      return (percentage / 100).toString();
+    });
+
+    return expr;
+  }
+
   void _onPressed(String value) {
     setState(() {
       if (value == 'CE' || value == 'C') {
@@ -73,6 +123,11 @@ class _CalculatorPageState extends State<CalculatorPage> {
         // Insert scientific notation 'E'
         if (_expression.isNotEmpty && !_expression.endsWith('E')) {
           _expression += 'E';
+        }
+      } else if (value == '%') {
+        // Handle percentage
+        if (_expression.isNotEmpty && !_expression.endsWith('%')) {
+          _expression += '%';
         }
       } else if (value == '(') {
         _expression += '(';
@@ -121,6 +176,11 @@ class _CalculatorPageState extends State<CalculatorPage> {
       expr = _replaceFactorials(expr);
       // Handle power operations (xʸ becomes ^)
       expr = expr.replaceAll('xʸ', '^');
+
+      // Handle percentage calculations
+      if (expr.contains('%')) {
+        expr = _handlePercentage(expr);
+      }
 
       // Handle scientific notation (E notation)
       if (expr.contains('E')) {
