@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../services/auth_service.dart';
 
 class SignInPage extends StatefulWidget {
   @override
@@ -42,6 +43,13 @@ class _SignInPageState extends State<SignInPage> {
         });
 
         if (response.statusCode == 200) {
+          // Store login state using AuthService
+          await AuthService.instance.login(
+            email: _emailController.text,
+            // You can store auth token from response if available
+            // authToken: json.decode(response.body)['token'],
+          );
+
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text('Login successful!')));

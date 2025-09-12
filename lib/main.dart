@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'screens/signin_page.dart';
 import 'screens/signup_page.dart';
 import 'screens/main_tab_page.dart';
+import 'widgets/auth_guard.dart';
+import 'services/auth_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,21 +12,60 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'AU Connect',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
       ),
-      initialRoute: '/signin',
+      home: FutureBuilder<bool>(
+        future: AuthService.instance.isLoggedIn(),
+        builder: (context, snapshot) {
+          // Show loading while checking auth status
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Scaffold(
+              backgroundColor: Color(0xFFE3F2FD),
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.school, size: 64, color: Color(0xFF0288D1)),
+                    SizedBox(height: 16),
+                    Text(
+                      'AU Connect',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 32),
+                    CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF0288D1),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          // If user is logged in, go to main page, otherwise go to signin
+          if (snapshot.hasData && snapshot.data == true) {
+            return MainTabPage();
+          } else {
+            return SignInPage();
+          }
+        },
+      ),
       routes: {
         '/signin': (context) => SignInPage(),
         '/signup': (context) => SignUpPage(),
-        '/main': (context) => MainTabPage(),
-        '/home': (context) => MyHomePage(title: 'Flutter Demo Home Page'),
+        '/main': (context) => AuthGuardDirect(child: MainTabPage()),
+        '/home': (context) =>
+            AuthGuardDirect(child: MyHomePage(title: 'Flutter Demo Home Page')),
       },
     );
   }
