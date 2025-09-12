@@ -1,6 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class SignInPage extends StatelessWidget {
+class SignInPage extends StatefulWidget {
+  @override
+  _SignInPageState createState() => _SignInPageState();
+}
+
+class _SignInPageState extends State<SignInPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  Future<void> _signIn() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Please fill in all fields')));
+      }
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:8383/users/signin'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': _emailController.text,
+          'password': _passwordController.text,
+        }),
+      );
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (response.statusCode == 200) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Login successful!')));
+          // Navigate to main page
+          Navigator.pushReplacementNamed(context, '/main');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Login failed: ${response.body}')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Network error: $e')));
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,6 +103,7 @@ class SignInPage extends StatelessWidget {
                       ),
                       SizedBox(height: 32),
                       TextField(
+                        controller: _emailController,
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.mail_outline),
                           hintText: 'Email',
@@ -44,6 +116,7 @@ class SignInPage extends StatelessWidget {
                       ),
                       SizedBox(height: 16),
                       TextField(
+                        controller: _passwordController,
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.lock_outline),
                           hintText: 'password',
@@ -82,13 +155,25 @@ class SignInPage extends StatelessWidget {
                               borderRadius: BorderRadius.circular(24),
                             ),
                           ),
-                          onPressed: () {
-                            Navigator.pushReplacementNamed(context, '/main');
-                          },
-                          child: Text(
-                            'Login',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
+                          onPressed: _isLoading ? null : _signIn,
+                          child: _isLoading
+                              ? SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : Text(
+                                  'Login',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
