@@ -1,16 +1,27 @@
-# au_connect
+# AU Connect
 
-A new Flutter project.
 
-## Getting Started
+## 2025-09-14 API Integration Sample Code
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+```dart
+Future<double?> getBangkokTemperature() async {
+  final url = Uri.parse('http://api.weatherapi.com/v1/current.json?key=2195048ca86d45e2bb6150052251109&q=Bangkok&aqi=no');
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+  try {
+    final response = await http.get(url);
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      // Accessing temp_c from the 'current' object
+      return data['current']['temp_c'].toDouble(); 
+    } else {
+      print('Failed to load weather data. Status code: ${response.statusCode}');
+      return null;
+    }
+  } catch (e) {
+    print('An error occurred: $e');
+    return null;
+  }
+}
+```
