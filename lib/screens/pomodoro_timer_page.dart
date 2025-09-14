@@ -242,18 +242,6 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
                 },
                 child: Text('End this session'),
               ),
-              SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[200],
-                  foregroundColor: Colors.black,
-                  minimumSize: Size(180, 48),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('Back'),
-              ),
             ],
           ),
         ),
