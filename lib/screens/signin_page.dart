@@ -16,9 +16,23 @@ class _SignInPageState extends State<SignInPage> {
   Future<void> _signIn() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Please fill in all fields')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white),
+                SizedBox(width: 8),
+                Text('Please fill in all fields'),
+              ],
+            ),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.red[400],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
       }
       return;
     }
@@ -50,14 +64,62 @@ class _SignInPageState extends State<SignInPage> {
             // authToken: json.decode(response.body)['token'],
           );
 
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Login successful!')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle_outline, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('Login successful!'),
+                ],
+              ),
+              duration: Duration(seconds: 2),
+              backgroundColor: Color(0xFF0288D1),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
           // Navigate to main page
           Navigator.pushReplacementNamed(context, '/main');
         } else {
+          // Parse the error message from response
+          String errorMessage = 'Invalid credentials';
+          try {
+            final responseData = json.decode(response.body);
+            if (responseData['message'] != null) {
+              if (responseData['message'].toString().toLowerCase().contains(
+                'password',
+              )) {
+                errorMessage = 'Incorrect password';
+              } else if (responseData['message']
+                  .toString()
+                  .toLowerCase()
+                  .contains('email')) {
+                errorMessage = 'Email not found';
+              }
+            }
+          } catch (e) {
+            // If parsing fails, keep default message
+          }
+
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Login failed: ${response.body}')),
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.error_outline, color: Colors.white),
+                  SizedBox(width: 8),
+                  Expanded(child: Text(errorMessage)),
+                ],
+              ),
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.red[400],
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
           );
         }
       }
@@ -66,9 +128,23 @@ class _SignInPageState extends State<SignInPage> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Network error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.wifi_off, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(child: Text('Network error: $e')),
+              ],
+            ),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.red[400],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
       }
     }
   }

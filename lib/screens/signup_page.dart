@@ -17,18 +17,46 @@ class _SignUpPageState extends State<SignUpPage> {
   Future<void> _signUp() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Please fill in all fields')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white),
+                SizedBox(width: 8),
+                Text('Please fill in all fields'),
+              ],
+            ),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.red[400],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
       }
       return;
     }
 
     if (_passwordController.text != _confirmPasswordController.text) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Passwords do not match')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.lock_open, color: Colors.white),
+                SizedBox(width: 8),
+                Text('Passwords do not match'),
+              ],
+            ),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.red[400],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
       }
       return;
     }
@@ -54,13 +82,66 @@ class _SignUpPageState extends State<SignUpPage> {
 
         if (response.statusCode == 200 || response.statusCode == 201) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Account created successfully!')),
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle_outline, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('Account created successfully!'),
+                ],
+              ),
+              duration: Duration(seconds: 2),
+              backgroundColor: Color(0xFF0288D1),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
           );
           // Navigate to sign in page or home page
           Navigator.pushNamed(context, '/signin');
         } else {
+          // Parse the error message from response
+          String errorMessage = 'Sign up failed';
+          try {
+            final responseData = json.decode(response.body);
+            if (responseData['message'] != null) {
+              if (responseData['message'].toString().toLowerCase().contains(
+                'exists',
+              )) {
+                errorMessage = 'Email already registered';
+              } else if (responseData['message']
+                  .toString()
+                  .toLowerCase()
+                  .contains('email')) {
+                errorMessage = 'Invalid email format';
+              } else if (responseData['message']
+                  .toString()
+                  .toLowerCase()
+                  .contains('password')) {
+                errorMessage = 'Password too weak';
+              }
+            }
+          } catch (e) {
+            // If parsing fails, keep default message
+          }
+
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Sign up failed: ${response.body}')),
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.error_outline, color: Colors.white),
+                  SizedBox(width: 8),
+                  Expanded(child: Text(errorMessage)),
+                ],
+              ),
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.red[400],
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
           );
         }
       }
@@ -69,9 +150,25 @@ class _SignUpPageState extends State<SignUpPage> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Network error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.wifi_off, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text('Network error: Please check your connection'),
+                ),
+              ],
+            ),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.red[400],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
       }
     }
   }
