@@ -12,6 +12,30 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _rememberMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSavedCredentials();
+  }
+
+  Future<void> _checkSavedCredentials() async {
+    final savedEmail = await AuthService.instance.getSavedEmail();
+    final rememberMe = await AuthService.instance.isRememberMeEnabled();
+
+    if (savedEmail != null && rememberMe) {
+      setState(() {
+        _emailController.text = savedEmail;
+        _rememberMe = true;
+      });
+
+      // Focus the password field since the email is already filled
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).requestFocus(FocusNode());
+      });
+    }
+  }
 
   Future<void> _signIn() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
@@ -60,6 +84,7 @@ class _SignInPageState extends State<SignInPage> {
           // Store login state using AuthService
           await AuthService.instance.login(
             email: _emailController.text,
+            rememberMe: _rememberMe,
             // You can store auth token from response if available
             // authToken: json.decode(response.body)['token'],
           );
@@ -214,17 +239,23 @@ class _SignInPageState extends State<SignInPage> {
                       ),
                       SizedBox(height: 8),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          Checkbox(
+                            value: _rememberMe,
+                            activeColor: Color(0xFF0288D1),
+                            onChanged: (bool? value) {
+                              setState(() {
+                                _rememberMe = value ?? false;
+                              });
+                            },
+                          ),
+                          Text('Remember me'),
+                          Spacer(),
                           TextButton(
                             onPressed: () {
                               Navigator.pushNamed(context, '/signup');
                             },
                             child: Text('Don\'t have an account?'),
-                          ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text('Forgot password'),
                           ),
                         ],
                       ),
@@ -259,6 +290,19 @@ class _SignInPageState extends State<SignInPage> {
                                   ),
                                 ),
                         ),
+                      ),
+                      SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () {},
+                            child: Text(
+                              'Forgot password',
+                              style: TextStyle(color: Color(0xFF0288D1)),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
