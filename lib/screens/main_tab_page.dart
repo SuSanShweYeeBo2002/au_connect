@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_page.dart';
 import 'friend_page.dart';
 import 'campus_corner_page.dart';
+import 'chats_list_page.dart';
 
 class MainTabPage extends StatefulWidget {
   @override
@@ -34,7 +35,10 @@ class _MainTabPageState extends State<MainTabPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Implement messaging functionality
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ChatsListPage()),
+          );
         },
         backgroundColor: Theme.of(context).primaryColor,
         elevation: 6.0,
