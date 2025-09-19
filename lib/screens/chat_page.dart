@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import '../services/chat_service.dart';
+import '../services/socket_service.dart';
 
 class ChatPage extends StatefulWidget {
+  final User? receiver;
+
+  const ChatPage({Key? key, this.receiver}) : super(key: key);
+
   @override
   _ChatPageState createState() => _ChatPageState();
 }
@@ -8,26 +14,109 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  List<ChatMessage> _messages = [];
+  List<Message> _messages = [];
+  bool _isLoading = false;
+  bool _isTyping = false;
+  DateTime? _lastTypingNotification;
+  String? _typingUserId;
 
-  void _handleSubmitted(String text) {
-    if (text.trim().isEmpty) return;
+  @override
+  void initState() {
+    super.initState();
+    _loadMessages();
+    _setupSocket();
+    _messageController.addListener(_onTypingChange);
+  }
 
-    _messageController.clear();
-    setState(() {
-      _messages.add(
-        ChatMessage(text: text, isUser: true, timestamp: DateTime.now()),
-      );
-    });
-
-    // Scroll to the bottom after sending a message
-    Future.delayed(Duration(milliseconds: 100), () {
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
         duration: Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
+    }
+  }
+
+  void _setupSocket() {
+    final socket = SocketService.instance;
+    socket.initSocket();
+
+    socket.addMessageListener((data) {
+      if (mounted && data['senderId'] == widget.receiver?.id) {
+        final newMessage = Message.fromJson(data);
+        setState(() {
+          _messages.add(newMessage);
+        });
+        _scrollToBottom();
+      }
     });
+
+    socket.addTypingListener((userId) {
+      if (mounted && userId == widget.receiver?.id) {
+        setState(() {
+          _typingUserId = userId;
+        });
+        // Clear typing indicator after 3 seconds
+        Future.delayed(Duration(seconds: 3), () {
+          if (mounted && _typingUserId == userId) {
+            setState(() {
+              _typingUserId = null;
+            });
+          }
+        });
+      }
+    });
+  }
+
+  void _onTypingChange() {
+    final now = DateTime.now();
+    if (_lastTypingNotification == null ||
+        now.difference(_lastTypingNotification!) > Duration(seconds: 2)) {
+      _lastTypingNotification = now;
+      if (widget.receiver != null) {
+        SocketService.instance.sendTypingNotification(widget.receiver!.id);
+      }
+    }
+  }
+
+  Future<void> _loadMessages() async {
+    if (widget.receiver == null) return;
+
+    setState(() => _isLoading = true);
+    try {
+      final messages = await ChatService.getConversation(widget.receiver!.id);
+      setState(() {
+        _messages = messages;
+        _isLoading = false;
+      });
+      _scrollToBottom();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load messages')));
+      }
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleSubmitted(String text) async {
+    if (text.trim().isEmpty || widget.receiver == null) return;
+
+    final messageText = text;
+    _messageController.clear();
+
+    try {
+      SocketService.instance.sendMessage(widget.receiver!.id, messageText);
+      // Message will be added to the list when received through socket
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to send message')));
+      }
+    }
   }
 
   @override
@@ -37,13 +126,28 @@ class _ChatPageState extends State<ChatPage> {
         backgroundColor: Color(0xFF64B5F6),
         title: Row(
           children: [
-            CircleAvatar(backgroundColor: Colors.white, child: Text('A')),
+            CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Text(
+                widget.receiver?.name.substring(0, 1).toUpperCase() ?? 'A',
+              ),
+            ),
             SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('New Chat', style: TextStyle(fontSize: 16)),
-                Text('Online', style: TextStyle(fontSize: 12)),
+                Text(
+                  widget.receiver?.name ?? 'New Chat',
+                  style: TextStyle(fontSize: 16),
+                ),
+                Text(
+                  _typingUserId == widget.receiver?.id
+                      ? 'Typing...'
+                      : widget.receiver?.isOnline == true
+                      ? 'Online'
+                      : 'Offline',
+                  style: TextStyle(fontSize: 12),
+                ),
               ],
             ),
           ],
@@ -62,7 +166,9 @@ class _ChatPageState extends State<ChatPage> {
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               itemCount: _messages.length,
               itemBuilder: (context, index) {
-                return _messages[index];
+                final message = _messages[index];
+                final isUser = message.senderId != widget.receiver?.id;
+                return MessageBubble(message: message, isUser: isUser);
               },
             ),
           ),
@@ -117,16 +223,11 @@ class _ChatPageState extends State<ChatPage> {
   }
 }
 
-class ChatMessage extends StatelessWidget {
-  final String text;
+class MessageBubble extends StatelessWidget {
+  final Message message;
   final bool isUser;
-  final DateTime timestamp;
 
-  const ChatMessage({
-    required this.text,
-    required this.isUser,
-    required this.timestamp,
-  });
+  const MessageBubble({required this.message, required this.isUser});
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +256,7 @@ class ChatMessage extends StatelessWidget {
                   : CrossAxisAlignment.start,
               children: [
                 Text(
-                  text,
+                  message.content,
                   style: TextStyle(
                     color: isUser ? Colors.white : Colors.black87,
                     fontSize: 16,
@@ -163,7 +264,7 @@ class ChatMessage extends StatelessWidget {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  '${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}',
+                  '${message.timestamp.hour}:${message.timestamp.minute.toString().padLeft(2, '0')}',
                   style: TextStyle(
                     color: isUser ? Colors.white70 : Colors.black54,
                     fontSize: 12,

@@ -81,12 +81,16 @@ class _SignInPageState extends State<SignInPage> {
         });
 
         if (response.statusCode == 200) {
+          final responseData = json.decode(response.body);
+          final token = responseData['token'];
+          if (token == null) {
+            throw Exception('No token received from server');
+          }
           // Store login state using AuthService
           await AuthService.instance.login(
             email: _emailController.text,
             rememberMe: _rememberMe,
-            // You can store auth token from response if available
-            // authToken: json.decode(response.body)['token'],
+            authToken: token,
           );
 
           // Remove the success message snackbar and proceed directly to navigation
