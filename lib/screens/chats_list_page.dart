@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'chat_page.dart';
+import 'new_message_page.dart';
 
 class ChatsListPage extends StatelessWidget {
   @override
@@ -14,7 +15,7 @@ class ChatsListPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ChatPage()),
+                MaterialPageRoute(builder: (context) => NewMessagePage()),
               );
             },
           ),
