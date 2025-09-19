@@ -32,6 +32,15 @@ class _MainTabPageState extends State<MainTabPage> {
           BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Campus'),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // TODO: Implement messaging functionality
+        },
+        backgroundColor: Theme.of(context).primaryColor,
+        elevation: 6.0,
+        child: const Icon(Icons.message, color: Colors.white),
+        tooltip: 'Messages',
+      ),
     );
   }
 }

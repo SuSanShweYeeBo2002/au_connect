@@ -89,23 +89,7 @@ class _SignInPageState extends State<SignInPage> {
             // authToken: json.decode(response.body)['token'],
           );
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  Icon(Icons.check_circle_outline, color: Colors.white),
-                  SizedBox(width: 8),
-                  Text('Login successful!'),
-                ],
-              ),
-              duration: Duration(seconds: 2),
-              backgroundColor: Color(0xFF0288D1),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          );
+          // Remove the success message snackbar and proceed directly to navigation
           // Navigate to main page
           Navigator.pushReplacementNamed(context, '/main');
         } else {
