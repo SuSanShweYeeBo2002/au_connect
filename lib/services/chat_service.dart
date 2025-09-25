@@ -79,8 +79,14 @@ class ChatService {
       );
 
       if (response.statusCode == 200) {
-        List<dynamic> data = json.decode(response.body);
-        return data.map((message) => Message.fromJson(message)).toList();
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success' &&
+            responseJson['data'] != null) {
+          final List<dynamic> data = responseJson['data'];
+          return data.map((message) => Message.fromJson(message)).toList();
+        } else {
+          throw Exception('Invalid response format');
+        }
       } else {
         throw Exception('Failed to load conversation: ${response.statusCode}');
       }
@@ -135,10 +141,16 @@ class Message {
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
       id: json['_id'] ?? json['id'] ?? '',
-      senderId: json['senderId'] ?? '',
-      receiverId: json['receiverId'] ?? '',
+      senderId: json['sender'] != null
+          ? json['sender']['_id'] ?? ''
+          : json['senderId'] ?? '',
+      receiverId: json['receiver'] != null
+          ? json['receiver']['_id'] ?? ''
+          : json['receiverId'] ?? '',
       content: json['content'] ?? '',
-      timestamp: json['timestamp'] != null
+      timestamp: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : json['timestamp'] != null
           ? DateTime.parse(json['timestamp'])
           : DateTime.now(),
     );
