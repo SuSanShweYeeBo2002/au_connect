@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/chat_service.dart';
 import '../services/socket_service.dart';
+import '../services/auth_service.dart';
 
 class ChatPage extends StatefulWidget {
   final User? receiver;
@@ -19,13 +20,22 @@ class _ChatPageState extends State<ChatPage> {
   bool _isTyping = false;
   DateTime? _lastTypingNotification;
   String? _typingUserId;
+  String? _currentUserId;
 
   @override
   void initState() {
     super.initState();
+    _loadCurrentUser();
     _loadMessages();
     _setupSocket();
     _messageController.addListener(_onTypingChange);
+  }
+
+  Future<void> _loadCurrentUser() async {
+    final userId = await AuthService.instance.getUserId();
+    setState(() {
+      _currentUserId = userId;
+    });
   }
 
   void _scrollToBottom() {
@@ -107,14 +117,51 @@ class _ChatPageState extends State<ChatPage> {
     final messageText = text;
     _messageController.clear();
 
+    // Create a temporary message for immediate display
+    final tempMessage = Message(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      senderId: _currentUserId ?? 'current_user',
+      receiverId: widget.receiver!.id,
+      content: messageText,
+      timestamp: DateTime.now(),
+    );
+
+    // Add the message to the local list immediately
+    setState(() {
+      _messages.add(tempMessage);
+    });
+    _scrollToBottom();
+
     try {
-      SocketService.instance.sendMessage(widget.receiver!.id, messageText);
-      // Message will be added to the list when received through socket
+      // Send message using HTTP service
+      final sentMessage = await ChatService.sendMessage(
+        receiverId: widget.receiver!.id,
+        content: messageText,
+      );
+
+      // Replace temporary message with actual message from server
+      setState(() {
+        final index = _messages.indexWhere((msg) => msg.id == tempMessage.id);
+        if (index != -1) {
+          _messages[index] = sentMessage;
+        }
+      });
+
+      print('Message sent successfully: ${sentMessage.content}');
+
+      // Optionally, you could also send via socket for real-time updates
+      // SocketService.instance.sendMessage(widget.receiver!.id, messageText);
     } catch (e) {
+      // Remove the temporary message if sending failed
+      setState(() {
+        _messages.removeWhere((msg) => msg.id == tempMessage.id);
+      });
+
+      print('Error sending message: $e');
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Failed to send message')));
+        ).showSnackBar(SnackBar(content: Text('Failed to send message: $e')));
       }
     }
   }
@@ -161,16 +208,18 @@ class _ChatPageState extends State<ChatPage> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                final isUser = message.senderId != widget.receiver?.id;
-                return MessageBubble(message: message, isUser: isUser);
-              },
-            ),
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    controller: _scrollController,
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    itemCount: _messages.length,
+                    itemBuilder: (context, index) {
+                      final message = _messages[index];
+                      final isUser = message.senderId == _currentUserId;
+                      return MessageBubble(message: message, isUser: isUser);
+                    },
+                  ),
           ),
           Container(
             decoration: BoxDecoration(

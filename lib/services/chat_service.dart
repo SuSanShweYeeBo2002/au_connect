@@ -42,7 +42,7 @@ class ChatService {
   }
 
   // Send a message
-  static Future<void> sendMessage({
+  static Future<Message> sendMessage({
     required String receiverId,
     required String content,
   }) async {
@@ -59,10 +59,26 @@ class ChatService {
         body: json.encode({'receiverId': receiverId, 'content': content}),
       );
 
-      if (response.statusCode != 200) {
-        throw Exception('Failed to send message: ${response.statusCode}');
+      print('Send message response status: ${response.statusCode}');
+      print('Send message response body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success' &&
+            responseJson['data'] != null) {
+          return Message.fromJson(responseJson['data']);
+        } else {
+          throw Exception(
+            'Invalid response format: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        throw Exception(
+          'Failed to send message: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
+      print('Error sending message: $e');
       throw Exception('Failed to send message: $e');
     }
   }

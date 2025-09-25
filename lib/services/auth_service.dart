@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthService {
   static const String _keyIsLoggedIn = 'is_logged_in';
   static const String _keyUserEmail = 'user_email';
+  static const String _keyUserId = 'user_id';
   static const String _keyAuthToken = 'auth_token';
   static const String _keySavedEmail = 'saved_email';
   static const String _keyRememberMe = 'remember_me';
@@ -27,6 +28,12 @@ class AuthService {
     return prefs.getString(_keyUserEmail);
   }
 
+  // Get stored user ID
+  Future<String?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyUserId);
+  }
+
   // Get stored auth token
   Future<String?> getAuthToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -37,6 +44,7 @@ class AuthService {
   Future<void> login({
     required String email,
     String? authToken,
+    String? userId,
     bool rememberMe = false,
   }) async {
     final prefs = await SharedPreferences.getInstance();
@@ -44,6 +52,9 @@ class AuthService {
     await prefs.setString(_keyUserEmail, email);
     if (authToken != null) {
       await prefs.setString(_keyAuthToken, authToken);
+    }
+    if (userId != null) {
+      await prefs.setString(_keyUserId, userId);
     }
 
     // Handle remember me
@@ -63,6 +74,7 @@ class AuthService {
 
     await prefs.remove(_keyIsLoggedIn);
     await prefs.remove(_keyUserEmail);
+    await prefs.remove(_keyUserId);
     await prefs.remove(_keyAuthToken);
 
     // Keep remember me settings if enabled
