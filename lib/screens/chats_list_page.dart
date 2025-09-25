@@ -133,33 +133,50 @@ class _ChatsListPageState extends State<ChatsListPage> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        trailing: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              _formatTime(conversation.lastMessage.timestamp),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                            if (conversation.unreadCount > 0)
-                              Container(
-                                margin: EdgeInsets.only(top: 4),
-                                padding: EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
+                        trailing: SizedBox(
+                          width: 80, // Fixed width to prevent overflow
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _formatTime(conversation.lastMessage.timestamp),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
                                 ),
-                                child: Text(
-                                  conversation.unreadCount.toString(),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
+                              ),
+                              if (conversation.unreadCount > 0) ...[
+                                SizedBox(height: 4),
+                                Container(
+                                  constraints: BoxConstraints(
+                                    minWidth: 18,
+                                    minHeight: 18,
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    conversation.unreadCount > 99
+                                        ? '99+'
+                                        : conversation.unreadCount.toString(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
                                 ),
-                              ),
-                          ],
+                              ],
+                            ],
+                          ),
                         ),
                         onTap: () {
                           Navigator.push(
