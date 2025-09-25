@@ -1,0 +1,20 @@
+Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        right: BorderSide(
+                          color: Colors.grey.shade300,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: _showStat("followers", "256"),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: _showStat("following", "356"),
+                  ),
+                ),
