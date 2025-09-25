@@ -83,14 +83,20 @@ class _SignInPageState extends State<SignInPage> {
         if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
           final token = responseData['token'];
+          final userId = responseData['userId'] ?? responseData['user']?['_id'];
+
           if (token == null) {
             throw Exception('No token received from server');
           }
+
+          print('Login successful - Token: $token, UserId: $userId');
+
           // Store login state using AuthService
           await AuthService.instance.login(
             email: _emailController.text,
             rememberMe: _rememberMe,
             authToken: token,
+            userId: userId,
           );
 
           // Remove the success message snackbar and proceed directly to navigation

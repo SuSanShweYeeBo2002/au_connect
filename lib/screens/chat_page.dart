@@ -33,6 +33,7 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _loadCurrentUser() async {
     final userId = await AuthService.instance.getUserId();
+    print('Loaded current user ID: "$userId"');
     setState(() {
       _currentUserId = userId;
     });
