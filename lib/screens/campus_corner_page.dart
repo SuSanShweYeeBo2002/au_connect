@@ -121,7 +121,7 @@ class CampusCornerPage extends StatelessWidget {
                             },
                             child: _CampusTile(
                               title: 'Pomodoro Study Timer',
-                              color: Colors.blue[200],
+                              color: Colors.blue[100],
                               icon: Icons.timer,
                             ),
                           ),
@@ -140,11 +140,6 @@ class CampusCornerPage extends StatelessWidget {
                               icon: Icons.calculate,
                             ),
                           ),
-                          _CampusTile(
-                            title: 'Games',
-                            color: Colors.white,
-                            icon: Icons.games,
-                          ),
                           GestureDetector(
                             onTap: () {
                               Navigator.push(
@@ -162,7 +157,7 @@ class CampusCornerPage extends StatelessWidget {
                           ),
                           _CampusTile(
                             title: 'Campus Market',
-                            color: Colors.blue[100],
+                            color: Colors.white,
                             icon: Icons.store,
                           ),
                           GestureDetector(
@@ -176,14 +171,9 @@ class CampusCornerPage extends StatelessWidget {
                             },
                             child: _CampusTile(
                               title: 'Idea Cloud',
-                              color: Colors.blue[200],
+                              color: Colors.blue[100],
                               icon: Icons.cloud,
                             ),
-                          ),
-                          _CampusTile(
-                            title: 'Future Activity',
-                            color: Colors.white,
-                            icon: Icons.help_outline,
                           ),
                         ],
                       ),
