@@ -67,6 +67,39 @@ class ChatService {
     }
   }
 
+  // Get conversations list
+  static Future<List<Conversation>> getConversations() async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/messages/conversations'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success' &&
+            responseJson['data'] != null) {
+          final List<dynamic> data = responseJson['data'];
+          return data
+              .map((conversation) => Conversation.fromJson(conversation))
+              .toList();
+        } else {
+          throw Exception('Invalid response format');
+        }
+      } else {
+        throw Exception('Failed to load conversations: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to load conversations: $e');
+    }
+  }
+
   // Get conversation messages
   static Future<List<Message>> getConversation(String receiverId) async {
     try {
@@ -153,6 +186,26 @@ class Message {
           : json['timestamp'] != null
           ? DateTime.parse(json['timestamp'])
           : DateTime.now(),
+    );
+  }
+}
+
+class Conversation {
+  final User user;
+  final Message lastMessage;
+  final int unreadCount;
+
+  Conversation({
+    required this.user,
+    required this.lastMessage,
+    required this.unreadCount,
+  });
+
+  factory Conversation.fromJson(Map<String, dynamic> json) {
+    return Conversation(
+      user: User.fromJson(json['user']),
+      lastMessage: Message.fromJson(json['lastMessage']),
+      unreadCount: json['unreadCount'] ?? 0,
     );
   }
 }

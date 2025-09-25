@@ -1,8 +1,57 @@
 import 'package:flutter/material.dart';
 import 'chat_page.dart';
 import 'new_message_page.dart';
+import '../services/chat_service.dart';
 
-class ChatsListPage extends StatelessWidget {
+class ChatsListPage extends StatefulWidget {
+  @override
+  _ChatsListPageState createState() => _ChatsListPageState();
+}
+
+class _ChatsListPageState extends State<ChatsListPage> {
+  List<Conversation> _conversations = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadConversations();
+  }
+
+  Future<void> _loadConversations() async {
+    setState(() => _isLoading = true);
+    try {
+      final conversations = await ChatService.getConversations();
+      setState(() {
+        _conversations = conversations;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading conversations: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load conversations')));
+      }
+      setState(() => _isLoading = false);
+    }
+  }
+
+  String _formatTime(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}d';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m';
+    } else {
+      return 'now';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,6 +68,7 @@ class ChatsListPage extends StatelessWidget {
               );
             },
           ),
+          IconButton(icon: Icon(Icons.refresh), onPressed: _loadConversations),
         ],
       ),
       body: Column(
@@ -39,102 +89,93 @@ class ChatsListPage extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: recentChats.length,
-              itemBuilder: (context, index) {
-                final chat = recentChats[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(
-                      'https://via.placeholder.com/150',
-                    ),
-                    child: Text(chat.name[0]),
-                  ),
-                  title: Text(chat.name),
-                  subtitle: Text(chat.lastMessage),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(chat.time),
-                      if (chat.unreadCount > 0)
-                        Container(
-                          padding: EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Text(
-                            chat.unreadCount.toString(),
-                            style: TextStyle(color: Colors.white, fontSize: 12),
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : _conversations.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.chat, size: 64, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text(
+                          'No conversations yet',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey[600],
                           ),
                         ),
-                    ],
+                        SizedBox(height: 8),
+                        Text(
+                          'Start a new conversation',
+                          style: TextStyle(color: Colors.grey[500]),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _conversations.length,
+                    itemBuilder: (context, index) {
+                      final conversation = _conversations[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Color(0xFF64B5F6),
+                          child: Text(
+                            conversation.user.name
+                                .substring(0, 1)
+                                .toUpperCase(),
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        title: Text(conversation.user.name),
+                        subtitle: Text(
+                          conversation.lastMessage.content,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _formatTime(conversation.lastMessage.timestamp),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            if (conversation.unreadCount > 0)
+                              Container(
+                                margin: EdgeInsets.only(top: 4),
+                                padding: EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Text(
+                                  conversation.unreadCount.toString(),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ChatPage(receiver: conversation.user),
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ChatPage()),
-                    );
-                  },
-                );
-              },
-            ),
           ),
         ],
       ),
     );
   }
 }
-
-class ChatPreview {
-  final String name;
-  final String lastMessage;
-  final String time;
-  final int unreadCount;
-
-  ChatPreview({
-    required this.name,
-    required this.lastMessage,
-    required this.time,
-    required this.unreadCount,
-  });
-}
-
-final List<ChatPreview> recentChats = [
-  ChatPreview(
-    name: 'Ariya Goulding',
-    lastMessage: 'Have a good day, Roman!',
-    time: '10:27 AM',
-    unreadCount: 1,
-  ),
-  ChatPreview(
-    name: 'Omari Norris',
-    lastMessage: 'Hi, good to hear from you. It\'s bee...',
-    time: '9:48 AM',
-    unreadCount: 0,
-  ),
-  ChatPreview(
-    name: 'Bella Huffman',
-    lastMessage: 'Wow, that looks amazing.',
-    time: '10:32 AM',
-    unreadCount: 0,
-  ),
-  ChatPreview(
-    name: 'Sherri Matthews',
-    lastMessage: 'Hey there, I\'m having trouble open...',
-    time: '11:24 AM',
-    unreadCount: 3,
-  ),
-  ChatPreview(
-    name: 'Marcus King',
-    lastMessage: 'I\'m ready to buy this thing, but I h...',
-    time: '9:48 AM',
-    unreadCount: 0,
-  ),
-  ChatPreview(
-    name: 'Chloe Hayes',
-    lastMessage: 'Hi! My order arrived yest',
-    time: '9:20 AM',
-    unreadCount: 1,
-  ),
-];
