@@ -9,7 +9,9 @@ class ChatsListPage extends StatefulWidget {
 }
 
 class _ChatsListPageState extends State<ChatsListPage> {
+  final TextEditingController _searchController = TextEditingController();
   List<Conversation> _conversations = [];
+  String _searchQuery = '';
   bool _isLoading = true;
 
   @override
@@ -35,6 +37,15 @@ class _ChatsListPageState extends State<ChatsListPage> {
       }
       setState(() => _isLoading = false);
     }
+  }
+
+  List<Conversation> get _filteredConversations {
+    if (_searchQuery.isEmpty) return _conversations;
+    return _conversations.where((conversation) {
+      return conversation.user.name.toLowerCase().contains(
+        _searchQuery.toLowerCase(),
+      );
+    }).toList();
   }
 
   String _formatTime(DateTime timestamp) {
@@ -76,9 +87,26 @@ class _ChatsListPageState extends State<ChatsListPage> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
               decoration: InputDecoration(
-                hintText: 'Search',
+                hintText: 'Search conversations',
                 prefixIcon: Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() {
+                            _searchQuery = '';
+                          });
+                        },
+                      )
+                    : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25),
                   borderSide: BorderSide.none,
@@ -114,9 +142,9 @@ class _ChatsListPageState extends State<ChatsListPage> {
                     ),
                   )
                 : ListView.builder(
-                    itemCount: _conversations.length,
+                    itemCount: _filteredConversations.length,
                     itemBuilder: (context, index) {
-                      final conversation = _conversations[index];
+                      final conversation = _filteredConversations[index];
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor: Color(0xFF64B5F6),
@@ -192,6 +220,16 @@ class _ChatsListPageState extends State<ChatsListPage> {
                   ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NewMessagePage()),
+          );
+        },
+        backgroundColor: Color(0xFF64B5F6),
+        child: Icon(Icons.edit, color: Colors.white),
       ),
     );
   }
