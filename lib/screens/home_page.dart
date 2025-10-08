@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'add_post_page.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -49,14 +50,22 @@ class HomePage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16.0, top: 8.0, bottom: 8.0),
             child: FloatingActionButton(
-              onPressed: () {
-                // TODO: Navigate to add post page or show add post dialog
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Add post feature coming soon!'),
-                    duration: Duration(seconds: 2),
-                  ),
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddPostPage()),
                 );
+
+                // If post was created successfully, show success message
+                if (result != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Post created successfully!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                  // TODO: Refresh posts list here when you implement dynamic posts
+                }
               },
               backgroundColor: Theme.of(context).primaryColor,
               child: Icon(Icons.add, color: Colors.white),
