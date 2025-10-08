@@ -41,10 +41,30 @@ class HomePage extends StatelessWidget {
     ];
     return Scaffold(
       appBar: AppBar(
-        title: Text('Social Feed'),
+        title: Text('AU CONNECT'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0, top: 8.0, bottom: 8.0),
+            child: FloatingActionButton(
+              onPressed: () {
+                // TODO: Navigate to add post page or show add post dialog
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Add post feature coming soon!'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              backgroundColor: Theme.of(context).primaryColor,
+              child: Icon(Icons.add, color: Colors.white),
+              mini: true,
+              tooltip: 'Add Post',
+            ),
+          ),
+        ],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
