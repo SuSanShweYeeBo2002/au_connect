@@ -11,6 +11,7 @@ class _HomePageState extends State<HomePage> {
   List<Post> posts = [];
   bool isLoading = true;
   String? errorMessage;
+  Set<String> likedPosts = {}; // Track which posts are liked by current user
 
   @override
   void initState() {
@@ -36,6 +37,77 @@ class _HomePageState extends State<HomePage> {
         isLoading = false;
       });
     }
+  }
+
+  Future<void> _likePost(Post post, int index) async {
+    try {
+      // Optimistically update UI
+      final wasLiked = likedPosts.contains(post.id);
+      setState(() {
+        if (wasLiked) {
+          likedPosts.remove(post.id);
+        } else {
+          likedPosts.add(post.id);
+        }
+      });
+
+      final response = await PostService.likePost(post.id);
+
+      // Update the local post with new like count
+      setState(() {
+        posts[index] = Post(
+          id: post.id,
+          authorId: post.authorId,
+          authorEmail: post.authorEmail,
+          authorName: post.authorName,
+          content: post.content,
+          image: post.image,
+          likeCount: response.likeCount,
+          commentCount: post.commentCount,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+        );
+
+        // Ensure liked state matches server response
+        if (response.action == 'liked') {
+          likedPosts.add(post.id);
+        } else {
+          likedPosts.remove(post.id);
+        }
+      });
+
+      // Show subtle feedback
+      if (response.action == 'liked') {
+        // Optionally show a small animation or haptic feedback
+        // HapticFeedback.lightImpact(); // Uncomment if you want haptic feedback
+      }
+    } catch (e) {
+      // Revert optimistic update on error
+      setState(() {
+        if (likedPosts.contains(post.id)) {
+          likedPosts.remove(post.id);
+        } else {
+          likedPosts.add(post.id);
+        }
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to like post: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _showComments(Post post) {
+    // TODO: Implement comments functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Comments feature coming soon!'),
+        duration: Duration(seconds: 1),
+      ),
+    );
   }
 
   Widget _buildContent() {
@@ -146,13 +218,48 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      Icon(Icons.favorite_border),
-                      SizedBox(width: 4),
-                      Text('${post.likeCount}'),
+                      GestureDetector(
+                        onTap: () => _likePost(post, index),
+                        child: Row(
+                          children: [
+                            AnimatedSwitcher(
+                              duration: Duration(milliseconds: 200),
+                              child: Icon(
+                                likedPosts.contains(post.id)
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                key: ValueKey(likedPosts.contains(post.id)),
+                                color: likedPosts.contains(post.id)
+                                    ? Colors.red
+                                    : Colors.grey[600],
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              '${post.likeCount}',
+                              style: TextStyle(
+                                color: likedPosts.contains(post.id)
+                                    ? Colors.red
+                                    : Colors.grey[600],
+                                fontWeight: likedPosts.contains(post.id)
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       SizedBox(width: 16),
-                      Icon(Icons.comment),
-                      SizedBox(width: 4),
-                      Text('${post.commentCount}'),
+                      GestureDetector(
+                        onTap: () => _showComments(post),
+                        child: Row(
+                          children: [
+                            Icon(Icons.comment, color: Colors.grey[600]),
+                            SizedBox(width: 4),
+                            Text('${post.commentCount}'),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),

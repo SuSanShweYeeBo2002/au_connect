@@ -123,6 +123,59 @@ class PostService {
       throw Exception('Failed to load posts: $e');
     }
   }
+
+  // Like/Unlike a post
+  static Future<LikeResponse> likePost(String postId) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/likes/post/$postId'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(Duration(seconds: 10));
+
+      print('Like post response status: ${response.statusCode}');
+      print('Like post response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success' &&
+            responseJson['data'] != null) {
+          return LikeResponse.fromJson(responseJson);
+        } else {
+          throw Exception(
+            'Server error: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        throw Exception(
+          'Failed to like post: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } on TimeoutException catch (e) {
+      print('Timeout error liking post: $e');
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      print('Network error liking post: $e');
+      throw Exception(
+        'Network error: Please check if the server is running on localhost:8383',
+      );
+    } catch (e) {
+      print('Error liking post: $e');
+      if (e.toString().contains('Failed to fetch')) {
+        throw Exception(
+          'Cannot connect to server. Please check if the backend is running.',
+        );
+      }
+      throw Exception('Failed to like post: $e');
+    }
+  }
 }
 
 class Post {
@@ -249,6 +302,26 @@ class Comment {
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
+    );
+  }
+}
+
+class LikeResponse {
+  final String action;
+  final int likeCount;
+  final String message;
+
+  LikeResponse({
+    required this.action,
+    required this.likeCount,
+    required this.message,
+  });
+
+  factory LikeResponse.fromJson(Map<String, dynamic> json) {
+    return LikeResponse(
+      action: json['data']?['action'] ?? '',
+      likeCount: json['data']?['likeCount'] ?? 0,
+      message: json['message'] ?? '',
     );
   }
 }
