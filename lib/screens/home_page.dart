@@ -11,7 +11,6 @@ class _HomePageState extends State<HomePage> {
   List<Post> posts = [];
   bool isLoading = true;
   String? errorMessage;
-  Set<String> likedPosts = {}; // Track which posts are liked by current user
 
   @override
   void initState() {
@@ -42,18 +41,26 @@ class _HomePageState extends State<HomePage> {
   Future<void> _likePost(Post post, int index) async {
     try {
       // Optimistically update UI
-      final wasLiked = likedPosts.contains(post.id);
+      final wasLiked = post.isLikedByUser;
       setState(() {
-        if (wasLiked) {
-          likedPosts.remove(post.id);
-        } else {
-          likedPosts.add(post.id);
-        }
+        posts[index] = Post(
+          id: post.id,
+          authorId: post.authorId,
+          authorEmail: post.authorEmail,
+          authorName: post.authorName,
+          content: post.content,
+          image: post.image,
+          likeCount: wasLiked ? post.likeCount - 1 : post.likeCount + 1,
+          commentCount: post.commentCount,
+          isLikedByUser: !wasLiked,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+        );
       });
 
       final response = await PostService.likePost(post.id);
 
-      // Update the local post with new like count
+      // Update the local post with server response
       setState(() {
         posts[index] = Post(
           id: post.id,
@@ -64,31 +71,15 @@ class _HomePageState extends State<HomePage> {
           image: post.image,
           likeCount: response.likeCount,
           commentCount: post.commentCount,
+          isLikedByUser: response.action == 'liked',
           createdAt: post.createdAt,
           updatedAt: post.updatedAt,
         );
-
-        // Ensure liked state matches server response
-        if (response.action == 'liked') {
-          likedPosts.add(post.id);
-        } else {
-          likedPosts.remove(post.id);
-        }
       });
-
-      // Show subtle feedback
-      if (response.action == 'liked') {
-        // Optionally show a small animation or haptic feedback
-        // HapticFeedback.lightImpact(); // Uncomment if you want haptic feedback
-      }
     } catch (e) {
       // Revert optimistic update on error
       setState(() {
-        if (likedPosts.contains(post.id)) {
-          likedPosts.remove(post.id);
-        } else {
-          likedPosts.add(post.id);
-        }
+        posts[index] = post; // Revert to original post
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -225,11 +216,11 @@ class _HomePageState extends State<HomePage> {
                             AnimatedSwitcher(
                               duration: Duration(milliseconds: 200),
                               child: Icon(
-                                likedPosts.contains(post.id)
+                                post.isLikedByUser
                                     ? Icons.favorite
                                     : Icons.favorite_border,
-                                key: ValueKey(likedPosts.contains(post.id)),
-                                color: likedPosts.contains(post.id)
+                                key: ValueKey(post.isLikedByUser),
+                                color: post.isLikedByUser
                                     ? Colors.red
                                     : Colors.grey[600],
                               ),
@@ -238,10 +229,10 @@ class _HomePageState extends State<HomePage> {
                             Text(
                               '${post.likeCount}',
                               style: TextStyle(
-                                color: likedPosts.contains(post.id)
+                                color: post.isLikedByUser
                                     ? Colors.red
                                     : Colors.grey[600],
-                                fontWeight: likedPosts.contains(post.id)
+                                fontWeight: post.isLikedByUser
                                     ? FontWeight.bold
                                     : FontWeight.normal,
                               ),

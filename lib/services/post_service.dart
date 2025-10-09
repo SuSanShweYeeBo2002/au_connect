@@ -187,6 +187,7 @@ class Post {
   final String? image;
   final int likeCount;
   final int commentCount;
+  final bool isLikedByUser;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -199,6 +200,7 @@ class Post {
     this.image,
     required this.likeCount,
     required this.commentCount,
+    required this.isLikedByUser,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -216,6 +218,7 @@ class Post {
       image: json['image'],
       likeCount: json['likeCount'] ?? 0,
       commentCount: json['commentCount'] ?? 0,
+      isLikedByUser: json['isLikedByUser'] ?? false,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
