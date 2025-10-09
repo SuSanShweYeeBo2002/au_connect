@@ -60,6 +60,9 @@ class _ChatPageState extends State<ChatPage> {
           _messages.add(newMessage);
         });
         _scrollToBottom();
+
+        // Mark the new message as read since user is viewing the conversation
+        _markMessagesAsRead();
       }
     });
 
@@ -102,6 +105,9 @@ class _ChatPageState extends State<ChatPage> {
         _isLoading = false;
       });
       _scrollToBottom();
+
+      // Mark messages as read when conversation is loaded
+      _markMessagesAsRead();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -109,6 +115,18 @@ class _ChatPageState extends State<ChatPage> {
         ).showSnackBar(SnackBar(content: Text('Failed to load messages')));
       }
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _markMessagesAsRead() async {
+    if (widget.receiver == null) return;
+
+    try {
+      await ChatService.markMessageAsRead(widget.receiver!.id);
+      print('Messages marked as read for user: ${widget.receiver!.name}');
+    } catch (e) {
+      print('Error marking messages as read: $e');
+      // Don't show error to user for this background operation
     }
   }
 

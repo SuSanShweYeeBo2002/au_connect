@@ -123,6 +123,40 @@ class ChatService {
     }
   }
 
+  // Mark message as read
+  static Future<bool> markMessageAsRead(String receiverId) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/messages/read/$receiverId'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      print('Mark as read response status: ${response.statusCode}');
+      print('Mark as read response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success') {
+          return true;
+        } else {
+          throw Exception(
+            'Mark as read failed: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        throw Exception(
+          'Failed to mark messages as read: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } catch (e) {
+      print('Error marking messages as read: $e');
+      throw Exception('Failed to mark messages as read: $e');
+    }
+  }
+
   // Get conversations list
   static Future<List<Conversation>> getConversations() async {
     try {
