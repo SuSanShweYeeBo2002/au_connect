@@ -210,8 +210,10 @@ class _ChatsListPageState extends State<ChatsListPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  ChatPage(receiver: conversation.user),
+                              builder: (context) => ChatPage(
+                                receiver: conversation.user,
+                                onConversationUpdated: _loadConversations,
+                              ),
                             ),
                           );
                         },

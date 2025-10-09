@@ -5,8 +5,10 @@ import '../services/auth_service.dart';
 
 class ChatPage extends StatefulWidget {
   final User? receiver;
+  final VoidCallback? onConversationUpdated;
 
-  const ChatPage({Key? key, this.receiver}) : super(key: key);
+  const ChatPage({Key? key, this.receiver, this.onConversationUpdated})
+    : super(key: key);
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -221,109 +223,131 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xFF64B5F6),
-        title: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Text(
-                widget.receiver?.name.substring(0, 1).toUpperCase() ?? 'A',
-              ),
-            ),
-            SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.receiver?.name ?? 'New Chat',
-                  style: TextStyle(fontSize: 16),
-                ),
-                Text(
-                  _typingUserId == widget.receiver?.id
-                      ? 'Typing...'
-                      : widget.receiver?.isOnline == true
-                      ? 'Online'
-                      : 'Offline',
-                  style: TextStyle(fontSize: 12),
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(icon: Icon(Icons.video_call), onPressed: () {}),
-          IconButton(icon: Icon(Icons.call), onPressed: () {}),
-          IconButton(icon: Icon(Icons.more_vert), onPressed: () {}),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: _isLoading
-                ? Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    itemCount: _messages.length,
-                    itemBuilder: (context, index) {
-                      final message = _messages[index];
-                      final isUser = message.senderId == _currentUserId;
-                      return MessageBubble(
-                        message: message,
-                        isUser: isUser,
-                        onDelete: isUser ? () => _deleteMessage(message) : null,
-                      );
-                    },
-                  ),
+    return PopScope(
+      onPopInvoked: (didPop) {
+        if (didPop && widget.onConversationUpdated != null) {
+          widget.onConversationUpdated!();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Color(0xFF64B5F6),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              // Call the callback to refresh conversations list
+              if (widget.onConversationUpdated != null) {
+                widget.onConversationUpdated!();
+              }
+              Navigator.pop(context);
+            },
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  offset: Offset(0, -2),
-                  blurRadius: 6,
-                  color: Colors.black.withOpacity(0.1),
+          title: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Text(
+                  widget.receiver?.name.substring(0, 1).toUpperCase() ?? 'A',
                 ),
-              ],
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Row(
+              ),
+              SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(icon: Icon(Icons.attach_file), onPressed: () {}),
-                  Expanded(
-                    child: TextField(
-                      controller: _messageController,
-                      decoration: InputDecoration(
-                        hintText: 'Type a message',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey[100],
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                      ),
-                      onSubmitted: _handleSubmitted,
-                    ),
+                  Text(
+                    widget.receiver?.name ?? 'New Chat',
+                    style: TextStyle(fontSize: 16),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.send),
-                    onPressed: () {
-                      _handleSubmitted(_messageController.text);
-                    },
+                  Text(
+                    _typingUserId == widget.receiver?.id
+                        ? 'Typing...'
+                        : widget.receiver?.isOnline == true
+                        ? 'Online'
+                        : 'Offline',
+                    style: TextStyle(fontSize: 12),
                   ),
                 ],
               ),
-            ),
+            ],
           ),
-        ],
+          actions: [
+            IconButton(icon: Icon(Icons.video_call), onPressed: () {}),
+            IconButton(icon: Icon(Icons.call), onPressed: () {}),
+            IconButton(icon: Icon(Icons.more_vert), onPressed: () {}),
+          ],
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: _isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      controller: _scrollController,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      itemCount: _messages.length,
+                      itemBuilder: (context, index) {
+                        final message = _messages[index];
+                        final isUser = message.senderId == _currentUserId;
+                        return MessageBubble(
+                          message: message,
+                          isUser: isUser,
+                          onDelete: isUser
+                              ? () => _deleteMessage(message)
+                              : null,
+                        );
+                      },
+                    ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    offset: Offset(0, -2),
+                    blurRadius: 6,
+                    color: Colors.black.withOpacity(0.1),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: Row(
+                  children: [
+                    IconButton(icon: Icon(Icons.attach_file), onPressed: () {}),
+                    Expanded(
+                      child: TextField(
+                        controller: _messageController,
+                        decoration: InputDecoration(
+                          hintText: 'Type a message',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                        ),
+                        onSubmitted: _handleSubmitted,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.send),
+                      onPressed: () {
+                        _handleSubmitted(_messageController.text);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
