@@ -167,6 +167,40 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  Future<void> _deleteMessage(Message message) async {
+    try {
+      // Show loading state
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Deleting message...')));
+
+      // Call the delete API
+      final success = await ChatService.deleteMessage(message.id);
+
+      if (success) {
+        // Remove message from local list
+        setState(() {
+          _messages.removeWhere((msg) => msg.id == message.id);
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Message deleted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error deleting message: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete message: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -218,7 +252,11 @@ class _ChatPageState extends State<ChatPage> {
                     itemBuilder: (context, index) {
                       final message = _messages[index];
                       final isUser = message.senderId == _currentUserId;
-                      return MessageBubble(message: message, isUser: isUser);
+                      return MessageBubble(
+                        message: message,
+                        isUser: isUser,
+                        onDelete: isUser ? () => _deleteMessage(message) : null,
+                      );
                     },
                   ),
           ),
@@ -276,8 +314,40 @@ class _ChatPageState extends State<ChatPage> {
 class MessageBubble extends StatelessWidget {
   final Message message;
   final bool isUser;
+  final VoidCallback? onDelete;
 
-  const MessageBubble({required this.message, required this.isUser});
+  const MessageBubble({
+    required this.message,
+    required this.isUser,
+    this.onDelete,
+  });
+
+  void _showDeleteDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Message'),
+          content: Text('Are you sure you want to delete this message?'),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text('Delete', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (onDelete != null) {
+                  onDelete!();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -291,36 +361,55 @@ class MessageBubble extends StatelessWidget {
           if (!isUser)
             CircleAvatar(backgroundColor: Color(0xFF64B5F6), child: Text('A')),
           SizedBox(width: 8),
-          Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.7,
-            ),
-            decoration: BoxDecoration(
-              color: isUser ? Color(0xFF64B5F6) : Colors.grey[200],
-              borderRadius: BorderRadius.circular(16),
-            ),
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Column(
-              crossAxisAlignment: isUser
-                  ? CrossAxisAlignment.end
-                  : CrossAxisAlignment.start,
-              children: [
-                Text(
-                  message.content,
-                  style: TextStyle(
-                    color: isUser ? Colors.white : Colors.black87,
-                    fontSize: 16,
+          GestureDetector(
+            onLongPress: isUser ? () => _showDeleteDialog(context) : null,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.7,
+              ),
+              decoration: BoxDecoration(
+                color: isUser ? Color(0xFF64B5F6) : Colors.grey[200],
+                borderRadius: BorderRadius.circular(16),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Column(
+                crossAxisAlignment: isUser
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    message.content,
+                    style: TextStyle(
+                      color: isUser ? Colors.white : Colors.black87,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  '${message.timestamp.hour}:${message.timestamp.minute.toString().padLeft(2, '0')}',
-                  style: TextStyle(
-                    color: isUser ? Colors.white70 : Colors.black54,
-                    fontSize: 12,
+                  SizedBox(height: 4),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${message.timestamp.hour}:${message.timestamp.minute.toString().padLeft(2, '0')}',
+                        style: TextStyle(
+                          color: isUser ? Colors.white70 : Colors.black54,
+                          fontSize: 12,
+                        ),
+                      ),
+                      if (isUser && onDelete != null) ...[
+                        SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () => _showDeleteDialog(context),
+                          child: Icon(
+                            Icons.more_vert,
+                            size: 16,
+                            color: isUser ? Colors.white70 : Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           SizedBox(width: 8),

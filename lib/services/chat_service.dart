@@ -83,6 +83,46 @@ class ChatService {
     }
   }
 
+  // Delete a message
+  static Future<bool> deleteMessage(String messageId) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http.delete(
+        Uri.parse('$baseUrl/messages/$messageId'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      print('Delete message response status: ${response.statusCode}');
+      print('Delete message response body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        // Some APIs return 200 with success response, others return 204 (No Content)
+        if (response.body.isNotEmpty) {
+          final responseJson = json.decode(response.body);
+          if (responseJson['status'] == 'success') {
+            return true;
+          } else {
+            throw Exception(
+              'Delete failed: ${responseJson['message'] ?? 'Unknown error'}',
+            );
+          }
+        } else {
+          // 204 No Content - deletion successful
+          return true;
+        }
+      } else {
+        throw Exception(
+          'Failed to delete message: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } catch (e) {
+      print('Error deleting message: $e');
+      throw Exception('Failed to delete message: $e');
+    }
+  }
+
   // Get conversations list
   static Future<List<Conversation>> getConversations() async {
     try {
