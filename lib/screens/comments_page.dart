@@ -383,7 +383,8 @@ class _CommentsPageState extends State<CommentsPage> {
                                         ],
                                       ),
                                     ),
-                                    if (currentUserId == comment.userId)
+                                    if (currentUserId == comment.userId ||
+                                        currentUserId == widget.post.authorId)
                                       PopupMenuButton<String>(
                                         icon: Icon(
                                           Icons.more_vert,
