@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'add_post_page.dart';
 import '../services/post_service.dart';
+import '../services/auth_service.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -11,11 +12,24 @@ class _HomePageState extends State<HomePage> {
   List<Post> posts = [];
   bool isLoading = true;
   String? errorMessage;
+  String? currentUserId;
 
   @override
   void initState() {
     super.initState();
+    _loadCurrentUser();
     _loadPosts();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    try {
+      final userId = await AuthService.instance.getUserId();
+      setState(() {
+        currentUserId = userId;
+      });
+    } catch (e) {
+      print('Error loading current user: $e');
+    }
   }
 
   Future<void> _loadPosts() async {
@@ -101,6 +115,65 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<void> _deletePost(Post post, int index) async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Post'),
+          content: Text(
+            'Are you sure you want to delete this post? This action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: Text('Delete', style: TextStyle(color: Colors.red)),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      // Show loading state
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Deleting post...')));
+
+      // Call the delete API
+      final success = await PostService.deletePost(post.id);
+
+      if (success) {
+        // Remove post from local list
+        setState(() {
+          posts.removeAt(index);
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Post deleted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error deleting post: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete post: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   Widget _buildContent() {
     if (isLoading) {
       return Center(child: CircularProgressIndicator());
@@ -179,7 +252,56 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(_formatTime(post.createdAt)),
-                  trailing: Icon(Icons.more_vert),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'delete') {
+                        _deletePost(post, index);
+                      } else if (value == 'report') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Report feature coming soon!'),
+                          ),
+                        );
+                      }
+                    },
+                    itemBuilder: (BuildContext context) {
+                      List<PopupMenuEntry<String>> items = [];
+
+                      // Show delete option only for post author
+                      if (currentUserId == post.authorId) {
+                        items.add(
+                          PopupMenuItem<String>(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete, color: Colors.red),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Delete',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+
+                      items.add(
+                        PopupMenuItem<String>(
+                          value: 'report',
+                          child: Row(
+                            children: [
+                              Icon(Icons.report),
+                              SizedBox(width: 8),
+                              Text('Report'),
+                            ],
+                          ),
+                        ),
+                      );
+
+                      return items;
+                    },
+                  ),
                 ),
                 if (post.image != null)
                   AspectRatio(
