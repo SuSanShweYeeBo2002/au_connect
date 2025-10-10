@@ -297,6 +297,59 @@ class PostService {
       throw Exception('Failed to add comment: $e');
     }
   }
+
+  // Get comments for a post
+  static Future<CommentsResponse> getComments({
+    required String postId,
+    int page = 1,
+  }) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/comments/post/$postId?page=$page'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(Duration(seconds: 10));
+
+      print('Get comments response status: ${response.statusCode}');
+      print('Get comments response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success') {
+          return CommentsResponse.fromJson(responseJson);
+        } else {
+          throw Exception(
+            'Server error: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        throw Exception('Failed to load comments: ${response.statusCode}');
+      }
+    } on TimeoutException catch (e) {
+      print('Timeout error loading comments: $e');
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      print('Network error loading comments: $e');
+      throw Exception(
+        'Network error: Please check if the server is running on localhost:8383',
+      );
+    } catch (e) {
+      print('Error loading comments: $e');
+      if (e.toString().contains('Failed to fetch')) {
+        throw Exception(
+          'Cannot connect to server. Please check if the backend is running.',
+        );
+      }
+      throw Exception('Failed to load comments: $e');
+    }
+  }
 }
 
 class Post {
@@ -467,6 +520,55 @@ class LikeResponse {
       action: json['data']?['action'] ?? '',
       likeCount: json['data']?['likeCount'] ?? 0,
       message: json['message'] ?? '',
+    );
+  }
+}
+
+class CommentsResponse {
+  final List<Comment> comments;
+  final CommentsPagination pagination;
+  final String message;
+
+  CommentsResponse({
+    required this.comments,
+    required this.pagination,
+    required this.message,
+  });
+
+  factory CommentsResponse.fromJson(Map<String, dynamic> json) {
+    final List<dynamic> data = json['data'] ?? [];
+    final comments = data.map((comment) => Comment.fromJson(comment)).toList();
+
+    return CommentsResponse(
+      comments: comments,
+      pagination: CommentsPagination.fromJson(json['pagination'] ?? {}),
+      message: json['message'] ?? '',
+    );
+  }
+}
+
+class CommentsPagination {
+  final int currentPage;
+  final int totalPages;
+  final int totalComments;
+  final bool hasNext;
+  final bool hasPrev;
+
+  CommentsPagination({
+    required this.currentPage,
+    required this.totalPages,
+    required this.totalComments,
+    required this.hasNext,
+    required this.hasPrev,
+  });
+
+  factory CommentsPagination.fromJson(Map<String, dynamic> json) {
+    return CommentsPagination(
+      currentPage: json['currentPage'] ?? 1,
+      totalPages: json['totalPages'] ?? 1,
+      totalComments: json['totalComments'] ?? 0,
+      hasNext: json['hasNext'] ?? false,
+      hasPrev: json['hasPrev'] ?? false,
     );
   }
 }

@@ -20,7 +20,26 @@ class _CommentsPageState extends State<CommentsPage> {
   @override
   void initState() {
     super.initState();
-    // TODO: Load existing comments when we have a get comments API
+    _loadComments();
+  }
+
+  Future<void> _loadComments() async {
+    setState(() => isLoading = true);
+    try {
+      final response = await PostService.getComments(postId: widget.post.id);
+      setState(() {
+        comments = response.comments;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load comments: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> _addComment() async {
@@ -37,21 +56,20 @@ class _CommentsPageState extends State<CommentsPage> {
     setState(() => isSubmitting = true);
 
     try {
-      final comment = await PostService.addComment(
+      await PostService.addComment(
         postId: widget.post.id,
         content: content,
         image: image.isNotEmpty ? image : null,
       );
 
-      // Add the new comment to the local list
-      setState(() {
-        comments.insert(0, comment); // Add to beginning of list
-        isSubmitting = false;
-      });
-
       // Clear the input fields
       _commentController.clear();
       _imageController.clear();
+
+      setState(() => isSubmitting = false);
+
+      // Reload comments from server to get the latest list
+      await _loadComments();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -144,7 +162,9 @@ class _CommentsPageState extends State<CommentsPage> {
 
           // Comments list
           Expanded(
-            child: comments.isEmpty
+            child: isLoading
+                ? Center(child: CircularProgressIndicator())
+                : comments.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -166,89 +186,93 @@ class _CommentsPageState extends State<CommentsPage> {
                       ],
                     ),
                   )
-                : ListView.separated(
-                    padding: EdgeInsets.all(16),
-                    itemCount: comments.length,
-                    separatorBuilder: (context, index) => SizedBox(height: 16),
-                    itemBuilder: (context, index) {
-                      final comment = comments[index];
-                      return Container(
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[50],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 16,
-                                  backgroundColor: Colors.grey[400],
-                                  child: Text(
-                                    comment.userName[0].toUpperCase(),
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
+                : RefreshIndicator(
+                    onRefresh: _loadComments,
+                    child: ListView.separated(
+                      padding: EdgeInsets.all(16),
+                      itemCount: comments.length,
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: 16),
+                      itemBuilder: (context, index) {
+                        final comment = comments[index];
+                        return Container(
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 16,
+                                    backgroundColor: Colors.grey[400],
+                                    child: Text(
+                                      comment.userName[0].toUpperCase(),
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(width: 8),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        comment.userName,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
+                                  SizedBox(width: 8),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          comment.userName,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        _formatTime(comment.createdAt),
-                                        style: TextStyle(
-                                          color: Colors.grey[600],
-                                          fontSize: 12,
+                                        Text(
+                                          _formatTime(comment.createdAt),
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 12,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              Text(comment.content),
+                              if (comment.image != null) ...[
+                                SizedBox(height: 8),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    comment.image!,
+                                    width: double.infinity,
+                                    height: 200,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        height: 200,
+                                        color: Colors.grey[300],
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.broken_image,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ],
-                            ),
-                            SizedBox(height: 8),
-                            Text(comment.content),
-                            if (comment.image != null) ...[
-                              SizedBox(height: 8),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  comment.image!,
-                                  width: double.infinity,
-                                  height: 200,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      height: 200,
-                                      color: Colors.grey[300],
-                                      child: Center(
-                                        child: Icon(
-                                          Icons.broken_image,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
                             ],
-                          ],
-                        ),
-                      );
-                    },
+                          ),
+                        );
+                      },
+                    ),
                   ),
           ),
 
