@@ -1,6 +1,30 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  Future<void> _logout() async {
+    try {
+      // Call the AuthService logout method to clear stored data
+      await AuthService.instance.logout();
+
+      // Navigate to signin page and clear navigation stack
+      Navigator.pushNamedAndRemoveUntil(context, '/signin', (route) => false);
+    } catch (e) {
+      // Show error message if logout fails
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error logging out: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,7 +106,7 @@ class ProfilePage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                             ),
-                            onPressed: () {},
+                            onPressed: _logout,
                             child: Text("Log out"),
                           ),
                         ),
