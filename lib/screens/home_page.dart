@@ -107,14 +107,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showComments(Post post) async {
-    await Navigator.push(
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => CommentsPage(post: post)),
     );
 
-    // Optionally refresh posts when returning to get updated comment counts
-    // You can uncomment this if you want to refresh the entire feed
-    // await _loadPosts();
+    // Refresh posts if comments were added
+    if (result == true) {
+      await _loadPosts();
+    }
   }
 
   Future<void> _deletePost(Post post, int index) async {
