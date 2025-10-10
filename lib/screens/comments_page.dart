@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/post_service.dart';
+import '../services/auth_service.dart';
 
 class CommentsPage extends StatefulWidget {
   final Post post;
@@ -17,11 +18,24 @@ class _CommentsPageState extends State<CommentsPage> {
   bool isLoading = false;
   bool isSubmitting = false;
   bool _commentsAdded = false; // Track if any comments were added
+  String? currentUserId;
 
   @override
   void initState() {
     super.initState();
+    _loadCurrentUser();
     _loadComments();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    try {
+      final userId = await AuthService.instance.getUserId();
+      setState(() {
+        currentUserId = userId;
+      });
+    } catch (e) {
+      print('Error loading current user: $e');
+    }
   }
 
   Future<void> _loadComments() async {
@@ -159,6 +173,68 @@ class _CommentsPageState extends State<CommentsPage> {
         );
       },
     );
+  }
+
+  Future<void> _deleteComment(Comment comment, int index) async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Comment'),
+          content: Text(
+            'Are you sure you want to delete this comment? This action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: Text('Delete', style: TextStyle(color: Colors.red)),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      // Show loading state
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Deleting comment...')));
+
+      // Call the delete API
+      final success = await PostService.deleteComment(comment.id);
+
+      if (success) {
+        // Remove comment from local list
+        setState(() {
+          comments.removeAt(index);
+        });
+
+        // Mark that comments were modified
+        _commentsAdded = true;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Comment deleted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error deleting comment: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete comment: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -307,6 +383,40 @@ class _CommentsPageState extends State<CommentsPage> {
                                         ],
                                       ),
                                     ),
+                                    if (currentUserId == comment.userId)
+                                      PopupMenuButton<String>(
+                                        icon: Icon(
+                                          Icons.more_vert,
+                                          size: 16,
+                                          color: Colors.grey[600],
+                                        ),
+                                        onSelected: (value) {
+                                          if (value == 'delete') {
+                                            _deleteComment(comment, index);
+                                          }
+                                        },
+                                        itemBuilder: (BuildContext context) => [
+                                          PopupMenuItem<String>(
+                                            value: 'delete',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.delete,
+                                                  size: 16,
+                                                  color: Colors.red,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  'Delete',
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                   ],
                                 ),
                                 SizedBox(height: 8),

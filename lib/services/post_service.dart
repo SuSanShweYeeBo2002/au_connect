@@ -350,6 +350,64 @@ class PostService {
       throw Exception('Failed to load comments: $e');
     }
   }
+
+  // Delete a comment
+  static Future<bool> deleteComment(String commentId) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http
+          .delete(
+            Uri.parse('$baseUrl/comments/$commentId'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(Duration(seconds: 10));
+
+      print('Delete comment response status: ${response.statusCode}');
+      print('Delete comment response body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        // Some APIs return 200 with success response, others return 204 (No Content)
+        if (response.body.isNotEmpty) {
+          final responseJson = json.decode(response.body);
+          if (responseJson['status'] == 'success') {
+            return true;
+          } else {
+            throw Exception(
+              'Delete failed: ${responseJson['message'] ?? 'Unknown error'}',
+            );
+          }
+        } else {
+          // 204 No Content - deletion successful
+          return true;
+        }
+      } else {
+        throw Exception(
+          'Failed to delete comment: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } on TimeoutException catch (e) {
+      print('Timeout error deleting comment: $e');
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      print('Network error deleting comment: $e');
+      throw Exception(
+        'Network error: Please check if the server is running on localhost:8383',
+      );
+    } catch (e) {
+      print('Error deleting comment: $e');
+      if (e.toString().contains('Failed to fetch')) {
+        throw Exception(
+          'Cannot connect to server. Please check if the backend is running.',
+        );
+      }
+      throw Exception('Failed to delete comment: $e');
+    }
+  }
 }
 
 class Post {
