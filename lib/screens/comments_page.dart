@@ -110,6 +110,57 @@ class _CommentsPageState extends State<CommentsPage> {
     }
   }
 
+  void _showImageViewer(String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.black,
+          child: Stack(
+            children: [
+              Center(
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 200,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.broken_image,
+                              color: Colors.white,
+                              size: 64,
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Failed to load image',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Positioned(
+                top: 20,
+                right: 20,
+                child: IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: Icon(Icons.close, color: Colors.white, size: 30),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -262,26 +313,67 @@ class _CommentsPageState extends State<CommentsPage> {
                                 Text(comment.content),
                                 if (comment.image != null) ...[
                                   SizedBox(height: 8),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      comment.image!,
-                                      width: double.infinity,
-                                      height: 200,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                            return Container(
-                                              height: 200,
-                                              color: Colors.grey[300],
-                                              child: Center(
+                                  GestureDetector(
+                                    onTap: () =>
+                                        _showImageViewer(comment.image!),
+                                    child: Container(
+                                      constraints: BoxConstraints(
+                                        maxWidth: 200,
+                                        maxHeight: 150,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: Colors.grey[300]!,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(7),
+                                        child: Stack(
+                                          children: [
+                                            Image.network(
+                                              comment.image!,
+                                              fit: BoxFit.cover,
+                                              width: double.infinity,
+                                              height: double.infinity,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
+                                                    return Container(
+                                                      width: 200,
+                                                      height: 150,
+                                                      color: Colors.grey[300],
+                                                      child: Center(
+                                                        child: Icon(
+                                                          Icons.broken_image,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                            ),
+                                            // Subtle overlay to indicate it's tappable
+                                            Positioned(
+                                              top: 4,
+                                              right: 4,
+                                              child: Container(
+                                                padding: EdgeInsets.all(2),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black
+                                                      .withOpacity(0.5),
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
                                                 child: Icon(
-                                                  Icons.broken_image,
-                                                  color: Colors.grey,
+                                                  Icons.zoom_in,
+                                                  color: Colors.white,
+                                                  size: 16,
                                                 ),
                                               ),
-                                            );
-                                          },
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
