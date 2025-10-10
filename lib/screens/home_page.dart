@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'add_post_page.dart';
+import 'comments_page.dart';
 import '../services/post_service.dart';
 import '../services/auth_service.dart';
 
@@ -105,14 +106,15 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _showComments(Post post) {
-    // TODO: Implement comments functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Comments feature coming soon!'),
-        duration: Duration(seconds: 1),
-      ),
+  void _showComments(Post post) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CommentsPage(post: post)),
     );
+
+    // Optionally refresh posts when returning to get updated comment counts
+    // You can uncomment this if you want to refresh the entire feed
+    // await _loadPosts();
   }
 
   Future<void> _deletePost(Post post, int index) async {

@@ -234,6 +234,69 @@ class PostService {
       throw Exception('Failed to delete post: $e');
     }
   }
+
+  // Add a comment to a post
+  static Future<Comment> addComment({
+    required String postId,
+    required String content,
+    String? image,
+  }) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final requestBody = <String, dynamic>{'content': content};
+      if (image != null && image.isNotEmpty) {
+        requestBody['image'] = image;
+      }
+
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/comments/post/$postId'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: json.encode(requestBody),
+          )
+          .timeout(Duration(seconds: 10));
+
+      print('Add comment response status: ${response.statusCode}');
+      print('Add comment response body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success' &&
+            responseJson['data'] != null) {
+          return Comment.fromJson(responseJson['data']);
+        } else {
+          throw Exception(
+            'Server error: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        throw Exception(
+          'Failed to add comment: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } on TimeoutException catch (e) {
+      print('Timeout error adding comment: $e');
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      print('Network error adding comment: $e');
+      throw Exception(
+        'Network error: Please check if the server is running on localhost:8383',
+      );
+    } catch (e) {
+      print('Error adding comment: $e');
+      if (e.toString().contains('Failed to fetch')) {
+        throw Exception(
+          'Cannot connect to server. Please check if the backend is running.',
+        );
+      }
+      throw Exception('Failed to add comment: $e');
+    }
+  }
 }
 
 class Post {
@@ -338,30 +401,51 @@ class Pagination {
 
 class Comment {
   final String id;
+  final String postId;
   final String userId;
   final String userName;
-  final String text;
+  final String userEmail;
+  final String content;
+  final String? image;
   final DateTime createdAt;
+  final DateTime updatedAt;
 
   Comment({
     required this.id,
+    required this.postId,
     required this.userId,
     required this.userName,
-    required this.text,
+    required this.userEmail,
+    required this.content,
+    this.image,
     required this.createdAt,
+    required this.updatedAt,
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
+    final userEmail = json['author']?['email'] ?? json['user']?['email'] ?? '';
+    final userName =
+        json['author']?['name'] ??
+        json['user']?['name'] ??
+        userEmail.split('@')[0];
+
     return Comment(
       id: json['_id'] ?? json['id'] ?? '',
-      userId: json['user']?['_id'] ?? json['userId'] ?? '',
-      userName:
-          json['user']?['name'] ??
-          json['user']?['email']?.split('@')[0] ??
-          'Unknown',
-      text: json['text'] ?? json['content'] ?? '',
+      postId: json['postId'] ?? '',
+      userId:
+          json['author']?['_id'] ??
+          json['user']?['_id'] ??
+          json['userId'] ??
+          '',
+      userName: userName,
+      userEmail: userEmail,
+      content: json['content'] ?? json['text'] ?? '',
+      image: json['image'],
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
           : DateTime.now(),
     );
   }
