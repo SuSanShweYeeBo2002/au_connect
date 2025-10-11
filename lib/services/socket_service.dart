@@ -5,7 +5,7 @@ class SocketService {
   static SocketService? _instance;
   IO.Socket? _socket;
   final String _serverUrl =
-      'http://localhost:8383'; // Update with your server URL
+      'https://au-connect-api.onrender.com'; // Live production server
 
   static SocketService get instance {
     _instance ??= SocketService._internal();

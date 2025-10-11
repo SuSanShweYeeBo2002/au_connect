@@ -4,7 +4,7 @@ import 'dart:async';
 import 'auth_service.dart';
 
 class PostService {
-  static const String baseUrl = 'http://localhost:8383';
+  static const String baseUrl = 'https://au-connect-api.onrender.com';
 
   // Get the token from AuthService
   static Future<String?> _getToken() async {
@@ -60,7 +60,7 @@ class PostService {
     } on http.ClientException catch (e) {
       print('Network error creating post: $e');
       throw Exception(
-        'Network error: Please check if the server is running on localhost:8383',
+        'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
       print('Error creating post: $e');
@@ -111,7 +111,7 @@ class PostService {
     } on http.ClientException catch (e) {
       print('Network error loading posts: $e');
       throw Exception(
-        'Network error: Please check if the server is running on localhost:8383',
+        'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
       print('Error loading posts: $e');
@@ -164,7 +164,7 @@ class PostService {
     } on http.ClientException catch (e) {
       print('Network error liking post: $e');
       throw Exception(
-        'Network error: Please check if the server is running on localhost:8383',
+        'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
       print('Error liking post: $e');
@@ -222,7 +222,7 @@ class PostService {
     } on http.ClientException catch (e) {
       print('Network error deleting post: $e');
       throw Exception(
-        'Network error: Please check if the server is running on localhost:8383',
+        'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
       print('Error deleting post: $e');
@@ -285,7 +285,7 @@ class PostService {
     } on http.ClientException catch (e) {
       print('Network error adding comment: $e');
       throw Exception(
-        'Network error: Please check if the server is running on localhost:8383',
+        'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
       print('Error adding comment: $e');
@@ -338,7 +338,7 @@ class PostService {
     } on http.ClientException catch (e) {
       print('Network error loading comments: $e');
       throw Exception(
-        'Network error: Please check if the server is running on localhost:8383',
+        'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
       print('Error loading comments: $e');
@@ -396,7 +396,7 @@ class PostService {
     } on http.ClientException catch (e) {
       print('Network error deleting comment: $e');
       throw Exception(
-        'Network error: Please check if the server is running on localhost:8383',
+        'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
       print('Error deleting comment: $e');

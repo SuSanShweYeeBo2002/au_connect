@@ -67,7 +67,7 @@ class _SignInPageState extends State<SignInPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:8383/users/signin'),
+        Uri.parse('https://au-connect-api.onrender.com/users/signin'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text,
