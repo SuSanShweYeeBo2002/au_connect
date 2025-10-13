@@ -374,14 +374,11 @@ class _ChatPageState extends State<ChatPage> {
                     widget.receiver?.name ?? 'New Chat',
                     style: TextStyle(fontSize: 16),
                   ),
-                  Text(
-                    _typingUserId == widget.receiver?.id
-                        ? 'Typing...'
-                        : widget.receiver?.isOnline == true
-                        ? 'Online'
-                        : 'Offline',
-                    style: TextStyle(fontSize: 12),
-                  ),
+                  if (_typingUserId == widget.receiver?.id)
+                    Text(
+                      'Typing...',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                 ],
               ),
             ],
@@ -569,7 +566,7 @@ class MessageBubble extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '${message.timestamp.hour}:${message.timestamp.minute.toString().padLeft(2, '0')}',
+                        _formatMessageTime(message.timestamp),
                         style: TextStyle(
                           color: isUser ? Colors.white70 : Colors.black54,
                           fontSize: 12,
@@ -598,5 +595,50 @@ class MessageBubble extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // Helper method to format message timestamp to user-friendly format
+  String _formatMessageTime(DateTime timestamp) {
+    final now = DateTime.now();
+    final messageDate = timestamp;
+
+    // Check if the message is from today
+    if (messageDate.year == now.year &&
+        messageDate.month == now.month &&
+        messageDate.day == now.day) {
+      // Show time only for today's messages
+      final hour = messageDate.hour;
+      final minute = messageDate.minute.toString().padLeft(2, '0');
+
+      // Convert to 12-hour format
+      if (hour == 0) {
+        return '12:$minute AM';
+      } else if (hour < 12) {
+        return '$hour:$minute AM';
+      } else if (hour == 12) {
+        return '12:$minute PM';
+      } else {
+        return '${hour - 12}:$minute PM';
+      }
+    } else {
+      // Show date and time for older messages
+      final month = messageDate.month.toString().padLeft(2, '0');
+      final day = messageDate.day.toString().padLeft(2, '0');
+      final hour = messageDate.hour;
+      final minute = messageDate.minute.toString().padLeft(2, '0');
+
+      String timeStr;
+      if (hour == 0) {
+        timeStr = '12:$minute AM';
+      } else if (hour < 12) {
+        timeStr = '$hour:$minute AM';
+      } else if (hour == 12) {
+        timeStr = '12:$minute PM';
+      } else {
+        timeStr = '${hour - 12}:$minute PM';
+      }
+
+      return '$month/$day $timeStr';
+    }
   }
 }

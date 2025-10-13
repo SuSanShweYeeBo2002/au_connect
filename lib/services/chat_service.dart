@@ -272,11 +272,39 @@ class Message {
           : json['receiverId'] ?? '',
       content: json['content'] ?? '',
       timestamp: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
+          ? _parseUtcTimestamp(json['createdAt'])
           : json['timestamp'] != null
-          ? DateTime.parse(json['timestamp'])
+          ? _parseUtcTimestamp(json['timestamp'])
           : DateTime.now(),
     );
+  }
+
+  // Helper method to parse UTC timestamp and convert to local time
+  static DateTime _parseUtcTimestamp(String timestamp) {
+    try {
+      // Parse the timestamp (handles both UTC 'Z' format and ISO format)
+      final dateTime = DateTime.parse(timestamp);
+
+      // If the timestamp doesn't have timezone info, treat it as UTC
+      if (dateTime.timeZoneOffset == Duration.zero &&
+          !timestamp.endsWith('Z')) {
+        return DateTime.utc(
+          dateTime.year,
+          dateTime.month,
+          dateTime.day,
+          dateTime.hour,
+          dateTime.minute,
+          dateTime.second,
+          dateTime.millisecond,
+        ).toLocal();
+      }
+
+      // If it's already UTC (with 'Z') or has timezone info, convert to local
+      return dateTime.toLocal();
+    } catch (e) {
+      print('❌ Error parsing timestamp: $timestamp, error: $e');
+      return DateTime.now();
+    }
   }
 }
 
