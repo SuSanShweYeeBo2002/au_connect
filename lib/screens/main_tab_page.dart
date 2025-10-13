@@ -45,6 +45,7 @@ class _MainTabPageState extends State<MainTabPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "main_tab_fab",
         onPressed: () {
           Navigator.push(
             context,

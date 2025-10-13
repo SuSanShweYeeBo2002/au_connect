@@ -415,6 +415,7 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.only(right: 16.0, top: 8.0, bottom: 8.0),
             child: FloatingActionButton(
+              heroTag: "home_fab",
               onPressed: () async {
                 final result = await Navigator.push(
                   context,

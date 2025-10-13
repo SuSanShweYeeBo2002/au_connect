@@ -247,6 +247,7 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "pomodoro_fab",
         child: Icon(
           (timer != null && timer!.isActive && !isPaused)
               ? Icons.pause

@@ -23,14 +23,19 @@ class _ChatPageState extends State<ChatPage> {
   DateTime? _lastTypingNotification;
   String? _typingUserId;
   String? _currentUserId;
+  bool _isSendingMessage = false;
 
   @override
   void initState() {
     super.initState();
-    _loadCurrentUser();
-    _loadMessages();
-    _setupSocket();
+    _initializeChat();
     _messageController.addListener(_onTypingChange);
+  }
+
+  Future<void> _initializeChat() async {
+    await _loadCurrentUser();
+    await _loadMessages();
+    _setupSocket();
   }
 
   Future<void> _loadCurrentUser() async {
@@ -51,36 +56,125 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  void _setupSocket() {
+  void _setupSocket() async {
+    print(
+      '🔧 Setting up socket for chat with ${widget.receiver?.name} (${widget.receiver?.id})',
+    );
     final socket = SocketService.instance;
-    socket.initSocket();
 
+    // Initialize socket and wait for connection
+    await socket.initSocket();
+
+    // Join a chat room if both current user and receiver are available
+    if (_currentUserId != null && widget.receiver?.id != null) {
+      // Create a consistent room ID for both users
+      final roomId = _createChatRoomId(_currentUserId!, widget.receiver!.id);
+      socket.joinChatRoom(roomId);
+    } else {
+      print(
+        '⚠️ Cannot join room - currentUserId: $_currentUserId, receiverId: ${widget.receiver?.id}',
+      );
+    }
+
+    // Add listeners after socket is initialized and room is joined
     socket.addMessageListener((data) {
-      if (mounted && data['senderId'] == widget.receiver?.id) {
-        final newMessage = Message.fromJson(data);
-        setState(() {
-          _messages.add(newMessage);
-        });
-        _scrollToBottom();
+      print('📨 ========= SOCKET MESSAGE RECEIVED =========');
+      print('📥 Raw data: $data');
 
-        // Mark the new message as read since user is viewing the conversation
-        _markMessagesAsRead();
+      try {
+        final senderId = data['senderId'] ?? data['sender']?['_id'];
+        final receiverId = data['receiverId'] ?? data['receiver']?['_id'];
+        final content = data['content'];
+        final currentUserId = _currentUserId;
+
+        print('🔍 DETAILED MESSAGE ANALYSIS:');
+        print('  📤 SenderId: $senderId');
+        print('  📥 ReceiverId: $receiverId');
+        print('  👤 CurrentUserId: $currentUserId');
+        print('  🎯 Expected (other person): ${widget.receiver?.id}');
+        print('  💬 Content: $content');
+        print('  📱 Mounted: $mounted');
+
+        // RULE 1: Only show messages where current user is the RECEIVER (not sender)
+        // RULE 2: Only show messages FROM the other person in this chat
+        // RULE 3: Don't process if we're currently sending a message
+        final isMessageForMe = receiverId == currentUserId;
+        final isFromOtherPerson = senderId == widget.receiver?.id;
+        final shouldShow =
+            mounted &&
+            isMessageForMe &&
+            isFromOtherPerson &&
+            !_isSendingMessage;
+
+        print('🤔 DECISION LOGIC:');
+        print('  - Is mounted: $mounted');
+        print(
+          '  - Am I the receiver? $isMessageForMe ($receiverId == $currentUserId)',
+        );
+        print(
+          '  - Is from other person? $isFromOtherPerson ($senderId == ${widget.receiver?.id})',
+        );
+        print('  - Currently sending? $_isSendingMessage');
+        print('  - Should show message: $shouldShow');
+
+        if (shouldShow) {
+          print('✅ PROCESSING MESSAGE - I am the receiver!');
+          final newMessage = Message.fromJson(data);
+
+          // Simple duplicate check by ID
+          final messageExists = _messages.any((msg) => msg.id == newMessage.id);
+
+          print('🔄 DUPLICATE CHECK:');
+          print('  - Message ID: ${newMessage.id}');
+          print('  - Already exists: $messageExists');
+
+          if (!messageExists) {
+            setState(() {
+              _messages.add(newMessage);
+            });
+            _scrollToBottom();
+            print('✅ SUCCESS: Message added to UI - ${newMessage.content}');
+
+            // Mark the new message as read since user is viewing the conversation
+            _markMessagesAsRead();
+          } else {
+            print('⏭️  SKIPPED: Duplicate message - ${newMessage.content}');
+          }
+        } else {
+          print('❌ REJECTED: Message not for me');
+          print('  - Reason: I am NOT the receiver');
+          print('  - SenderId: $senderId vs CurrentUser: $currentUserId');
+          print('  - ReceiverId: $receiverId vs CurrentUser: $currentUserId');
+        }
+      } catch (e) {
+        print('🚨 Error processing received message: $e');
+        print('🚨 Message data: $data');
       }
     });
 
     socket.addTypingListener((userId) {
-      if (mounted && userId == widget.receiver?.id) {
-        setState(() {
-          _typingUserId = userId;
-        });
-        // Clear typing indicator after 3 seconds
-        Future.delayed(Duration(seconds: 3), () {
-          if (mounted && _typingUserId == userId) {
-            setState(() {
-              _typingUserId = null;
-            });
-          }
-        });
+      print('⌨️ Chat page received typing from userId: $userId');
+      try {
+        if (mounted && userId.isNotEmpty && userId == widget.receiver?.id) {
+          print('✅ Processing typing indicator from ${widget.receiver?.name}');
+          setState(() {
+            _typingUserId = userId;
+          });
+          // Clear typing indicator after 3 seconds
+          Future.delayed(Duration(seconds: 3), () {
+            if (mounted && _typingUserId == userId) {
+              setState(() {
+                _typingUserId = null;
+              });
+            }
+          });
+        } else {
+          print(
+            '❌ Typing not processed - userId: $userId, expected: ${widget.receiver?.id}',
+          );
+        }
+      } catch (e) {
+        print('🚨 Error processing typing indicator: $e');
       }
     });
   }
@@ -133,7 +227,12 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _handleSubmitted(String text) async {
-    if (text.trim().isEmpty || widget.receiver == null) return;
+    if (text.trim().isEmpty || widget.receiver == null || _isSendingMessage)
+      return;
+
+    setState(() {
+      _isSendingMessage = true;
+    });
 
     final messageText = text;
     _messageController.clear();
@@ -170,8 +269,18 @@ class _ChatPageState extends State<ChatPage> {
 
       print('Message sent successfully: ${sentMessage.content}');
 
-      // Optionally, you could also send via socket for real-time updates
-      // SocketService.instance.sendMessage(widget.receiver!.id, messageText);
+      // TEMPORARILY DISABLE socket sending - backend creates duplicate messages
+      print(
+        '🚫 Socket sending disabled - backend creates duplicates when both HTTP and Socket are used',
+      );
+
+      // TODO: Fix backend to handle both HTTP and Socket without creating duplicates
+      // if (widget.receiver?.id != null) {
+      //   SocketService.instance.sendMessage(widget.receiver!.id, messageText);
+      //   print('✅ Socket message sent to: ${widget.receiver!.id}');
+      // } else {
+      //   print('⚠️ Cannot send socket message - receiver ID is null');
+      // }
     } catch (e) {
       // Remove the temporary message if sending failed
       setState(() {
@@ -183,6 +292,13 @@ class _ChatPageState extends State<ChatPage> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Failed to send message: $e')));
+      }
+    } finally {
+      // Reset the sending flag
+      if (mounted) {
+        setState(() {
+          _isSendingMessage = false;
+        });
       }
     }
   }
@@ -350,6 +466,28 @@ class _ChatPageState extends State<ChatPage> {
         ),
       ),
     );
+  }
+
+  // Create a consistent chat room ID for both users
+  String _createChatRoomId(String userId1, String userId2) {
+    final sortedIds = [userId1, userId2]..sort();
+    return '${sortedIds[0]}_${sortedIds[1]}';
+  }
+
+  @override
+  void dispose() {
+    print('🗑️ Disposing chat page - cleaning up socket listeners');
+
+    // Leave the chat room
+    if (_currentUserId != null && widget.receiver?.id != null) {
+      final roomId = _createChatRoomId(_currentUserId!, widget.receiver!.id);
+      SocketService.instance.leaveChatRoom(roomId);
+    }
+
+    _messageController.removeListener(_onTypingChange);
+    _messageController.dispose();
+    SocketService.instance.removeAllListeners();
+    super.dispose();
   }
 }
 

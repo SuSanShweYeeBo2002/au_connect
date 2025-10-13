@@ -224,6 +224,7 @@ class _ChatsListPageState extends State<ChatsListPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "chats_list_fab",
         onPressed: () {
           Navigator.push(
             context,
