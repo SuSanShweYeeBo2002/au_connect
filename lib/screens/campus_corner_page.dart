@@ -3,6 +3,7 @@ import 'pomodoro_timer_page.dart';
 import 'calculator_page.dart';
 import 'idea_cloud_page.dart';
 import 'upcoming_event_page.dart';
+import 'au_poll_page.dart';
 
 class CampusCornerPage extends StatelessWidget {
   @override
@@ -155,10 +156,20 @@ class CampusCornerPage extends StatelessWidget {
                               icon: Icons.event,
                             ),
                           ),
-                          _CampusTile(
-                            title: 'Campus Market',
-                            color: Colors.white,
-                            icon: Icons.store,
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AuPollPage(),
+                                ),
+                              );
+                            },
+                            child: _CampusTile(
+                              title: 'AU Poll',
+                              color: Colors.white,
+                              icon: Icons.poll,
+                            ),
                           ),
                           GestureDetector(
                             onTap: () {
