@@ -9,11 +9,16 @@ class UpcomingEventPage extends StatelessWidget {
     // Replace with your app's color scheme
     final events = [
       {
-        'title': 'Art Festival',
-        'date': 'Sep 15, 2025',
-        'location': 'Campus Park',
+        'title': 'AU_Web',
         'imageUrl': 'assets/images/au_logo.jpg',
         'isAsset': true,
+        'url': 'https://www.au.edu/',
+      },
+      {
+        'title': 'AUSO_IG',
+        'imageUrl': 'assets/images/au_insta.webp',
+        'isAsset': true,
+        'url': 'https://www.instagram.com/ausoabac?igsh=MWh3aDc5azA0N2xzdQ==',
       },
     ];
 
@@ -26,7 +31,7 @@ class UpcomingEventPage extends StatelessWidget {
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Upcoming Events'),
+        title: const Text('Campus Clicks'),
         backgroundColor: Colors.deepPurple,
       ),
       body: Padding(
@@ -53,10 +58,9 @@ class UpcomingEventPage extends StatelessWidget {
                     .map(
                       (event) => _eventCard(
                         title: event['title'] as String,
-                        date: event['date'] as String,
-                        location: event['location'] as String,
                         imageUrl: event['imageUrl'] as String?,
                         isAsset: event['isAsset'] as bool? ?? false,
+                        url: event['url'] as String? ?? 'https://www.au.edu/',
                       ),
                     )
                     .toList(),
@@ -70,10 +74,9 @@ class UpcomingEventPage extends StatelessWidget {
 
   Widget _eventCard({
     required String title,
-    required String date,
-    required String location,
     String? imageUrl,
     bool isAsset = false,
+    String url = 'https://www.au.edu/',
   }) {
     return Card(
       shape: RoundedRectangleBorder(
@@ -179,13 +182,13 @@ class UpcomingEventPage extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    final Uri url = Uri.parse('https://www.au.edu/');
+                    final Uri uri = Uri.parse(url);
                     if (!await launchUrl(
-                      url,
+                      uri,
                       mode: LaunchMode.externalApplication,
                     )) {
                       // Handle error if URL cannot be launched
-                      debugPrint('Could not launch $url');
+                      debugPrint('Could not launch $uri');
                     }
                   },
                   child: const Text('Details'),
