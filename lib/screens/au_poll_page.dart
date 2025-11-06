@@ -45,6 +45,18 @@ class _AuPollPageState extends State<AuPollPage> {
 
     try {
       final response = await PollService.getPolls(page: 1);
+      print('Loaded ${response.polls.length} polls');
+      for (var poll in response.polls) {
+        print('Poll: ${poll.question}');
+        print('  Total votes: ${poll.totalVotes}');
+        print('  Has voted: ${poll.hasVoted}');
+        print('  User voted index: ${poll.userVotedIndex}');
+        for (var i = 0; i < poll.options.length; i++) {
+          print(
+            '  Option $i: ${poll.options[i].text} - ${poll.options[i].votes} votes',
+          );
+        }
+      }
       setState(() {
         _polls = response.polls;
         _hasMore = response.pagination.hasNext;
@@ -52,6 +64,7 @@ class _AuPollPageState extends State<AuPollPage> {
         _isLoading = false;
       });
     } catch (e) {
+      print('Error loading polls: $e');
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -397,6 +410,74 @@ class _PollCard extends StatelessWidget {
     }
   }
 
+  void _showVoters(BuildContext context, PollOption option) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Voted for "${option.text}"',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '${option.votes} ${option.votes == 1 ? 'vote' : 'votes'}',
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            if (option.voters.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Center(
+                  child: Text(
+                    'No votes yet',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ),
+              )
+            else
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: option.voters.length,
+                  itemBuilder: (context, index) {
+                    final voter = option.voters[index];
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        child: Text(
+                          voter.initials,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      title: Text(voter.displayName),
+                      subtitle: voter.email.isNotEmpty
+                          ? Text(voter.email, style: TextStyle(fontSize: 12))
+                          : null,
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasVoted = poll.hasVoted;
@@ -413,12 +494,13 @@ class _PollCard extends StatelessWidget {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: Colors.blue[300],
+                  backgroundColor: Theme.of(context).primaryColor,
                   child: Text(
-                    poll.authorName.isNotEmpty
-                        ? poll.authorName[0].toUpperCase()
-                        : 'U',
-                    style: TextStyle(color: Colors.white),
+                    poll.authorName[0].toUpperCase(),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 SizedBox(width: 12),
@@ -507,7 +589,9 @@ class _PollCard extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: InkWell(
-                  onTap: (!hasVoted && !isExpired) ? () => onVote(index) : null,
+                  onTap: (!hasVoted && !isExpired)
+                      ? () => onVote(index)
+                      : () => _showVoters(context, option),
                   child: Container(
                     decoration: BoxDecoration(
                       color: isUserVote ? Colors.blue[100] : Colors.grey[100],
@@ -525,7 +609,9 @@ class _PollCard extends StatelessWidget {
                             child: Container(
                               height: 48,
                               decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.3),
+                                color: isUserVote
+                                    ? Colors.blue.withOpacity(0.4)
+                                    : Colors.blue.withOpacity(0.3),
                                 borderRadius: BorderRadius.circular(7),
                               ),
                             ),
@@ -539,23 +625,62 @@ class _PollCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
-                                child: Text(
-                                  option.text,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: isUserVote
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                  ),
+                                child: Row(
+                                  children: [
+                                    if (isUserVote)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 8.0,
+                                        ),
+                                        child: Icon(
+                                          Icons.check_circle,
+                                          color: Colors.blue[700],
+                                          size: 20,
+                                        ),
+                                      ),
+                                    Expanded(
+                                      child: Text(
+                                        option.text,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: isUserVote
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               if (hasVoted || isExpired)
-                                Text(
-                                  '${percentage.toStringAsFixed(1)}% (${option.votes})',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue[700],
-                                  ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.8),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        '${percentage.toStringAsFixed(0)}% • ${option.votes}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue[700],
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Icon(
+                                      Icons.people,
+                                      size: 16,
+                                      color: Colors.blue[700],
+                                    ),
+                                  ],
                                 ),
                             ],
                           ),

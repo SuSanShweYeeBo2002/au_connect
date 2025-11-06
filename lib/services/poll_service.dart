@@ -222,23 +222,76 @@ class PollService {
   }
 }
 
+class Voter {
+  final String id;
+  final String email;
+  final String name;
+
+  Voter({required this.id, required this.email, required this.name});
+
+  factory Voter.fromJson(Map<String, dynamic> json) {
+    final email = json['email'] ?? '';
+    final name = json['name'] ?? email.split('@')[0];
+    return Voter(id: json['_id'] ?? json['id'] ?? '', email: email, name: name);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'_id': id, 'email': email, 'name': name};
+  }
+
+  String get displayName {
+    if (name.isNotEmpty) return name;
+    if (email.isNotEmpty) return email.split('@')[0];
+    return 'User';
+  }
+
+  String get initials {
+    if (name.isNotEmpty) {
+      final parts = name.split(' ');
+      if (parts.length >= 2) {
+        return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+      }
+      return name[0].toUpperCase();
+    }
+    if (email.isNotEmpty) {
+      return email[0].toUpperCase();
+    }
+    return 'U';
+  }
+}
+
 class PollOption {
   final String text;
   final int votes;
-  final List<String> voters;
+  final List<Voter> voters;
 
   PollOption({required this.text, required this.votes, required this.voters});
 
   factory PollOption.fromJson(Map<String, dynamic> json) {
+    final List<dynamic> votersData = json['voters'] ?? [];
+    final voters = votersData.map((voter) {
+      // Handle both string IDs and user objects
+      if (voter is String) {
+        return Voter(id: voter, email: '', name: '');
+      } else if (voter is Map<String, dynamic>) {
+        return Voter.fromJson(voter);
+      }
+      return Voter(id: '', email: '', name: '');
+    }).toList();
+
     return PollOption(
       text: json['text'] ?? '',
       votes: json['votes'] ?? 0,
-      voters: List<String>.from(json['voters'] ?? []),
+      voters: voters,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'text': text, 'votes': votes, 'voters': voters};
+    return {
+      'text': text,
+      'votes': votes,
+      'voters': voters.map((v) => v.toJson()).toList(),
+    };
   }
 }
 
@@ -295,8 +348,8 @@ class Poll {
       expiresAt: json['expiresAt'] != null
           ? DateTime.parse(json['expiresAt'])
           : null,
-      isExpired: json['isExpired'] ?? false,
-      userVotedIndex: json['userVotedIndex'],
+      isExpired: json['isExpired'] ?? json['expired'] ?? false,
+      userVotedIndex: json['votedOptionIndex'] ?? json['userVotedIndex'],
     );
   }
 
