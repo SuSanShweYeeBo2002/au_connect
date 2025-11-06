@@ -99,6 +99,14 @@ class _AuPollPageState extends State<AuPollPage> {
 
   Future<void> _votePoll(String pollId, int optionIndex) async {
     try {
+      // Find the current poll to check if user is switching vote
+      final currentPollIndex = _polls.indexWhere((p) => p.id == pollId);
+      final currentPoll = currentPollIndex != -1
+          ? _polls[currentPollIndex]
+          : null;
+      final isSwitching = currentPoll?.hasVoted ?? false;
+      final isSameOption = currentPoll?.userVotedIndex == optionIndex;
+
       final updatedPoll = await PollService.votePoll(
         pollId: pollId,
         optionIndex: optionIndex,
@@ -111,10 +119,21 @@ class _AuPollPageState extends State<AuPollPage> {
         }
       });
 
+      // Show appropriate message
+      String message;
+      if (isSameOption) {
+        message = 'Already voted for this option';
+      } else if (isSwitching) {
+        message = 'Vote switched successfully!';
+      } else {
+        message = 'Vote recorded successfully!';
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Vote recorded successfully!'),
+          content: Text(message),
           backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
         ),
       );
     } catch (e) {
@@ -222,36 +241,41 @@ class _AuPollPageState extends State<AuPollPage> {
                 Row(
                   children: [
                     Text('Expiry: '),
-                    TextButton(
-                      onPressed: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now().add(Duration(days: 7)),
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(Duration(days: 365)),
-                        );
-                        if (date != null) {
-                          final time = await showTimePicker(
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () async {
+                          final date = await showDatePicker(
                             context: context,
-                            initialTime: TimeOfDay.now(),
+                            initialDate: DateTime.now().add(Duration(days: 1)),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(Duration(days: 365)),
                           );
-                          if (time != null) {
-                            setDialogState(() {
-                              selectedExpiry = DateTime(
-                                date.year,
-                                date.month,
-                                date.day,
-                                time.hour,
-                                time.minute,
-                              );
-                            });
+                          if (date != null) {
+                            final time = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.fromDateTime(
+                                DateTime.now().add(Duration(hours: 1)),
+                              ),
+                            );
+                            if (time != null) {
+                              setDialogState(() {
+                                selectedExpiry = DateTime(
+                                  date.year,
+                                  date.month,
+                                  date.day,
+                                  time.hour,
+                                  time.minute,
+                                );
+                              });
+                            }
                           }
-                        }
-                      },
-                      child: Text(
-                        selectedExpiry == null
-                            ? 'No expiry'
-                            : '${selectedExpiry!.day}/${selectedExpiry!.month}/${selectedExpiry!.year}',
+                        },
+                        child: Text(
+                          selectedExpiry == null
+                              ? 'No expiry (tap to set)'
+                              : '${selectedExpiry!.day}/${selectedExpiry!.month}/${selectedExpiry!.year} ${selectedExpiry!.hour.toString().padLeft(2, '0')}:${selectedExpiry!.minute.toString().padLeft(2, '0')}',
+                          style: TextStyle(fontSize: 13),
+                        ),
                       ),
                     ),
                     if (selectedExpiry != null)
@@ -303,18 +327,34 @@ class _AuPollPageState extends State<AuPollPage> {
                     options: options,
                     expiresAt: selectedExpiry,
                   );
+
+                  // Refresh the poll list
+                  await _loadPolls();
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Poll created successfully!'),
                       backgroundColor: Colors.green,
                     ),
                   );
-                  _loadPolls();
                 } catch (e) {
+                  // Parse error message for user-friendly display
+                  String errorMessage = e.toString();
+                  if (errorMessage.contains('expiresAt') &&
+                      errorMessage.contains('greater than')) {
+                    errorMessage =
+                        'Expiry date must be in the future. Please select a later date and time.';
+                  } else if (errorMessage.contains('Exception:')) {
+                    errorMessage = errorMessage
+                        .replaceFirst('Exception:', '')
+                        .trim();
+                  }
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Failed to create poll: ${e.toString()}'),
+                      content: Text(errorMessage),
                       backgroundColor: Colors.red,
+                      duration: Duration(seconds: 4),
                     ),
                   );
                 }
@@ -589,9 +629,12 @@ class _PollCard extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: InkWell(
-                  onTap: (!hasVoted && !isExpired)
-                      ? () => onVote(index)
-                      : () => _showVoters(context, option),
+                  onTap: isExpired
+                      ? () => _showVoters(context, option)
+                      : () => onVote(index),
+                  onLongPress: (hasVoted || isExpired)
+                      ? () => _showVoters(context, option)
+                      : null,
                   child: Container(
                     decoration: BoxDecoration(
                       color: isUserVote ? Colors.blue[100] : Colors.grey[100],
@@ -712,6 +755,24 @@ class _PollCard extends StatelessWidget {
                   ),
               ],
             ),
+            if (hasVoted && !isExpired)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 14, color: Colors.grey[600]),
+                    SizedBox(width: 4),
+                    Text(
+                      'Tap to switch your vote • Long press to see voters',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
