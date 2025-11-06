@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UpcomingEventPage extends StatelessWidget {
   const UpcomingEventPage({Key? key}) : super(key: key);
@@ -8,32 +9,11 @@ class UpcomingEventPage extends StatelessWidget {
     // Replace with your app's color scheme
     final events = [
       {
-        'title': 'Tech Talk 2025',
-        'date': 'Sep 10, 2025',
-        'location': 'Main Auditorium',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
-      },
-      {
         'title': 'Art Festival',
         'date': 'Sep 15, 2025',
         'location': 'Campus Park',
-      },
-      {
-        'title': 'Music Night',
-        'date': 'Sep 20, 2025',
-        'location': 'Student Center',
-      },
-      {
-        'title': 'Sports Day',
-        'date': 'Sep 25, 2025',
-        'location': 'Sports Complex',
-      },
-      {'title': 'Career Fair', 'date': 'Sep 30, 2025', 'location': 'Main Hall'},
-      {
-        'title': 'Science Expo',
-        'date': 'Oct 5, 2025',
-        'location': 'Lab Building',
+        'imageUrl': 'assets/images/au_logo.jpg',
+        'isAsset': true,
       },
     ];
 
@@ -72,10 +52,11 @@ class UpcomingEventPage extends StatelessWidget {
                 children: events
                     .map(
                       (event) => _eventCard(
-                        title: event['title']!,
-                        date: event['date']!,
-                        location: event['location']!,
-                        imageUrl: event['imageUrl'],
+                        title: event['title'] as String,
+                        date: event['date'] as String,
+                        location: event['location'] as String,
+                        imageUrl: event['imageUrl'] as String?,
+                        isAsset: event['isAsset'] as bool? ?? false,
                       ),
                     )
                     .toList(),
@@ -92,6 +73,7 @@ class UpcomingEventPage extends StatelessWidget {
     required String date,
     required String location,
     String? imageUrl,
+    bool isAsset = false,
   }) {
     return Card(
       shape: RoundedRectangleBorder(
@@ -115,48 +97,97 @@ class UpcomingEventPage extends StatelessWidget {
                   color: Colors.deepPurple,
                 ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.calendar_today,
-                    color: Colors.orange,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(date, style: TextStyle(color: Colors.grey)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.location_on, color: Colors.orange, size: 18),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(location, style: TextStyle(color: Colors.grey)),
-                  ),
-                ],
-              ),
               const SizedBox(height: 12),
               if (imageUrl != null)
                 AspectRatio(
                   aspectRatio: 2.5,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      imageUrl,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
+                    child: isAsset
+                        ? Image.asset(
+                            imageUrl,
+                            width: double.infinity,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              debugPrint('Asset load error: $error');
+                              return Container(
+                                color: Colors.grey[300],
+                                child: const Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.broken_image,
+                                        size: 50,
+                                        color: Colors.grey,
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Image not available',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+                        : Image.network(
+                            imageUrl,
+                            width: double.infinity,
+                            fit: BoxFit.contain,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value:
+                                      loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              debugPrint('Image load error: $error');
+                              return Container(
+                                color: Colors.grey[300],
+                                child: const Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.broken_image,
+                                        size: 50,
+                                        color: Colors.grey,
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Image not available',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                   ),
                 ),
               const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final Uri url = Uri.parse('https://www.au.edu/');
+                    if (!await launchUrl(
+                      url,
+                      mode: LaunchMode.externalApplication,
+                    )) {
+                      // Handle error if URL cannot be launched
+                      debugPrint('Could not launch $url');
+                    }
+                  },
                   child: const Text('Details'),
                 ),
               ),
