@@ -360,6 +360,7 @@ class StudySession {
   final String status;
   final bool isActive;
   final bool isFull;
+  final bool hasJoined;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -380,6 +381,7 @@ class StudySession {
     required this.status,
     required this.isActive,
     required this.isFull,
+    required this.hasJoined,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -404,6 +406,7 @@ class StudySession {
       status: json['status'] ?? '',
       isActive: json['isActive'] ?? true,
       isFull: json['isFull'] ?? false,
+      hasJoined: json['hasJoined'] ?? false,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),

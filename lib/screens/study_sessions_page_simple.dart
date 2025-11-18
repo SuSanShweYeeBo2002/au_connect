@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/study_session_service.dart';
 import '../services/auth_service.dart';
 
@@ -52,6 +53,10 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
       setState(() {
         if (result['success']) {
           _sessions = result['sessions'];
+          // Debug: Print hasJoined status
+          for (var session in _sessions) {
+            print('Session: ${session.title}, hasJoined: ${session.hasJoined}');
+          }
           final pagination = result['pagination'] as StudySessionPagination;
           _hasMore = pagination.hasNext;
           _currentPage = 1;
@@ -104,6 +109,25 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Joined successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      _loadSessions();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result['message']), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  Future<void> _leaveSession(String sessionId) async {
+    final result = await StudySessionService.instance.leaveStudySession(
+      sessionId,
+    );
+    if (result['success']) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Left session successfully!'),
           backgroundColor: Colors.green,
         ),
       );
@@ -442,8 +466,529 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                               selectedTime!.minute,
                             );
 
+                            try {
+                              final result = await StudySessionService.instance
+                                  .createStudySession(
+                                    title: titleController.text.trim(),
+                                    description: descController.text.trim(),
+                                    subject: subjectController.text.trim(),
+                                    platform: selectedPlatform,
+                                    platformLink:
+                                        linkController.text.trim().isNotEmpty
+                                        ? linkController.text.trim()
+                                        : null,
+                                    studyType: selectedType,
+                                    location:
+                                        locationController.text
+                                            .trim()
+                                            .isNotEmpty
+                                        ? locationController.text.trim()
+                                        : null,
+                                    maxParticipants:
+                                        maxController.text.trim().isNotEmpty
+                                        ? int.tryParse(
+                                            maxController.text.trim(),
+                                          )
+                                        : null,
+                                    scheduledDate: scheduledDate,
+                                    duration: int.parse(
+                                      durationController.text,
+                                    ),
+                                  );
+
+                              if (result['success']) {
+                                await _loadSessions();
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Session created!'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(result['message']),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Failed to create session: ${e.toString()}',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showParticipantsDialog(StudySession session) async {
+    // Fetch participants
+    final result = await StudySessionService.instance.getSessionParticipants(
+      sessionId: session.id,
+      page: 1,
+      limit: 50,
+    );
+
+    if (!result['success']) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? 'Failed to load participants'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final participants = result['participants'] as List<Participant>;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          width: 400,
+          constraints: BoxConstraints(maxHeight: 500),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.blue[700],
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.people, color: Colors.white),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Participants',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            session.title,
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: participants.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.people_outline,
+                              size: 64,
+                              color: Colors.grey,
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              'No participants yet',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: EdgeInsets.all(16),
+                        itemCount: participants.length,
+                        itemBuilder: (context, index) {
+                          final participant = participants[index];
+                          final isCreator =
+                              participant.user.id == session.creator.id;
+
+                          return Card(
+                            margin: EdgeInsets.only(bottom: 8),
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.blue[700],
+                                child: Text(
+                                  participant.user.email[0].toUpperCase(),
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              title: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      participant.user.email,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                  if (isCreator)
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue[100],
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        'Creator',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.blue[900],
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              subtitle: Text(
+                                'Joined ${_formatJoinedDate(participant.joinedAt)}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatJoinedDate(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inMinutes < 1) return 'just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inDays < 7) return '${diff.inDays}d ago';
+
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  void _showEditDialog(StudySession session) {
+    final titleController = TextEditingController(text: session.title);
+    final descController = TextEditingController(text: session.description);
+    final subjectController = TextEditingController(text: session.subject);
+    final linkController = TextEditingController(
+      text: session.platformLink ?? '',
+    );
+    final locationController = TextEditingController(
+      text: session.location ?? '',
+    );
+    final maxController = TextEditingController(
+      text: session.maxParticipants?.toString() ?? '',
+    );
+    final durationController = TextEditingController(
+      text: session.duration.toString(),
+    );
+
+    String selectedPlatform = session.platform;
+    String selectedType = session.studyType;
+    DateTime? selectedDate = DateTime(
+      session.scheduledDate.year,
+      session.scheduledDate.month,
+      session.scheduledDate.day,
+    );
+    TimeOfDay? selectedTime = TimeOfDay(
+      hour: session.scheduledDate.hour,
+      minute: session.scheduledDate.minute,
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            width: MediaQuery.of(context).size.width > 600
+                ? 600
+                : MediaQuery.of(context).size.width * 0.9,
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.9,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.blue[700]!, Colors.blue[500]!],
+                    ),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, color: Colors.white),
+                      SizedBox(width: 12),
+                      Text(
+                        'Edit Study Session',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionLabel('Basic Information', Icons.info),
+                        SizedBox(height: 12),
+                        _buildTextField(
+                          controller: titleController,
+                          label: 'Title',
+                          hint: 'Study session title',
+                          icon: Icons.title,
+                        ),
+                        SizedBox(height: 16),
+                        _buildTextField(
+                          controller: descController,
+                          label: 'Description',
+                          hint: 'What will you study?',
+                          icon: Icons.description,
+                          maxLines: 3,
+                        ),
+                        SizedBox(height: 16),
+                        _buildTextField(
+                          controller: subjectController,
+                          label: 'Subject',
+                          hint: 'e.g., Mathematics, Physics',
+                          icon: Icons.book,
+                        ),
+                        SizedBox(height: 24),
+                        _buildSectionLabel(
+                          'Platform & Location',
+                          Icons.computer,
+                        ),
+                        SizedBox(height: 12),
+                        _buildDropdown(
+                          value: selectedPlatform,
+                          label: 'Platform',
+                          icon: Icons.video_call,
+                          items: [
+                            'Zoom',
+                            'Google Meet',
+                            'Microsoft Teams',
+                            'Discord',
+                            'Other',
+                          ],
+                          onChanged: (v) =>
+                              setDialogState(() => selectedPlatform = v!),
+                        ),
+                        SizedBox(height: 16),
+                        _buildTextField(
+                          controller: linkController,
+                          label: 'Platform Link (Optional)',
+                          hint: 'https://...',
+                          icon: Icons.link,
+                        ),
+                        SizedBox(height: 24),
+                        _buildSectionLabel('Study Settings', Icons.settings),
+                        SizedBox(height: 12),
+                        _buildDropdown(
+                          value: selectedType,
+                          label: 'Study Type',
+                          icon: Icons.location_on,
+                          items: ['Online', 'Offline', 'Hybrid'],
+                          onChanged: (v) =>
+                              setDialogState(() => selectedType = v!),
+                        ),
+                        if (selectedType != 'Online') ...[
+                          SizedBox(height: 16),
+                          _buildTextField(
+                            controller: locationController,
+                            label: 'Location',
+                            hint: 'e.g., Library Room 301',
+                            icon: Icons.place,
+                          ),
+                        ],
+                        SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildTextField(
+                                controller: maxController,
+                                label: 'Max Participants',
+                                hint: 'Unlimited',
+                                icon: Icons.people,
+                                keyboardType: TextInputType.number,
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            Expanded(
+                              child: _buildTextField(
+                                controller: durationController,
+                                label: 'Duration (min)',
+                                hint: '60',
+                                icon: Icons.timer,
+                                keyboardType: TextInputType.number,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 24),
+                        _buildSectionLabel('Schedule', Icons.event),
+                        SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildDateTimeButton(
+                                context: context,
+                                label: selectedDate != null
+                                    ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
+                                    : 'Select Date',
+                                icon: Icons.calendar_today,
+                                onPressed: () async {
+                                  final date = await showDatePicker(
+                                    context: context,
+                                    initialDate: selectedDate ?? DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime.now().add(
+                                      Duration(days: 365),
+                                    ),
+                                  );
+                                  if (date != null) {
+                                    setDialogState(() => selectedDate = date);
+                                  }
+                                },
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            Expanded(
+                              child: _buildDateTimeButton(
+                                context: context,
+                                label: selectedTime != null
+                                    ? '${selectedTime!.hour}:${selectedTime!.minute.toString().padLeft(2, '0')}'
+                                    : 'Select Time',
+                                icon: Icons.access_time,
+                                onPressed: () async {
+                                  final time = await showTimePicker(
+                                    context: context,
+                                    initialTime:
+                                        selectedTime ?? TimeOfDay.now(),
+                                  );
+                                  if (time != null) {
+                                    setDialogState(() => selectedTime = time);
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text('Cancel'),
+                      ),
+                      SizedBox(width: 12),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue[700],
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () async {
+                          if (titleController.text.trim().isEmpty ||
+                              descController.text.trim().isEmpty ||
+                              subjectController.text.trim().isEmpty ||
+                              selectedDate == null ||
+                              selectedTime == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Please fill all required fields',
+                                ),
+                              ),
+                            );
+                            return;
+                          }
+
+                          Navigator.pop(context);
+
+                          final scheduledDate = DateTime(
+                            selectedDate!.year,
+                            selectedDate!.month,
+                            selectedDate!.day,
+                            selectedTime!.hour,
+                            selectedTime!.minute,
+                          );
+
+                          try {
                             final result = await StudySessionService.instance
-                                .createStudySession(
+                                .updateStudySession(
+                                  sessionId: session.id,
                                   title: titleController.text.trim(),
                                   description: descController.text.trim(),
                                   subject: subjectController.text.trim(),
@@ -466,13 +1011,14 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                                 );
 
                             if (result['success']) {
+                              await _loadSessions();
+
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Session created!'),
+                                  content: Text('Session updated!'),
                                   backgroundColor: Colors.green,
                                 ),
                               );
-                              _loadSessions();
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -481,17 +1027,27 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                                 ),
                               );
                             }
-                          },
-                        ),
-                      ],
-                    ),
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Failed to update session: ${e.toString()}',
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                        child: Text('Update', style: TextStyle(fontSize: 16)),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -552,7 +1108,6 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
   }) {
     return InputDecorator(
       decoration: InputDecoration(
-        labelText: label,
         prefixIcon: Icon(icon, color: Colors.blue[700]),
         filled: true,
         fillColor: Colors.grey[50],
@@ -645,7 +1200,36 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                   return _SessionCard(
                     session: session,
                     onJoin: () => _joinSession(session.id),
+                    onLeave: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Leave Session'),
+                          content: Text(
+                            'Are you sure you want to leave this study session?',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text('Cancel'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                _leaveSession(session.id);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
+                              ),
+                              child: Text('Leave'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                     onDelete: () => _deleteSession(session.id),
+                    onEdit: () => _showEditDialog(session),
+                    onViewParticipants: () => _showParticipantsDialog(session),
                   );
                 },
               ),
@@ -662,12 +1246,18 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
 class _SessionCard extends StatelessWidget {
   final StudySession session;
   final VoidCallback onJoin;
+  final VoidCallback onLeave;
   final VoidCallback onDelete;
+  final VoidCallback onEdit;
+  final VoidCallback onViewParticipants;
 
   const _SessionCard({
     required this.session,
     required this.onJoin,
+    required this.onLeave,
     required this.onDelete,
+    required this.onEdit,
+    required this.onViewParticipants,
   });
 
   Color _getStatusColor(String status) {
@@ -736,11 +1326,17 @@ class _SessionCard extends StatelessWidget {
                 FutureBuilder<String?>(
                   future: AuthService.instance.getUserId(),
                   builder: (context, snapshot) {
-                    if (snapshot.hasData &&
-                        snapshot.data == session.creator.id) {
+                    if (!snapshot.hasData) return SizedBox.shrink();
+
+                    final isCreator = snapshot.data == session.creator.id;
+
+                    // Show menu for creator or participant
+                    if (isCreator) {
                       return PopupMenuButton<String>(
                         onSelected: (value) {
-                          if (value == 'delete') {
+                          if (value == 'edit') {
+                            onEdit();
+                          } else if (value == 'delete') {
                             showDialog(
                               context: context,
                               builder: (context) => AlertDialog(
@@ -768,6 +1364,16 @@ class _SessionCard extends StatelessWidget {
                         },
                         itemBuilder: (context) => [
                           PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit, color: Colors.blue),
+                                SizedBox(width: 8),
+                                Text('Edit'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
                             value: 'delete',
                             child: Row(
                               children: [
@@ -779,8 +1385,54 @@ class _SessionCard extends StatelessWidget {
                           ),
                         ],
                       );
+                    } else if (session.hasJoined) {
+                      // Show leave option for participants who have joined
+                      // Debug: Always show menu for testing
+                      print(
+                        'Showing leave menu: hasJoined=${session.hasJoined}',
+                      );
+                      return PopupMenuButton<String>(
+                        onSelected: (value) {
+                          if (value == 'leave') {
+                            onLeave();
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'leave',
+                            child: Row(
+                              children: [
+                                Icon(Icons.exit_to_app, color: Colors.orange),
+                                SizedBox(width: 8),
+                                Text('Leave Session'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    } else {
+                      // Debug: Show for all non-creators temporarily
+                      return PopupMenuButton<String>(
+                        icon: Icon(Icons.more_vert, color: Colors.grey),
+                        onSelected: (value) {
+                          if (value == 'leave') {
+                            onLeave();
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'leave',
+                            child: Row(
+                              children: [
+                                Icon(Icons.exit_to_app, color: Colors.orange),
+                                SizedBox(width: 8),
+                                Text('Leave Session'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
                     }
-                    return SizedBox.shrink();
                   },
                 ),
               ],
@@ -819,6 +1471,49 @@ class _SessionCard extends StatelessWidget {
                 SizedBox(width: 4),
                 Text(session.studyType, style: TextStyle(fontSize: 13)),
                 SizedBox(width: 16),
+                Icon(Icons.video_call, size: 16, color: Colors.grey[700]),
+                SizedBox(width: 4),
+                Text(session.platform, style: TextStyle(fontSize: 13)),
+              ],
+            ),
+            if (session.platformLink != null) ...[
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.link, size: 16, color: Colors.blue[700]),
+                  SizedBox(width: 4),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(
+                          ClipboardData(text: session.platformLink!),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Link copied to clipboard!'),
+                            backgroundColor: Colors.green,
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        session.platformLink!,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.blue[700],
+                          decoration: TextDecoration.underline,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            SizedBox(height: 8),
+            Row(
+              children: [
                 Icon(Icons.calendar_today, size: 16, color: Colors.grey[700]),
                 SizedBox(width: 4),
                 Text(session.formattedDate, style: TextStyle(fontSize: 13)),
@@ -834,11 +1529,26 @@ class _SessionCard extends StatelessWidget {
                   style: TextStyle(fontSize: 13),
                 ),
                 SizedBox(width: 16),
-                Icon(Icons.people, size: 16, color: Colors.grey[700]),
-                SizedBox(width: 4),
-                Text(
-                  '${session.currentParticipants}${session.maxParticipants != null ? '/${session.maxParticipants}' : ''}',
-                  style: TextStyle(fontSize: 13),
+                InkWell(
+                  onTap: onViewParticipants,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    child: Row(
+                      children: [
+                        Icon(Icons.people, size: 16, color: Colors.blue[700]),
+                        SizedBox(width: 4),
+                        Text(
+                          '${session.currentParticipants}${session.maxParticipants != null ? '/${session.maxParticipants}' : ''}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.blue[700],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 if (session.isFull) ...[
                   SizedBox(width: 8),
@@ -859,18 +1569,33 @@ class _SessionCard extends StatelessWidget {
                   ),
                 ],
                 Spacer(),
-                if (session.status == 'Scheduled' && !session.isFull)
-                  ElevatedButton(
-                    onPressed: onJoin,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[700],
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
+                if (session.status == 'Scheduled')
+                  if (session.hasJoined)
+                    ElevatedButton(
+                      onPressed: onLeave,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange[600],
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                       ),
+                      child: Text('Leave', style: TextStyle(fontSize: 13)),
+                    )
+                  else if (!session.isFull)
+                    ElevatedButton(
+                      onPressed: onJoin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green[600],
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                      ),
+                      child: Text('Join', style: TextStyle(fontSize: 13)),
                     ),
-                    child: Text('Join', style: TextStyle(fontSize: 13)),
-                  ),
               ],
             ),
           ],
