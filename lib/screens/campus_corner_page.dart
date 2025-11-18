@@ -4,6 +4,7 @@ import 'calculator_page.dart';
 import 'idea_cloud_page.dart';
 import 'upcoming_event_page.dart';
 import 'au_poll_page.dart';
+import 'study_sessions_page_simple.dart';
 
 class CampusCornerPage extends StatelessWidget {
   @override
@@ -184,6 +185,21 @@ class CampusCornerPage extends StatelessWidget {
                               title: 'Idea Cloud',
                               color: Colors.blue[100],
                               icon: Icons.cloud,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => StudySessionsPage(),
+                                ),
+                              );
+                            },
+                            child: _CampusTile(
+                              title: 'Study Sessions',
+                              color: Colors.white,
+                              icon: Icons.groups,
                             ),
                           ),
                         ],
