@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'pomodoro_timer_page.dart';
-import 'calculator_page.dart';
 import 'idea_cloud_page.dart';
 import 'upcoming_event_page.dart';
 import 'au_poll_page.dart';
@@ -72,33 +71,6 @@ class CampusCornerPage extends StatelessWidget {
                         ],
                       ),
                       SizedBox(height: 24),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.search, color: Colors.grey[600]),
-                              SizedBox(width: 8),
-                              Expanded(
-                                child: TextField(
-                                  decoration: InputDecoration(
-                                    hintText: 'Search',
-                                    border: InputBorder.none,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 24),
                       GridView.count(
                         crossAxisCount: 2,
                         shrinkWrap: true,
@@ -125,21 +97,6 @@ class CampusCornerPage extends StatelessWidget {
                               title: 'Pomodoro Study Timer',
                               color: Colors.blue[100],
                               icon: Icons.timer,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CalculatorPage(),
-                                ),
-                              );
-                            },
-                            child: _CampusTile(
-                              title: 'Calculator',
-                              color: Colors.blue[100],
-                              icon: Icons.calculate,
                             ),
                           ),
                           GestureDetector(
@@ -197,7 +154,7 @@ class CampusCornerPage extends StatelessWidget {
                               );
                             },
                             child: _CampusTile(
-                              title: 'Study Sessions',
+                              title: 'Study Buddy',
                               color: Colors.white,
                               icon: Icons.groups,
                             ),

@@ -209,7 +209,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                         Icon(Icons.groups, color: Colors.white, size: 28),
                         SizedBox(width: 12),
                         Text(
-                          'Create Study Session',
+                          'Create Study Buddy',
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -775,7 +775,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                       Icon(Icons.edit, color: Colors.white),
                       SizedBox(width: 12),
                       Text(
-                        'Edit Study Session',
+                        'Edit Study Buddy',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -1158,7 +1158,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFE3F2FD),
       appBar: AppBar(
-        title: Text('Study Sessions'),
+        title: Text('Study Buddy'),
         backgroundColor: Colors.blue[700],
         foregroundColor: Colors.white,
       ),
@@ -1206,7 +1206,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                         builder: (context) => AlertDialog(
                           title: Text('Leave Session'),
                           content: Text(
-                            'Are you sure you want to leave this study session?',
+                            'Are you sure you want to leave this study buddy?',
                           ),
                           actions: [
                             TextButton(
