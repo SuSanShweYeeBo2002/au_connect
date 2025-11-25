@@ -124,6 +124,64 @@ class PostService {
     }
   }
 
+  // Get posts by author ID
+  static Future<PostsResponse> getPostsByAuthor({
+    required String authorId,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http
+          .get(
+            Uri.parse(
+              '$baseUrl/posts/author/$authorId?page=$page&limit=$limit',
+            ),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(Duration(seconds: 10));
+
+      print('Get posts by author response status: ${response.statusCode}');
+      print('Get posts by author response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success') {
+          return PostsResponse.fromJson(responseJson);
+        } else {
+          throw Exception(
+            'Server error: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        throw Exception(
+          'Failed to load posts by author: ${response.statusCode}',
+        );
+      }
+    } on TimeoutException catch (e) {
+      print('Timeout error loading posts by author: $e');
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      print('Network error loading posts by author: $e');
+      throw Exception(
+        'Network error: Please check your internet connection and try again',
+      );
+    } catch (e) {
+      print('Error loading posts by author: $e');
+      if (e.toString().contains('Failed to fetch')) {
+        throw Exception(
+          'Cannot connect to server. Please check if the backend is running.',
+        );
+      }
+      throw Exception('Failed to load posts by author: $e');
+    }
+  }
+
   // Like/Unlike a post
   static Future<LikeResponse> likePost(String postId) async {
     try {

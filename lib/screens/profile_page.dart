@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/post_service.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -7,6 +8,145 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  List<Post> _userPosts = [];
+  bool _isLoadingPosts = true;
+  String? _userId;
+  int _currentPage = 1;
+  bool _hasMorePosts = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final userId = await AuthService.instance.getUserId();
+    setState(() {
+      _userId = userId;
+    });
+    if (userId != null) {
+      await _loadUserPosts();
+    }
+  }
+
+  Future<void> _loadUserPosts() async {
+    if (_userId == null) return;
+
+    try {
+      setState(() {
+        _isLoadingPosts = true;
+      });
+
+      final response = await PostService.getPostsByAuthor(
+        authorId: _userId!,
+        page: _currentPage,
+        limit: 10,
+      );
+
+      setState(() {
+        _userPosts = response.posts;
+        _hasMorePosts = response.pagination.hasNext;
+        _isLoadingPosts = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingPosts = false;
+      });
+      print('Error loading user posts: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load posts: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleLike(String postId, int index) async {
+    try {
+      final response = await PostService.likePost(postId);
+
+      setState(() {
+        _userPosts[index] = Post(
+          id: _userPosts[index].id,
+          authorId: _userPosts[index].authorId,
+          authorEmail: _userPosts[index].authorEmail,
+          authorName: _userPosts[index].authorName,
+          content: _userPosts[index].content,
+          image: _userPosts[index].image,
+          likeCount: response.likeCount,
+          commentCount: _userPosts[index].commentCount,
+          isLikedByUser: response.action == 'liked',
+          createdAt: _userPosts[index].createdAt,
+          updatedAt: _userPosts[index].updatedAt,
+        );
+      });
+    } catch (e) {
+      print('Error liking post: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to like post'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleDelete(String postId, int index) async {
+    // Show confirmation dialog
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Post'),
+        content: Text('Are you sure you want to delete this post?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      final success = await PostService.deletePost(postId);
+      if (success) {
+        setState(() {
+          _userPosts.removeAt(index);
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Post deleted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error deleting post: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete post: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _logout() async {
     try {
       // Call the AuthService logout method to clear stored data
@@ -148,7 +288,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     //const SizedBox(height: 10),
                     DefaultTabController(
-                      length: 4,
+                      length: 3,
                       child: Column(
                         children: [
                           TabBar(
@@ -156,7 +296,6 @@ class _ProfilePageState extends State<ProfilePage> {
                             tabs: [
                               Tab(text: "Posts"),
                               Tab(text: "Album"),
-                              Tab(text: "Class"),
                               Tab(text: "About"),
                             ],
                           ),
@@ -166,7 +305,6 @@ class _ProfilePageState extends State<ProfilePage> {
                               children: [
                                 _buildPosts(),
                                 Center(child: Text("Photos will show here")),
-                                Center(child: Text("Classes will show here")),
                                 Center(child: Text("About infos")),
                               ],
                             ),
@@ -194,35 +332,126 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildPosts() {
-    return ListView.builder(
-      itemCount: 3,
-      itemBuilder: (context, index) {
-        return Card(
-          margin: EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                leading: CircleAvatar(
-                  backgroundImage: NetworkImage(
-                    "https://win.gg/wp-content/uploads/2022/03/baki-hanma.jpg.webp",
+    if (_isLoadingPosts) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (_userPosts.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.post_add, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text(
+              'No posts yet',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadUserPosts,
+      child: ListView.builder(
+        itemCount: _userPosts.length,
+        itemBuilder: (context, index) {
+          final post = _userPosts[index];
+          return Card(
+            margin: EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(
+                      "https://win.gg/wp-content/uploads/2022/03/baki-hanma.jpg.webp",
+                    ),
+                  ),
+                  title: Text(post.authorName),
+                  subtitle: Text(_formatDate(post.createdAt)),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'delete') {
+                        _handleDelete(post.id, index);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text('Delete'),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                title: Text("Baki Hanma"),
-                subtitle: Text("10 min ago"),
-                trailing: Icon(Icons.more_vert),
-              ),
-              SizedBox(height: 10),
-              Image.network(
-                "https://th.bing.com/th/id/OIP.2jUQVYzbkgUqB_7LOAuP3QHaEK?w=310&h=180&c=7&r=0&o=7&dpr=1.4&pid=1.7&rm=3",
-                fit: BoxFit.cover,
-              ),
-              SizedBox(height: 10),
-              Text("A fight!!"),
-            ],
-          ),
-        );
-      },
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text(post.content, style: TextStyle(fontSize: 16)),
+                ),
+                if (post.image != null && post.image!.isNotEmpty)
+                  Image.network(
+                    post.image!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 200,
+                        color: Colors.grey[300],
+                        child: Center(
+                          child: Icon(Icons.broken_image, size: 64),
+                        ),
+                      );
+                    },
+                  ),
+                Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          post.isLikedByUser
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: post.isLikedByUser ? Colors.red : null,
+                        ),
+                        onPressed: () => _handleLike(post.id, index),
+                      ),
+                      Text('${post.likeCount}'),
+                      SizedBox(width: 16),
+                      Icon(Icons.comment),
+                      SizedBox(width: 4),
+                      Text('${post.commentCount}'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inMinutes < 1) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} min ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} hour${difference.inHours > 1 ? 's' : ''} ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
   }
 }
