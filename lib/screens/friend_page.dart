@@ -228,7 +228,7 @@ class _FriendPageState extends State<FriendPage> {
           );
         },
       ),
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Color(0xFFE3F2FD),
     );
   }
 

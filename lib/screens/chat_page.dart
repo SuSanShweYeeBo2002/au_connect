@@ -425,17 +425,85 @@ class _ChatPageState extends State<ChatPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Unfriend User'),
-          content: Text(
-            'Are you sure you want to unfriend ${widget.receiver?.name}? You will need to send a new friend request to reconnect.',
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.person_remove,
+                  color: Colors.orange[700],
+                  size: 24,
+                ),
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Unfriend User',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Are you sure you want to unfriend ${widget.receiver?.name}?',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[700],
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'You will need to send a new friend request to reconnect.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey[600], fontSize: 16),
+              ),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            TextButton(
-              child: Text('Unfriend', style: TextStyle(color: Colors.orange)),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange[600],
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 2,
+              ),
+              child: Text(
+                'Unfriend',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _unfriendUser();
@@ -452,17 +520,81 @@ class _ChatPageState extends State<ChatPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Block User'),
-          content: Text(
-            'Are you sure you want to block ${widget.receiver?.name}? They will not be able to message you or see your posts.',
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.block, color: Colors.red[700], size: 24),
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Block User',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Are you sure you want to block ${widget.receiver?.name}?',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[700],
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'They will not be able to message you or see your posts.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey[600], fontSize: 16),
+              ),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            TextButton(
-              child: Text('Block', style: TextStyle(color: Colors.red)),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red[600],
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 2,
+              ),
+              child: Text(
+                'Block',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _blockUser();
@@ -479,17 +611,85 @@ class _ChatPageState extends State<ChatPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Unblock User'),
-          content: Text(
-            'Are you sure you want to unblock ${widget.receiver?.name}? They will be able to message you and see your posts again.',
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.check_circle,
+                  color: Colors.green[700],
+                  size: 24,
+                ),
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Unblock User',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Are you sure you want to unblock ${widget.receiver?.name}?',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[700],
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'They will be able to message you and see your posts again.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey[600], fontSize: 16),
+              ),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            TextButton(
-              child: Text('Unblock', style: TextStyle(color: Colors.green)),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[600],
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 2,
+              ),
+              child: Text(
+                'Unblock',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _unblockUser();
@@ -506,17 +706,85 @@ class _ChatPageState extends State<ChatPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Add Friend'),
-          content: Text(
-            'Do you want to send a friend request to ${widget.receiver?.name}?',
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Color(0xFF64B5F6).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.person_add,
+                  color: Color(0xFF64B5F6),
+                  size: 24,
+                ),
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Add Friend',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Do you want to send a friend request to ${widget.receiver?.name}?',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[700],
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'They will be notified of your request.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey[600], fontSize: 16),
+              ),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            TextButton(
-              child: Text('Send Request', style: TextStyle(color: Colors.blue)),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF64B5F6),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 2,
+              ),
+              child: Text(
+                'Send Request',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _addFriend();
@@ -532,9 +800,29 @@ class _ChatPageState extends State<ChatPage> {
     if (widget.receiver == null) return;
 
     try {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Unfriending...')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+              SizedBox(width: 12),
+              Text('Unfriending...', style: TextStyle(fontSize: 16)),
+            ],
+          ),
+          backgroundColor: Colors.grey[700],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
 
       final success = await FriendService.unfriend(widget.receiver!.id);
 
@@ -545,8 +833,24 @@ class _ChatPageState extends State<ChatPage> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${widget.receiver!.name} has been unfriended'),
-            backgroundColor: Colors.green,
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '${widget.receiver!.name} has been unfriended',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green[600],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: Duration(seconds: 3),
           ),
         );
       }
@@ -558,8 +862,24 @@ class _ChatPageState extends State<ChatPage> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to unfriend: $errorMsg'),
-          backgroundColor: Colors.red,
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Failed to unfriend: $errorMsg',
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: Duration(seconds: 4),
         ),
       );
     }
@@ -569,9 +889,29 @@ class _ChatPageState extends State<ChatPage> {
     if (widget.receiver == null) return;
 
     try {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Blocking user...')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+              SizedBox(width: 12),
+              Text('Blocking user...', style: TextStyle(fontSize: 16)),
+            ],
+          ),
+          backgroundColor: Colors.grey[700],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
 
       await FriendService.blockUser(widget.receiver!.id);
 
@@ -583,8 +923,24 @@ class _ChatPageState extends State<ChatPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${widget.receiver!.name} has been blocked'),
-          backgroundColor: Colors.green,
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '${widget.receiver!.name} has been blocked',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.green[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: Duration(seconds: 3),
         ),
       );
     } catch (e) {
@@ -595,8 +951,24 @@ class _ChatPageState extends State<ChatPage> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to block: $errorMsg'),
-          backgroundColor: Colors.red,
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Failed to block: $errorMsg',
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: Duration(seconds: 4),
         ),
       );
     }
@@ -606,9 +978,29 @@ class _ChatPageState extends State<ChatPage> {
     if (widget.receiver == null) return;
 
     try {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Unblocking user...')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+              SizedBox(width: 12),
+              Text('Unblocking user...', style: TextStyle(fontSize: 16)),
+            ],
+          ),
+          backgroundColor: Colors.grey[700],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
 
       final success = await FriendService.unblockUser(widget.receiver!.id);
 
@@ -620,8 +1012,24 @@ class _ChatPageState extends State<ChatPage> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${widget.receiver!.name} has been unblocked'),
-            backgroundColor: Colors.green,
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '${widget.receiver!.name} has been unblocked',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green[600],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: Duration(seconds: 3),
           ),
         );
       }
@@ -633,8 +1041,24 @@ class _ChatPageState extends State<ChatPage> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to unblock: $errorMsg'),
-          backgroundColor: Colors.red,
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Failed to unblock: $errorMsg',
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: Duration(seconds: 4),
         ),
       );
     }
@@ -644,16 +1068,52 @@ class _ChatPageState extends State<ChatPage> {
     if (widget.receiver == null) return;
 
     try {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Sending friend request...')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+              SizedBox(width: 12),
+              Text('Sending friend request...', style: TextStyle(fontSize: 16)),
+            ],
+          ),
+          backgroundColor: Colors.grey[700],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
 
       await FriendService.sendFriendRequest(recipientId: widget.receiver!.id);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Friend request sent to ${widget.receiver!.name}'),
-          backgroundColor: Colors.green,
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Friend request sent to ${widget.receiver!.name}',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Color(0xFF64B5F6),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: Duration(seconds: 3),
         ),
       );
 
@@ -666,8 +1126,24 @@ class _ChatPageState extends State<ChatPage> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to send friend request: $errorMsg'),
-          backgroundColor: Colors.red,
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Failed to send friend request: $errorMsg',
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: Duration(seconds: 4),
         ),
       );
     }

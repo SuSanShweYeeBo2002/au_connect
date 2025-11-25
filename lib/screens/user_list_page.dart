@@ -145,6 +145,8 @@ class _UserListPageState extends State<UserListPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Find Friends'),
+        backgroundColor: Color(0xFF64B5F6),
+        elevation: 0,
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(60),
           child: Padding(
@@ -174,7 +176,7 @@ class _UserListPageState extends State<UserListPage> {
         ),
       ),
       body: _buildBody(),
-      backgroundColor: Colors.grey[200],
+      backgroundColor: Color(0xFFE3F2FD),
     );
   }
 

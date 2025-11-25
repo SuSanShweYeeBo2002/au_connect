@@ -201,7 +201,7 @@ class _FriendRequestsPageState extends State<FriendRequestsPage>
           child: Icon(Icons.person_add),
           tooltip: 'Send Friend Request',
         ),
-        backgroundColor: Colors.grey[200],
+        backgroundColor: Color(0xFFE3F2FD),
       ),
     );
   }
