@@ -15,11 +15,20 @@ class _FriendRequestsPageState extends State<FriendRequestsPage>
   bool _isLoadingPending = false;
   bool _isLoadingSent = false;
   String? _errorMessage;
+  bool _hasChanges = false; // Track if friends list changed
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _loadPendingRequests();
+    _loadSentRequests();
+  }
+
+  @override
+  void didUpdateWidget(FriendRequestsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reload when widget updates
     _loadPendingRequests();
     _loadSentRequests();
   }
@@ -77,6 +86,9 @@ class _FriendRequestsPageState extends State<FriendRequestsPage>
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Friend request accepted')));
+      setState(() {
+        _hasChanges = true;
+      });
       _loadPendingRequests();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -94,6 +106,9 @@ class _FriendRequestsPageState extends State<FriendRequestsPage>
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Friend request rejected')));
+      setState(() {
+        _hasChanges = true;
+      });
       _loadPendingRequests();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -144,41 +159,50 @@ class _FriendRequestsPageState extends State<FriendRequestsPage>
 
     // Reload sent requests if a friend request was sent
     if (result == true) {
+      setState(() {
+        _hasChanges = true;
+      });
       _loadSentRequests();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Friend Requests'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(
-              text: 'Received',
-              icon: _pendingRequests.isNotEmpty
-                  ? Badge(
-                      label: Text(_pendingRequests.length.toString()),
-                      child: Icon(Icons.inbox),
-                    )
-                  : Icon(Icons.inbox),
-            ),
-            Tab(text: 'Sent', icon: Icon(Icons.send)),
-          ],
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pop(context, _hasChanges);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Friend Requests'),
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: [
+              Tab(
+                text: 'Received',
+                icon: _pendingRequests.isNotEmpty
+                    ? Badge(
+                        label: Text(_pendingRequests.length.toString()),
+                        child: Icon(Icons.inbox),
+                      )
+                    : Icon(Icons.inbox),
+              ),
+              Tab(text: 'Sent', icon: Icon(Icons.send)),
+            ],
+          ),
         ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [_buildPendingRequestsList(), _buildSentRequestsList()],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: _showSendRequestDialog,
+          child: Icon(Icons.person_add),
+          tooltip: 'Send Friend Request',
+        ),
+        backgroundColor: Colors.grey[200],
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [_buildPendingRequestsList(), _buildSentRequestsList()],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showSendRequestDialog,
-        child: Icon(Icons.person_add),
-        tooltip: 'Send Friend Request',
-      ),
-      backgroundColor: Colors.grey[200],
     );
   }
 

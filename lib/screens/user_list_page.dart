@@ -115,6 +115,8 @@ class _UserListPageState extends State<UserListPage> {
       setState(() {
         _sentRequestIds.add(user.id);
       });
+      // Return true to parent to trigger refresh
+      Navigator.pop(context, true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

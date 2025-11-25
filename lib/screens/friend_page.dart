@@ -104,11 +104,12 @@ class _FriendPageState extends State<FriendPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Friends'),
+        elevation: 0,
         actions: [
           Stack(
             children: [
               IconButton(
-                icon: Icon(Icons.person_add),
+                icon: Icon(Icons.person_add_outlined),
                 onPressed: () async {
                   final result = await Navigator.push(
                     context,
@@ -121,6 +122,7 @@ class _FriendPageState extends State<FriendPage> {
                     _loadPendingRequestsCount();
                   }
                 },
+                tooltip: 'Friend Requests',
               ),
               if (_pendingRequestsCount > 0)
                 Positioned(
@@ -146,7 +148,6 @@ class _FriendPageState extends State<FriendPage> {
                 ),
             ],
           ),
-          IconButton(icon: Icon(Icons.refresh), onPressed: _loadFriends),
         ],
       ),
       body: LayoutBuilder(
@@ -159,7 +160,7 @@ class _FriendPageState extends State<FriendPage> {
           );
         },
       ),
-      backgroundColor: Colors.grey[200],
+      backgroundColor: Colors.grey[100],
     );
   }
 
@@ -198,35 +199,63 @@ class _FriendPageState extends State<FriendPage> {
     if (_friends.isEmpty) {
       return Center(
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.people_outline, size: 64, color: Colors.grey),
-              SizedBox(height: 16),
+              Container(
+                padding: EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.people_outline,
+                  size: 80,
+                  color: Colors.blue[300],
+                ),
+              ),
+              SizedBox(height: 24),
               Text(
                 'No friends yet',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
               ),
-              SizedBox(height: 8),
+              SizedBox(height: 12),
               Text(
-                'Start adding friends to connect with them',
+                'Start connecting with others by\nsending friend requests',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey[600]),
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.grey[600],
+                  height: 1.5,
+                ),
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 32),
               ElevatedButton.icon(
                 onPressed: () async {
-                  await Navigator.push(
+                  final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => FriendRequestsPage(),
                     ),
                   );
-                  _loadFriends();
+                  if (result == true) {
+                    _loadFriends();
+                    _loadPendingRequestsCount();
+                  }
                 },
                 icon: Icon(Icons.person_add),
-                label: Text('Send Friend Request'),
+                label: Text('Find Friends'),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
             ],
           ),
@@ -237,6 +266,7 @@ class _FriendPageState extends State<FriendPage> {
     return RefreshIndicator(
       onRefresh: _loadFriends,
       child: ListView.builder(
+        padding: EdgeInsets.symmetric(vertical: 8),
         itemCount: _friends.length,
         itemBuilder: (context, index) {
           final friend = _friends[index];
@@ -244,34 +274,69 @@ class _FriendPageState extends State<FriendPage> {
           final friendEmail = _getFriendEmail(friend);
 
           return Card(
-            margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            margin: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: ListTile(
+              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               leading: CircleAvatar(
+                radius: 28,
+                backgroundColor: Colors.blue[100],
                 child: Text(
                   friendName.isNotEmpty ? friendName[0].toUpperCase() : '?',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue[800],
+                  ),
                 ),
               ),
-              title: Text(friendName),
-              subtitle: Text(friendEmail),
-              trailing: PopupMenuButton(
-                icon: Icon(Icons.more_vert),
-                onSelected: (value) {
-                  if (value == 'unfriend') {
-                    _unfriend(friend);
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'unfriend',
-                    child: Row(
-                      children: [
-                        Icon(Icons.person_remove, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Unfriend', style: TextStyle(color: Colors.red)),
-                      ],
+              title: Text(
+                friendName,
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+              subtitle: Padding(
+                padding: EdgeInsets.only(top: 4),
+                child: Text(
+                  friendEmail,
+                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                ),
+              ),
+              trailing: IconButton(
+                icon: Icon(Icons.more_vert, color: Colors.grey[600]),
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
                     ),
-                  ),
-                ],
+                    builder: (context) => SafeArea(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: Icon(
+                              Icons.person_remove,
+                              color: Colors.red,
+                            ),
+                            title: Text(
+                              'Unfriend',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            onTap: () {
+                              Navigator.pop(context);
+                              _unfriend(friend);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           );
