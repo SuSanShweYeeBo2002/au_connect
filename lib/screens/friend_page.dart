@@ -75,7 +75,8 @@ class _FriendPageState extends State<FriendPage> {
 
     if (confirm == true) {
       try {
-        await FriendService.unfriend(friend.id);
+        final friendUserId = _getFriendUserId(friend);
+        await FriendService.unfriend(friendUserId);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Friend removed successfully')));
@@ -97,6 +98,12 @@ class _FriendPageState extends State<FriendPage> {
   String _getFriendEmail(Friend friend) {
     final otherUser = friend.requester ?? friend.recipient;
     return otherUser?.email ?? '';
+  }
+
+  String _getFriendUserId(Friend friend) {
+    // Get the friend's user ID (not the friendship record ID)
+    final otherUser = friend.requester ?? friend.recipient;
+    return otherUser?.id ?? '';
   }
 
   @override
