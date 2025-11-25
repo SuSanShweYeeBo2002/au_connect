@@ -185,7 +185,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       alignment: Alignment.center,
                       children: [
                         Container(
-                          height: 190,
+                          height: 120,
                           decoration: BoxDecoration(
                             image: DecorationImage(
                               image: NetworkImage(
@@ -196,9 +196,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                         Positioned(
-                          bottom: -50,
+                          bottom: -40,
                           child: CircleAvatar(
-                            radius: 50,
+                            radius: 40,
                             backgroundImage: NetworkImage(
                               "https://win.gg/wp-content/uploads/2022/03/baki-hanma.jpg.webp",
                             ),
@@ -206,18 +206,18 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 60),
+                    const SizedBox(height: 45),
 
                     Text("Baki Hanma", style: TextStyle(fontSize: 22)),
 
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     Text(
                       "Software Engineer at Google!!",
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 18),
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -253,40 +253,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey.shade300,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  right: BorderSide(
-                                    color: Colors.grey.shade300,
-                                    width: 1.5,
-                                  ),
-                                ),
-                              ),
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              child: _showStat("followers", "256"),
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              child: _showStat("following", "356"),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    //const SizedBox(height: 10),
                     DefaultTabController(
                       length: 3,
                       child: Column(
@@ -300,7 +266,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ],
                           ),
                           Container(
-                            height: 400,
+                            height: 700,
                             child: TabBarView(
                               children: [
                                 _buildPosts(),
@@ -319,15 +285,6 @@ class _ProfilePageState extends State<ProfilePage> {
           );
         },
       ),
-    );
-  }
-
-  Widget _showStat(String label, String data) {
-    return Column(
-      children: [
-        Text(data, style: TextStyle(fontSize: 18)),
-        Text(label),
-      ],
     );
   }
 
