@@ -26,6 +26,9 @@ class _ChatPageState extends State<ChatPage> {
   String? _currentUserId;
   bool _isSendingMessage = false;
   bool _isBlocked = false;
+  bool _isFriend = false;
+  bool _iBlockedThem = false;
+  bool _theyBlockedMe = false;
 
   @override
   void initState() {
@@ -37,6 +40,7 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _initializeChat() async {
     await _loadCurrentUser();
     await _checkBlockStatus();
+    await _checkFriendshipStatus();
     await _loadMessages();
     _setupSocket();
   }
@@ -45,16 +49,30 @@ class _ChatPageState extends State<ChatPage> {
     if (widget.receiver == null) return;
 
     try {
-      // Check bidirectional block (you blocked them OR they blocked you)
-      final isBlocked = await FriendService.checkIfBlockedByUser(
-        widget.receiver!.id,
+      // Check both directions separately
+      final results = await Future.wait([
+        FriendService.getBlockedUsers(),
+        FriendService.getUsersWhoBlockedMe(),
+      ]);
+
+      final blockedByYou = results[0];
+      final blockedYou = results[1];
+
+      final iBlockedThem = blockedByYou.blockedUsers.any(
+        (block) => block.blockedId == widget.receiver!.id,
+      );
+
+      final theyBlockedMe = blockedYou.blockedUsers.any(
+        (block) => block.blockedId == widget.receiver!.id,
       );
 
       setState(() {
-        _isBlocked = isBlocked;
+        _iBlockedThem = iBlockedThem;
+        _theyBlockedMe = theyBlockedMe;
+        _isBlocked = iBlockedThem || theyBlockedMe;
       });
 
-      if (isBlocked) {
+      if (_isBlocked) {
         print('Messaging is blocked with user: ${widget.receiver!.name}');
       }
     } catch (e) {
@@ -71,14 +89,38 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeOut,
+  Future<void> _checkFriendshipStatus() async {
+    if (widget.receiver == null) return;
+
+    try {
+      final friendsList = await FriendService.getFriendsList();
+      final isFriend = friendsList.friends.any(
+        (friend) =>
+            friend.recipientId == widget.receiver!.id ||
+            friend.requesterId == widget.receiver!.id,
       );
+
+      setState(() {
+        _isFriend = isFriend;
+      });
+
+      print('Friendship status with ${widget.receiver!.name}: $isFriend');
+    } catch (e) {
+      print('Error checking friendship status: $e');
+      // Don't show error to user, just assume not friend
     }
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   void _setupSocket() async {
@@ -225,7 +267,13 @@ class _ChatPageState extends State<ChatPage> {
         _messages = messages;
         _isLoading = false;
       });
-      _scrollToBottom();
+
+      // Scroll to bottom after messages are loaded and rendered
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        }
+      });
 
       // Mark messages as read when conversation is loaded
       _markMessagesAsRead();
@@ -372,6 +420,259 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  void _showUnfriendDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Unfriend User'),
+          content: Text(
+            'Are you sure you want to unfriend ${widget.receiver?.name}? You will need to send a new friend request to reconnect.',
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text('Unfriend', style: TextStyle(color: Colors.orange)),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _unfriendUser();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showBlockDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Block User'),
+          content: Text(
+            'Are you sure you want to block ${widget.receiver?.name}? They will not be able to message you or see your posts.',
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text('Block', style: TextStyle(color: Colors.red)),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _blockUser();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showUnblockDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Unblock User'),
+          content: Text(
+            'Are you sure you want to unblock ${widget.receiver?.name}? They will be able to message you and see your posts again.',
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text('Unblock', style: TextStyle(color: Colors.green)),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _unblockUser();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showAddFriendDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add Friend'),
+          content: Text(
+            'Do you want to send a friend request to ${widget.receiver?.name}?',
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text('Send Request', style: TextStyle(color: Colors.blue)),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _addFriend();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _unfriendUser() async {
+    if (widget.receiver == null) return;
+
+    try {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Unfriending...')));
+
+      final success = await FriendService.unfriend(widget.receiver!.id);
+
+      if (success) {
+        setState(() {
+          _isFriend = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${widget.receiver!.name} has been unfriended'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error unfriending user: $e');
+      String errorMsg = e.toString();
+      if (errorMsg.startsWith('Exception: ')) {
+        errorMsg = errorMsg.substring(11);
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to unfriend: $errorMsg'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _blockUser() async {
+    if (widget.receiver == null) return;
+
+    try {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Blocking user...')));
+
+      await FriendService.blockUser(widget.receiver!.id);
+
+      setState(() {
+        _iBlockedThem = true;
+        _isBlocked = true;
+        _isFriend = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${widget.receiver!.name} has been blocked'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      print('Error blocking user: $e');
+      String errorMsg = e.toString();
+      if (errorMsg.startsWith('Exception: ')) {
+        errorMsg = errorMsg.substring(11);
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to block: $errorMsg'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _unblockUser() async {
+    if (widget.receiver == null) return;
+
+    try {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Unblocking user...')));
+
+      final success = await FriendService.unblockUser(widget.receiver!.id);
+
+      if (success) {
+        setState(() {
+          _iBlockedThem = false;
+          _isBlocked = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${widget.receiver!.name} has been unblocked'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error unblocking user: $e');
+      String errorMsg = e.toString();
+      if (errorMsg.startsWith('Exception: ')) {
+        errorMsg = errorMsg.substring(11);
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to unblock: $errorMsg'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _addFriend() async {
+    if (widget.receiver == null) return;
+
+    try {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Sending friend request...')));
+
+      await FriendService.sendFriendRequest(recipientId: widget.receiver!.id);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Friend request sent to ${widget.receiver!.name}'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Note: _isFriend stays false until they accept the request
+    } catch (e) {
+      print('Error sending friend request: $e');
+      String errorMsg = e.toString();
+      if (errorMsg.startsWith('Exception: ')) {
+        errorMsg = errorMsg.substring(11);
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to send friend request: $errorMsg'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -419,9 +720,92 @@ class _ChatPageState extends State<ChatPage> {
             ],
           ),
           actions: [
-            IconButton(icon: Icon(Icons.video_call), onPressed: () {}),
-            IconButton(icon: Icon(Icons.call), onPressed: () {}),
-            IconButton(icon: Icon(Icons.more_vert), onPressed: () {}),
+            PopupMenuButton<String>(
+              icon: Icon(Icons.more_vert),
+              onSelected: (value) {
+                switch (value) {
+                  case 'addFriend':
+                    _showAddFriendDialog();
+                    break;
+                  case 'unfriend':
+                    _showUnfriendDialog();
+                    break;
+                  case 'block':
+                    _showBlockDialog();
+                    break;
+                  case 'unblock':
+                    _showUnblockDialog();
+                    break;
+                }
+              },
+              itemBuilder: (BuildContext context) {
+                List<PopupMenuEntry<String>> items = [];
+
+                // Show add friend option if not friends and not blocked
+                if (!_isFriend && !_isBlocked) {
+                  items.add(
+                    PopupMenuItem<String>(
+                      value: 'addFriend',
+                      child: Row(
+                        children: [
+                          Icon(Icons.person_add, color: Colors.blue),
+                          SizedBox(width: 8),
+                          Text('Add Friend'),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                // Show unfriend option only if they are friends
+                if (_isFriend && !_isBlocked) {
+                  items.add(
+                    PopupMenuItem<String>(
+                      value: 'unfriend',
+                      child: Row(
+                        children: [
+                          Icon(Icons.person_remove, color: Colors.orange),
+                          SizedBox(width: 8),
+                          Text('Unfriend'),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                // Show unblock if you blocked them
+                if (_iBlockedThem) {
+                  items.add(
+                    PopupMenuItem<String>(
+                      value: 'unblock',
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.green),
+                          SizedBox(width: 8),
+                          Text('Unblock'),
+                        ],
+                      ),
+                    ),
+                  );
+                } else if (!_theyBlockedMe) {
+                  // Show block only if they haven't blocked you
+                  items.add(
+                    PopupMenuItem<String>(
+                      value: 'block',
+                      child: Row(
+                        children: [
+                          Icon(Icons.block, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('Block'),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                return items;
+              },
+            ),
           ],
         ),
         body: Column(
