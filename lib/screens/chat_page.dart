@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/chat_service.dart';
 import '../services/socket_service.dart';
 import '../services/auth_service.dart';
+import '../services/friend_service.dart';
 
 class ChatPage extends StatefulWidget {
   final User? receiver;
@@ -24,6 +25,7 @@ class _ChatPageState extends State<ChatPage> {
   String? _typingUserId;
   String? _currentUserId;
   bool _isSendingMessage = false;
+  bool _isBlocked = false;
 
   @override
   void initState() {
@@ -34,8 +36,31 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _initializeChat() async {
     await _loadCurrentUser();
+    await _checkBlockStatus();
     await _loadMessages();
     _setupSocket();
+  }
+
+  Future<void> _checkBlockStatus() async {
+    if (widget.receiver == null) return;
+
+    try {
+      // Check bidirectional block (you blocked them OR they blocked you)
+      final isBlocked = await FriendService.checkIfBlockedByUser(
+        widget.receiver!.id,
+      );
+
+      setState(() {
+        _isBlocked = isBlocked;
+      });
+
+      if (isBlocked) {
+        print('Messaging is blocked with user: ${widget.receiver!.name}');
+      }
+    } catch (e) {
+      print('Error checking block status: $e');
+      // Don't show error to user, just assume not blocked
+    }
   }
 
   Future<void> _loadCurrentUser() async {
@@ -289,9 +314,19 @@ class _ChatPageState extends State<ChatPage> {
 
       print('Error sending message: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to send message: $e')));
+        // Clean up the error message for display
+        String errorMsg = e.toString();
+        if (errorMsg.startsWith('Exception: ')) {
+          errorMsg = errorMsg.substring(11); // Remove 'Exception: ' prefix
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMsg),
+            backgroundColor: Colors.red[700],
+            duration: Duration(seconds: 4),
+          ),
+        );
       }
     } finally {
       // Reset the sending flag
@@ -414,51 +449,81 @@ class _ChatPageState extends State<ChatPage> {
                       },
                     ),
             ),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    offset: Offset(0, -2),
-                    blurRadius: 6,
-                    color: Colors.black.withOpacity(0.1),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                child: Row(
-                  children: [
-                    IconButton(icon: Icon(Icons.attach_file), onPressed: () {}),
-                    Expanded(
-                      child: TextField(
-                        controller: _messageController,
-                        decoration: InputDecoration(
-                          hintText: 'Type a message',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
-                            borderSide: BorderSide.none,
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[100],
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
-                          ),
-                        ),
-                        onSubmitted: _handleSubmitted,
+            _isBlocked
+                ? Container(
+                    decoration: BoxDecoration(
+                      color: Colors.red[50],
+                      border: Border(
+                        top: BorderSide(color: Colors.red[200]!, width: 1),
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.send),
-                      onPressed: () {
-                        _handleSubmitted(_messageController.text);
-                      },
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Icon(Icons.block, color: Colors.red[700], size: 20),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'You cannot send messages to this user',
+                              style: TextStyle(
+                                color: Colors.red[700],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
-            ),
+                  )
+                : Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          offset: Offset(0, -2),
+                          blurRadius: 6,
+                          color: Colors.black.withOpacity(0.1),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.attach_file),
+                            onPressed: () {},
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: _messageController,
+                              decoration: InputDecoration(
+                                hintText: 'Type a message',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                  borderSide: BorderSide.none,
+                                ),
+                                filled: true,
+                                fillColor: Colors.grey[100],
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 10,
+                                ),
+                              ),
+                              onSubmitted: _handleSubmitted,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.send),
+                            onPressed: () {
+                              _handleSubmitted(_messageController.text);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
           ],
         ),
       ),

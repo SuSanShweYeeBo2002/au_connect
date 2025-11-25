@@ -42,6 +42,28 @@ class ChatService {
   }
 
   // Send a message
+  // Helper to format error messages for users
+  static String _formatErrorMessage(String errorMessage) {
+    // Parse blocked user errors
+    if (errorMessage.contains('User is blocked') ||
+        errorMessage.contains('has blocked you')) {
+      return 'Unable to send message. You cannot message this user due to blocking restrictions.';
+    }
+
+    // Parse other common errors
+    if (errorMessage.contains('No authentication token')) {
+      return 'Please sign in again to send messages.';
+    }
+
+    if (errorMessage.contains('Network error') ||
+        errorMessage.contains('connection')) {
+      return 'Connection error. Please check your internet and try again.';
+    }
+
+    // Return original message if no match
+    return errorMessage;
+  }
+
   static Future<Message> sendMessage({
     required String receiverId,
     required String content,
@@ -68,18 +90,27 @@ class ChatService {
             responseJson['data'] != null) {
           return Message.fromJson(responseJson['data']);
         } else {
-          throw Exception(
-            'Invalid response format: ${responseJson['message'] ?? 'Unknown error'}',
-          );
+          final errorMsg = responseJson['message'] ?? 'Unknown error';
+          throw Exception(_formatErrorMessage(errorMsg));
         }
       } else {
-        throw Exception(
-          'Failed to send message: ${response.statusCode} - ${response.body}',
-        );
+        // Try to parse error message from response body
+        try {
+          final errorJson = json.decode(response.body);
+          final errorMsg = errorJson['message'] ?? 'Failed to send message';
+          throw Exception(_formatErrorMessage(errorMsg));
+        } catch (_) {
+          throw Exception('Failed to send message. Please try again.');
+        }
       }
     } catch (e) {
       print('Error sending message: $e');
-      throw Exception('Failed to send message: $e');
+      // Check if error is already formatted
+      if (e is Exception &&
+          e.toString().startsWith('Exception: Unable to send message')) {
+        rethrow;
+      }
+      throw Exception(_formatErrorMessage(e.toString()));
     }
   }
 

@@ -385,6 +385,255 @@ class FriendService {
       throw Exception('Failed to unfriend: $e');
     }
   }
+
+  // Block a user
+  static Future<BlockUser> blockUser(String blockedId) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/blocks'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: json.encode({'blockedId': blockedId}),
+          )
+          .timeout(Duration(seconds: 10));
+
+      print('Block user response status: ${response.statusCode}');
+      print('Block user response body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success' &&
+            responseJson['data'] != null) {
+          return BlockUser.fromJson(responseJson['data']);
+        } else {
+          throw Exception(
+            'Server error: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        final errorBody = json.decode(response.body);
+        throw Exception(errorBody['message'] ?? 'Failed to block user');
+      }
+    } on TimeoutException catch (e) {
+      print('Timeout error blocking user: $e');
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      print('Network error blocking user: $e');
+      throw Exception(
+        'Network error: Please check your internet connection and try again',
+      );
+    } catch (e) {
+      print('Error blocking user: $e');
+      if (e.toString().contains('Failed to fetch')) {
+        throw Exception(
+          'Cannot connect to server. Please check if the backend is running.',
+        );
+      }
+      rethrow;
+    }
+  }
+
+  // Unblock a user
+  static Future<bool> unblockUser(String blockedId) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http
+          .delete(
+            Uri.parse('$baseUrl/blocks/$blockedId'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(Duration(seconds: 10));
+
+      print('Unblock user response status: ${response.statusCode}');
+      print('Unblock user response body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        if (response.body.isNotEmpty) {
+          final responseJson = json.decode(response.body);
+          if (responseJson['status'] == 'success') {
+            return true;
+          } else {
+            throw Exception(
+              'Unblock failed: ${responseJson['message'] ?? 'Unknown error'}',
+            );
+          }
+        } else {
+          return true;
+        }
+      } else {
+        throw Exception('Failed to unblock user: ${response.statusCode}');
+      }
+    } on TimeoutException catch (e) {
+      print('Timeout error unblocking user: $e');
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      print('Network error unblocking user: $e');
+      throw Exception(
+        'Network error: Please check your internet connection and try again',
+      );
+    } catch (e) {
+      print('Error unblocking user: $e');
+      if (e.toString().contains('Failed to fetch')) {
+        throw Exception(
+          'Cannot connect to server. Please check if the backend is running.',
+        );
+      }
+      throw Exception('Failed to unblock user: $e');
+    }
+  }
+
+  // Get blocked users list
+  static Future<BlockedUsersResponse> getBlockedUsers() async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/blocks/list'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(Duration(seconds: 10));
+
+      print('Get blocked users response status: ${response.statusCode}');
+      print('Get blocked users response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success') {
+          return BlockedUsersResponse.fromJson(responseJson);
+        } else {
+          throw Exception(
+            'Server error: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        throw Exception('Failed to load blocked users: ${response.statusCode}');
+      }
+    } on TimeoutException catch (e) {
+      print('Timeout error loading blocked users: $e');
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      print('Network error loading blocked users: $e');
+      throw Exception(
+        'Network error: Please check your internet connection and try again',
+      );
+    } catch (e) {
+      print('Error loading blocked users: $e');
+      if (e.toString().contains('Failed to fetch')) {
+        throw Exception(
+          'Cannot connect to server. Please check if the backend is running.',
+        );
+      }
+      throw Exception('Failed to load blocked users: $e');
+    }
+  }
+
+  // Get users who blocked me
+  static Future<BlockedUsersResponse> getUsersWhoBlockedMe() async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/blocks/who-blocked-me'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(Duration(seconds: 10));
+
+      print('Get users who blocked me response status: ${response.statusCode}');
+      print('Get users who blocked me response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success') {
+          return BlockedUsersResponse.fromJson(responseJson);
+        } else {
+          throw Exception(
+            'Server error: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        throw Exception(
+          'Failed to load users who blocked me: ${response.statusCode}',
+        );
+      }
+    } on TimeoutException catch (e) {
+      print('Timeout error loading users who blocked me: $e');
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      print('Network error loading users who blocked me: $e');
+      throw Exception(
+        'Network error: Please check your internet connection and try again',
+      );
+    } catch (e) {
+      print('Error loading users who blocked me: $e');
+      if (e.toString().contains('Failed to fetch')) {
+        throw Exception(
+          'Cannot connect to server. Please check if the backend is running.',
+        );
+      }
+      throw Exception('Failed to load users who blocked me: $e');
+    }
+  }
+
+  // Check if blocked by a specific user (bidirectional check)
+  // Returns true if either you blocked them OR they blocked you
+  static Future<bool> checkIfBlockedByUser(String userId) async {
+    try {
+      // Check both directions in parallel for better performance
+      final results = await Future.wait([
+        getBlockedUsers(),
+        getUsersWhoBlockedMe(),
+      ]);
+
+      final blockedByYou = results[0];
+      final blockedYou = results[1];
+
+      // Check if you blocked them
+      final youBlockedThem = blockedByYou.blockedUsers.any(
+        (block) => block.blockedId == userId,
+      );
+
+      if (youBlockedThem) {
+        print('You have blocked user: $userId');
+        return true;
+      }
+
+      // Check if they blocked you
+      final theyBlockedYou = blockedYou.blockedUsers.any(
+        (block) => block.blockedId == userId,
+      );
+
+      if (theyBlockedYou) {
+        print('User $userId has blocked you');
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      print('Error checking block status: $e');
+      return false; // Assume not blocked on error
+    }
+  }
 }
 
 class Friend {
@@ -536,6 +785,81 @@ class FriendRequestsResponse {
 
     return FriendRequestsResponse(
       requests: requests,
+      message: json['message'] ?? '',
+    );
+  }
+}
+
+class BlockUser {
+  final String id;
+  final String blockerId;
+  final String blockedId;
+  final DateTime createdAt;
+  final BlockedUserInfo? blockedUser;
+
+  BlockUser({
+    required this.id,
+    required this.blockerId,
+    required this.blockedId,
+    required this.createdAt,
+    this.blockedUser,
+  });
+
+  factory BlockUser.fromJson(Map<String, dynamic> json) {
+    // Backend returns: { _id, user: { _id, email, name }, blockedAt }
+    final userId = json['user'] != null
+        ? (json['user']['_id'] ?? json['user']['id'] ?? '')
+        : json['blockedId'] ?? '';
+
+    return BlockUser(
+      id: json['_id'] ?? json['id'] ?? '',
+      blockerId: json['blockerId'] ?? '',
+      blockedId: userId,
+      createdAt: json['blockedAt'] != null
+          ? DateTime.parse(json['blockedAt'])
+          : (json['createdAt'] != null
+                ? DateTime.parse(json['createdAt'])
+                : DateTime.now()),
+      blockedUser: json['user'] != null
+          ? BlockedUserInfo.fromJson(json['user'])
+          : (json['blockedUser'] != null
+                ? BlockedUserInfo.fromJson(json['blockedUser'])
+                : null),
+    );
+  }
+}
+
+class BlockedUserInfo {
+  final String id;
+  final String email;
+  final String name;
+
+  BlockedUserInfo({required this.id, required this.email, required this.name});
+
+  factory BlockedUserInfo.fromJson(Map<String, dynamic> json) {
+    final email = json['email'] ?? '';
+    return BlockedUserInfo(
+      id: json['_id'] ?? json['id'] ?? '',
+      email: email,
+      name: json['name'] ?? email.split('@')[0],
+    );
+  }
+}
+
+class BlockedUsersResponse {
+  final List<BlockUser> blockedUsers;
+  final String message;
+
+  BlockedUsersResponse({required this.blockedUsers, required this.message});
+
+  factory BlockedUsersResponse.fromJson(Map<String, dynamic> json) {
+    final List<dynamic> data = json['data'] ?? [];
+    final blockedUsers = data
+        .map((block) => BlockUser.fromJson(block))
+        .toList();
+
+    return BlockedUsersResponse(
+      blockedUsers: blockedUsers,
       message: json['message'] ?? '',
     );
   }

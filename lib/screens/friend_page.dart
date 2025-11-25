@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/friend_service.dart';
 import 'friend_requests_page.dart';
+import 'blocked_users_page.dart';
 
 class FriendPage extends StatefulWidget {
   @override
@@ -106,6 +107,43 @@ class _FriendPageState extends State<FriendPage> {
     return otherUser?.id ?? '';
   }
 
+  Future<void> _blockUser(Friend friend) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Block User'),
+        content: Text(
+          'Are you sure you want to block ${_getFriendName(friend)}? This will unfriend them and prevent all interactions.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('Block', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        final friendUserId = _getFriendUserId(friend);
+        await FriendService.blockUser(friendUserId);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('User blocked successfully')));
+        _loadFriends();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to block user: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,6 +191,29 @@ class _FriendPageState extends State<FriendPage> {
                     ),
                   ),
                 ),
+            ],
+          ),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert),
+            onSelected: (value) {
+              if (value == 'blocked') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => BlockedUsersPage()),
+                );
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'blocked',
+                child: Row(
+                  children: [
+                    Icon(Icons.block, size: 20),
+                    SizedBox(width: 12),
+                    Text('Blocked Users'),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
@@ -328,15 +389,26 @@ class _FriendPageState extends State<FriendPage> {
                           ListTile(
                             leading: Icon(
                               Icons.person_remove,
-                              color: Colors.red,
+                              color: Colors.orange,
                             ),
                             title: Text(
                               'Unfriend',
-                              style: TextStyle(color: Colors.red),
+                              style: TextStyle(color: Colors.orange),
                             ),
                             onTap: () {
                               Navigator.pop(context);
                               _unfriend(friend);
+                            },
+                          ),
+                          ListTile(
+                            leading: Icon(Icons.block, color: Colors.red),
+                            title: Text(
+                              'Block',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            onTap: () {
+                              Navigator.pop(context);
+                              _blockUser(friend);
                             },
                           ),
                         ],
