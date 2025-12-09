@@ -4,6 +4,7 @@ import 'idea_cloud_page.dart';
 import 'upcoming_event_page.dart';
 import 'au_poll_page.dart';
 import 'study_sessions_page_simple.dart';
+import 'shop_and_lost_found_page.dart';
 
 class CampusCornerPage extends StatelessWidget {
   @override
@@ -79,10 +80,20 @@ class CampusCornerPage extends StatelessWidget {
                         mainAxisSpacing: 16,
                         crossAxisSpacing: 16,
                         children: [
-                          _CampusTile(
-                            title: 'Learning Hub',
-                            color: Colors.white,
-                            icon: Icons.school,
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ShopAndLostFoundPage(),
+                                ),
+                              );
+                            },
+                            child: _CampusTile(
+                              title: 'Shop & Lost Found',
+                              color: Colors.white,
+                              icon: Icons.shopping_bag,
+                            ),
                           ),
                           GestureDetector(
                             onTap: () {
