@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_page.dart';
 import 'friend_page.dart';
 import 'campus_corner_page.dart';
+import 'chats_list_page.dart';
 import 'profile_page.dart';
 
 class MainTabPage extends StatefulWidget {
@@ -42,6 +43,19 @@ class _MainTabPageState extends State<MainTabPage> {
             label: 'You',
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: "main_tab_fab",
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ChatsListPage()),
+          );
+        },
+        backgroundColor: Theme.of(context).primaryColor,
+        elevation: 6.0,
+        child: const Icon(Icons.message, color: Colors.white),
+        tooltip: 'Messages',
       ),
     );
   }

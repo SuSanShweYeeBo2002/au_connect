@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'pomodoro_timer_page.dart';
-import 'calculator_page.dart';
 import 'idea_cloud_page.dart';
 import 'upcoming_event_page.dart';
+import 'au_poll_page.dart';
+import 'study_sessions_page_simple.dart';
+import 'shop_and_lost_found_page.dart';
 
 class CampusCornerPage extends StatelessWidget {
   @override
@@ -70,33 +72,6 @@ class CampusCornerPage extends StatelessWidget {
                         ],
                       ),
                       SizedBox(height: 24),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.search, color: Colors.grey[600]),
-                              SizedBox(width: 8),
-                              Expanded(
-                                child: TextField(
-                                  decoration: InputDecoration(
-                                    hintText: 'Search',
-                                    border: InputBorder.none,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 24),
                       GridView.count(
                         crossAxisCount: 2,
                         shrinkWrap: true,
@@ -105,10 +80,20 @@ class CampusCornerPage extends StatelessWidget {
                         mainAxisSpacing: 16,
                         crossAxisSpacing: 16,
                         children: [
-                          _CampusTile(
-                            title: 'Learning Hub',
-                            color: Colors.white,
-                            icon: Icons.school,
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ShopAndLostFoundPage(),
+                                ),
+                              );
+                            },
+                            child: _CampusTile(
+                              title: 'Shop & Lost Found',
+                              color: Colors.white,
+                              icon: Icons.shopping_bag,
+                            ),
                           ),
                           GestureDetector(
                             onTap: () {
@@ -121,29 +106,9 @@ class CampusCornerPage extends StatelessWidget {
                             },
                             child: _CampusTile(
                               title: 'Pomodoro Study Timer',
-                              color: Colors.blue[200],
+                              color: Colors.blue[100],
                               icon: Icons.timer,
                             ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CalculatorPage(),
-                                ),
-                              );
-                            },
-                            child: _CampusTile(
-                              title: 'Calculator',
-                              color: Colors.blue[100],
-                              icon: Icons.calculate,
-                            ),
-                          ),
-                          _CampusTile(
-                            title: 'Games',
-                            color: Colors.white,
-                            icon: Icons.games,
                           ),
                           GestureDetector(
                             onTap: () {
@@ -160,10 +125,20 @@ class CampusCornerPage extends StatelessWidget {
                               icon: Icons.event,
                             ),
                           ),
-                          _CampusTile(
-                            title: 'Campus Market',
-                            color: Colors.blue[100],
-                            icon: Icons.store,
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AuPollPage(),
+                                ),
+                              );
+                            },
+                            child: _CampusTile(
+                              title: 'AU Poll',
+                              color: Colors.white,
+                              icon: Icons.poll,
+                            ),
                           ),
                           GestureDetector(
                             onTap: () {
@@ -176,14 +151,24 @@ class CampusCornerPage extends StatelessWidget {
                             },
                             child: _CampusTile(
                               title: 'Idea Cloud',
-                              color: Colors.blue[200],
+                              color: Colors.blue[100],
                               icon: Icons.cloud,
                             ),
                           ),
-                          _CampusTile(
-                            title: 'Future Activity',
-                            color: Colors.white,
-                            icon: Icons.help_outline,
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => StudySessionsPage(),
+                                ),
+                              );
+                            },
+                            child: _CampusTile(
+                              title: 'Study Buddy',
+                              color: Colors.white,
+                              icon: Icons.groups,
+                            ),
                           ),
                         ],
                       ),
