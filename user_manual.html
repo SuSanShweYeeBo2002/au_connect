@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AU Connect - User Manual</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            border-left: 5px solid #667eea;
+        }
+
+        .toc h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            padding: 8px 0;
+        }
+
+        .toc a {
+            color: #333;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 1.05em;
+        }
+
+        .toc a:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        .section {
+            margin-bottom: 60px;
+            scroll-margin-top: 20px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .section h3 {
+            color: #764ba2;
+            font-size: 1.7em;
+            margin: 30px 0 15px 0;
+        }
+
+        .section h4 {
+            color: #555;
+            font-size: 1.3em;
+            margin: 20px 0 10px 0;
+        }
+
+        .section p {
+            margin-bottom: 15px;
+            font-size: 1.05em;
+            color: #555;
+        }
+
+        .feature-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+
+        .feature-box h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .screenshot-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .screenshot-placeholder {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            border: 2px dashed #999;
+            border-radius: 10px;
+            padding: 60px 20px;
+            margin: 15px 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        .screenshot-placeholder img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .screenshot-caption {
+            margin-top: 10px;
+            font-size: 0.95em;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .step-list {
+            counter-reset: step-counter;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .step-list li {
+            counter-increment: step-counter;
+            position: relative;
+            padding: 20px 20px 20px 70px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .note {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .note strong {
+            color: #856404;
+        }
+
+        .tip {
+            background: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .tip strong {
+            color: #0c5460;
+        }
+
+        .warning {
+            background: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .warning strong {
+            color: #721c24;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            border-top: 3px solid #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .section h2 {
+                font-size: 1.8em;
+            }
+        }
+
+        .button-demo {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+
+        .button-demo:hover {
+            background: #764ba2;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎓 AU Connect</h1>
+            <p>Complete User Manual & Guide</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Table of Contents -->
+            <div class="toc">
+                <h2>📑 Table of Contents</h2>
+                <ul>
+                    <li><a href="#introduction">1. Introduction</a></li>
+                    <li><a href="#getting-started">2. Getting Started</a></li>
+                    <li><a href="#authentication">3. Authentication</a></li>
+                    <li><a href="#home-feed">4. Home Feed</a></li>
+                    <li><a href="#profile">5. Profile Management</a></li>
+                    <li><a href="#campus-corner">6. Campus Corner</a></li>
+                    <li><a href="#shop-lost-found">7. Shop & Lost Found</a></li>
+                    <li><a href="#social-features">8. Social Features</a></li>
+                    <li><a href="#productivity">9. Productivity Tools</a></li>
+                    <li><a href="#settings">10. Settings & Privacy</a></li>
+                    <li><a href="#troubleshooting">11. Troubleshooting</a></li>
+                </ul>
+            </div>
+
+            <!-- Section 1: Introduction -->
+            <div class="section" id="introduction">
+                <h2>1. Introduction</h2>
+                <p>Welcome to <strong>AU Connect</strong>, your comprehensive campus companion app! AU Connect brings together social networking, productivity tools, and campus resources into one seamless platform.</p>
+                
+                <div class="feature-box">
+                    <h4>🌟 Key Features</h4>
+                    <ul>
+                        <li>Connect with classmates and build your campus network</li>
+                        <li>Share posts, photos, and updates</li>
+                        <li>Buy, sell, and trade items with fellow students</li>
+                        <li>Report and find lost items</li>
+                        <li>Join study sessions and use productivity tools</li>
+                        <li>Stay updated on campus events and polls</li>
+                        <li>Real-time messaging with friends</li>
+                    </ul>
+                </div>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: AU Connect Welcome Screen
+                        <br><em>Place your welcome/splash screen image here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 1.1: AU Connect Welcome Screen</div>
+                </div>
+            </div>
+
+            <!-- Section 2: Getting Started -->
+            <div class="section" id="getting-started">
+                <h2>2. Getting Started</h2>
+                
+                <h3>2.1 System Requirements</h3>
+                <table>
+                    <tr>
+                        <th>Platform</th>
+                        <th>Requirements</th>
+                    </tr>
+                    <tr>
+                        <td>Web</td>
+                        <td>Chrome, Firefox, Safari (latest versions)</td>
+                    </tr>
+                    <tr>
+                        <td>Android</td>
+                        <td>Android 6.0 (API 23) or higher</td>
+                    </tr>
+                    <tr>
+                        <td>iOS</td>
+                        <td>iOS 12.0 or higher</td>
+                    </tr>
+                </table>
+
+                <h3>2.2 Installation</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>Download the App</strong>
+                        <p>Download AU Connect from your platform's app store or access it via web browser.</p>
+                    </li>
+                    <li>
+                        <strong>Grant Permissions</strong>
+                        <p>Allow necessary permissions for camera, storage, and notifications for the best experience.</p>
+                    </li>
+                    <li>
+                        <strong>Create an Account</strong>
+                        <p>Sign up with your university email to get started.</p>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- Section 3: Authentication -->
+            <div class="section" id="authentication">
+                <h2>3. Authentication</h2>
+                
+                <h3>3.1 Sign Up</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>Navigate to Sign Up</strong>
+                        <p>From the welcome screen, tap on "Sign Up" or "Create Account".</p>
+                    </li>
+                    <li>
+                        <strong>Enter Your Details</strong>
+                        <p>Provide your university email address and create a secure password.</p>
+                    </li>
+                    <li>
+                        <strong>Verify Email</strong>
+                        <p>Check your email for a verification link and click it to activate your account.</p>
+                    </li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Sign Up Page
+                        <br><em>Place signup_page.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 3.1: Sign Up Screen</div>
+                </div>
+
+                <h3>3.2 Sign In</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>Enter Credentials</strong>
+                        <p>Enter your registered email and password.</p>
+                    </li>
+                    <li>
+                        <strong>Tap Sign In</strong>
+                        <p>Click the "Sign In" button to access your account.</p>
+                    </li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        <img src="assets/images/sign_in.png" alt="Sign In Page">
+                    </div>
+                    <div class="screenshot-caption">Fig 3.2: Sign In Screen</div>
+                </div>
+
+                <div class="tip">
+                    <strong>💡 Tip:</strong> Keep your password secure and don't share it with anyone. Use a strong password with a mix of letters, numbers, and symbols.
+                </div>
+            </div>
+
+            <!-- Section 4: Home Feed -->
+            <div class="section" id="home-feed">
+                <h2>4. Home Feed</h2>
+                <p>The Home Feed is your central hub for staying connected with the campus community.</p>
+
+                <h3>4.1 Viewing Posts</h3>
+                <p>Scroll through posts from your friends and campus community. Each post displays:</p>
+                <ul>
+                    <li>User's name and profile picture</li>
+                    <li>Post content (text and/or images)</li>
+                    <li>Like count and comments</li>
+                    <li>Timestamp</li>
+                </ul>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Home Feed
+                        <br><em>Place home_page.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 4.1: Home Feed with Posts</div>
+                </div>
+
+                <h3>4.2 Creating a Post</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>Tap the "+" Button</strong>
+                        <p>Look for the floating action button or "Create Post" option.</p>
+                    </li>
+                    <li>
+                        <strong>Write Your Content</strong>
+                        <p>Type your message in the text field.</p>
+                    </li>
+                    <li>
+                        <strong>Add an Image (Optional)</strong>
+                        <p>Tap the image icon to attach a photo from your gallery or take a new one.</p>
+                    </li>
+                    <li>
+                        <strong>Post It!</strong>
+                        <p>Click "Post" to share with the community.</p>
+                    </li>
+                </ol>
+
+                <h3>4.3 Interacting with Posts</h3>
+                <div class="feature-box">
+                    <h4>Available Actions:</h4>
+                    <ul>
+                        <li><strong>Like:</strong> Tap the heart icon to like a post</li>
+                        <li><strong>Comment:</strong> Tap the comment icon to add your thoughts</li>
+                        <li><strong>Delete:</strong> If you created the post, use the delete option to remove it</li>
+                    </ul>
+                </div>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Create Post Dialog
+                        <br><em>Place create post dialog screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 4.2: Creating a New Post</div>
+                </div>
+            </div>
+
+            <!-- Section 5: Profile Management -->
+            <div class="section" id="profile">
+                <h2>5. Profile Management</h2>
+
+                <h3>5.1 Viewing Your Profile</h3>
+                <p>Access your profile from the bottom navigation bar. Your profile displays:</p>
+                <ul>
+                    <li>Profile picture/avatar</li>
+                    <li>Your name (derived from email)</li>
+                    <li>Email address</li>
+                    <li>Your posts and activity</li>
+                </ul>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Profile Page
+                        <br><em>Place profile_page.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 5.1: User Profile Page</div>
+                </div>
+
+                <h3>5.2 Editing Your Profile</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>Tap "Edit" Button</strong>
+                        <p>Click the Edit button on your profile page.</p>
+                    </li>
+                    <li>
+                        <strong>Update Email</strong>
+                        <p>Change your email address if needed.</p>
+                    </li>
+                    <li>
+                        <strong>Change Password</strong>
+                        <p>Enter a new password and confirm it (optional).</p>
+                    </li>
+                    <li>
+                        <strong>Save Changes</strong>
+                        <p>Click "Update" to save your modifications.</p>
+                    </li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Edit Profile Dialog
+                        <br><em>Place edit profile dialog screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 5.2: Edit Profile Dialog</div>
+                </div>
+
+                <div class="note">
+                    <strong>📝 Note:</strong> You must enter at least one field (email or password) to update your profile. Both fields cannot be empty.
+                </div>
+
+                <h3>5.3 Viewing Your Posts</h3>
+                <p>Scroll down on your profile to see all posts you've created. You can:</p>
+                <ul>
+                    <li>View likes and comments on your posts</li>
+                    <li>Delete posts you no longer want to share</li>
+                    <li>See when each post was created</li>
+                </ul>
+            </div>
+
+            <!-- Section 6: Campus Corner -->
+            <div class="section" id="campus-corner">
+                <h2>6. Campus Corner</h2>
+                <p>Campus Corner is your hub for all campus-related tools and features.</p>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Campus Corner Page
+                        <br><em>Place campus_corner_page.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 6.1: Campus Corner Dashboard</div>
+                </div>
+
+                <h3>6.1 Available Tools</h3>
+                <table>
+                    <tr>
+                        <th>Tool</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>Shop & Lost Found</td>
+                        <td>Buy/sell items and report lost/found items</td>
+                    </tr>
+                    <tr>
+                        <td>Pomodoro Timer</td>
+                        <td>Focus sessions with customizable timer</td>
+                    </tr>
+                    <tr>
+                        <td>Upcoming Events</td>
+                        <td>Campus events calendar and RSVP</td>
+                    </tr>
+                    <tr>
+                        <td>AU Polls</td>
+                        <td>Create and participate in campus polls</td>
+                    </tr>
+                    <tr>
+                        <td>Study Sessions</td>
+                        <td>Join or create study groups</td>
+                    </tr>
+                    <tr>
+                        <td>Idea Cloud</td>
+                        <td>Share and collaborate on ideas</td>
+                    </tr>
+                    <tr>
+                        <td>Calculator</td>
+                        <td>Quick calculations</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Section 7: Shop & Lost Found -->
+            <div class="section" id="shop-lost-found">
+                <h2>7. Shop & Lost Found</h2>
+                <p>Buy, sell, and trade items with fellow students, or help reunite lost items with their owners.</p>
+
+                <h3>7.1 Shop Tab - Selling Items</h3>
+                
+                <h4>Creating a Sell Listing</h4>
+                <ol class="step-list">
+                    <li>
+                        <strong>Navigate to Shop Tab</strong>
+                        <p>Open Shop & Lost Found from Campus Corner, then select the "Shop" tab.</p>
+                    </li>
+                    <li>
+                        <strong>Tap "Create" Button</strong>
+                        <p>Click the floating action button with a "+" icon.</p>
+                    </li>
+                    <li>
+                        <strong>Fill in Details</strong>
+                        <p>Enter item name, description, price, and optionally attach an image.</p>
+                    </li>
+                    <li>
+                        <strong>Submit Listing</strong>
+                        <p>Click "Create" to publish your item for sale.</p>
+                    </li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Shop Tab
+                        <br><em>Place shop tab from shop_and_lost_found_page.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 7.1: Shop Tab with Listings</div>
+                </div>
+
+                <h4>Managing Your Listings</h4>
+                <div class="feature-box">
+                    <h4>Actions Available:</h4>
+                    <ul>
+                        <li><strong>Edit:</strong> Update item details, price, or description (tap dropdown → Edit)</li>
+                        <li><strong>Delete:</strong> Remove your listing (tap dropdown → Delete)</li>
+                        <li><strong>View Details:</strong> See full item information</li>
+                    </ul>
+                </div>
+
+                <div class="note">
+                    <strong>📝 Note:</strong> You can only edit or delete items that you created. Other users' listings are read-only.
+                </div>
+
+                <h3>7.2 Lost & Found Tab</h3>
+                
+                <h4>Reporting a Lost Item</h4>
+                <ol class="step-list">
+                    <li>
+                        <strong>Switch to Lost & Found Tab</strong>
+                        <p>Tap the "Lost & Found" tab at the top.</p>
+                    </li>
+                    <li>
+                        <strong>Create New Report</strong>
+                        <p>Tap the "+" button to open the report dialog.</p>
+                    </li>
+                    <li>
+                        <strong>Describe the Item</strong>
+                        <p>Enter item name, description, location where lost/found, and attach a photo if available.</p>
+                    </li>
+                    <li>
+                        <strong>Submit Report</strong>
+                        <p>Click "Create" to post your report.</p>
+                    </li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Lost & Found Tab
+                        <br><em>Place lost & found tab screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 7.2: Lost & Found Tab</div>
+                </div>
+
+                <div class="tip">
+                    <strong>💡 Tip:</strong> Include specific details like brand, color, and distinctive features to help reunite lost items with their owners faster!
+                </div>
+            </div>
+
+            <!-- Section 8: Social Features -->
+            <div class="section" id="social-features">
+                <h2>8. Social Features</h2>
+
+                <h3>8.1 Friends</h3>
+                <p>Build your campus network by connecting with classmates.</p>
+
+                <h4>Sending Friend Requests</h4>
+                <ol class="step-list">
+                    <li>
+                        <strong>Find Users</strong>
+                        <p>Navigate to the user list or search for specific users.</p>
+                    </li>
+                    <li>
+                        <strong>Send Request</strong>
+                        <p>Tap "Add Friend" on a user's profile.</p>
+                    </li>
+                    <li>
+                        <strong>Wait for Acceptance</strong>
+                        <p>The user will receive a notification and can accept or reject your request.</p>
+                    </li>
+                </ol>
+
+                <h4>Managing Friend Requests</h4>
+                <p>View pending requests in your Friend Requests page:</p>
+                <ul>
+                    <li><strong>Accept:</strong> Add the user to your friends list</li>
+                    <li><strong>Reject:</strong> Decline the friend request</li>
+                </ul>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Friend Requests Page
+                        <br><em>Place friend_requests_page.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 8.1: Friend Requests</div>
+                </div>
+
+                <h3>8.2 Messaging</h3>
+                <p>Chat with your friends in real-time.</p>
+
+                <h4>Starting a Conversation</h4>
+                <ol class="step-list">
+                    <li>
+                        <strong>Open Chats List</strong>
+                        <p>Navigate to the Messages section from the bottom navigation.</p>
+                    </li>
+                    <li>
+                        <strong>New Message</strong>
+                        <p>Tap the "+" icon to start a new conversation.</p>
+                    </li>
+                    <li>
+                        <strong>Select Friend</strong>
+                        <p>Choose a friend from your contacts list.</p>
+                    </li>
+                    <li>
+                        <strong>Send Messages</strong>
+                        <p>Type your message and tap send!</p>
+                    </li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Chat Page
+                        <br><em>Place chat_page.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 8.2: Chat Conversation</div>
+                </div>
+
+                <h3>8.3 Comments</h3>
+                <p>Engage in discussions on posts.</p>
+
+                <h4>Adding Comments</h4>
+                <ol class="step-list">
+                    <li>
+                        <strong>Tap Comment Icon</strong>
+                        <p>Click the comment icon on any post.</p>
+                    </li>
+                    <li>
+                        <strong>Write Your Comment</strong>
+                        <p>Type your thoughts in the comment field.</p>
+                    </li>
+                    <li>
+                        <strong>Submit</strong>
+                        <p>Click "Post" to add your comment.</p>
+                    </li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Comments Page
+                        <br><em>Place comments_page.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 8.3: Post Comments</div>
+                </div>
+            </div>
+
+            <!-- Section 9: Productivity Tools -->
+            <div class="section" id="productivity">
+                <h2>9. Productivity Tools</h2>
+
+                <h3>9.1 Pomodoro Timer</h3>
+                <p>Boost your focus with the Pomodoro Technique - work in focused intervals with breaks.</p>
+
+                <h4>Using the Timer</h4>
+                <ol class="step-list">
+                    <li>
+                        <strong>Set Duration</strong>
+                        <p>Choose your work session length (default: 25 minutes).</p>
+                    </li>
+                    <li>
+                        <strong>Start Timer</strong>
+                        <p>Tap "Start" to begin your focus session.</p>
+                    </li>
+                    <li>
+                        <strong>Work Focused</strong>
+                        <p>Work without distractions until the timer rings.</p>
+                    </li>
+                    <li>
+                        <strong>Take a Break</strong>
+                        <p>Enjoy a 5-minute break when the timer completes.</p>
+                    </li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Pomodoro Timer
+                        <br><em>Place pomodoro_timer_page.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 9.1: Pomodoro Timer</div>
+                </div>
+
+                <h3>9.2 Study Sessions</h3>
+                <p>Join or create study groups to collaborate with classmates.</p>
+
+                <h4>Creating a Study Session</h4>
+                <ol class="step-list">
+                    <li>
+                        <strong>Open Study Sessions</strong>
+                        <p>Navigate from Campus Corner.</p>
+                    </li>
+                    <li>
+                        <strong>Create New Session</strong>
+                        <p>Tap "+" to create a new study group.</p>
+                    </li>
+                    <li>
+                        <strong>Set Details</strong>
+                        <p>Add subject, location, time, and participant limit.</p>
+                    </li>
+                    <li>
+                        <strong>Publish</strong>
+                        <p>Other students can now join your session!</p>
+                    </li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Study Sessions
+                        <br><em>Place study_sessions_page_simple.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 9.2: Study Sessions List</div>
+                </div>
+
+                <h3>9.3 Calculator</h3>
+                <p>Quick access to a calculator for on-the-go calculations.</p>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Calculator
+                        <br><em>Place calculator_page.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 9.3: Built-in Calculator</div>
+                </div>
+
+                <h3>9.4 AU Polls</h3>
+                <p>Create polls and gather opinions from the campus community.</p>
+
+                <h4>Creating a Poll</h4>
+                <ol class="step-list">
+                    <li>
+                        <strong>Access Polls</strong>
+                        <p>Open AU Polls from Campus Corner.</p>
+                    </li>
+                    <li>
+                        <strong>New Poll</strong>
+                        <p>Tap "Create Poll" button.</p>
+                    </li>
+                    <li>
+                        <strong>Add Question & Options</strong>
+                        <p>Enter your question and at least 2 answer options.</p>
+                    </li>
+                    <li>
+                        <strong>Publish</strong>
+                        <p>Share your poll with the community!</p>
+                    </li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: AU Polls
+                        <br><em>Place au_poll_page.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 9.4: Campus Polls</div>
+                </div>
+
+                <h3>9.5 Idea Cloud</h3>
+                <p>Brainstorm and collaborate on ideas with fellow students.</p>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Idea Cloud
+                        <br><em>Place idea_cloud_page.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 9.5: Idea Cloud</div>
+                </div>
+
+                <h3>9.6 Upcoming Events</h3>
+                <p>Stay informed about campus events and activities.</p>
+
+                <h4>Viewing Events</h4>
+                <ul>
+                    <li>Browse upcoming events with date, time, and location</li>
+                    <li>Filter events by category or date</li>
+                    <li>RSVP to events you want to attend</li>
+                </ul>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Upcoming Events
+                        <br><em>Place upcoming_event_page.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 9.6: Campus Events Calendar</div>
+                </div>
+            </div>
+
+            <!-- Section 10: Settings & Privacy -->
+            <div class="section" id="settings">
+                <h2>10. Settings & Privacy</h2>
+
+                <h3>10.1 Account Settings</h3>
+                <ul>
+                    <li><strong>Profile:</strong> Edit email and password from your profile page</li>
+                    <li><strong>Blocked Users:</strong> Manage users you've blocked</li>
+                    <li><strong>Logout:</strong> Sign out of your account securely</li>
+                </ul>
+
+                <h3>10.2 Privacy & Safety</h3>
+                <div class="feature-box">
+                    <h4>Best Practices:</h4>
+                    <ul>
+                        <li>Don't share personal information like phone numbers or addresses publicly</li>
+                        <li>Report inappropriate content or behavior</li>
+                        <li>Block users who harass or spam</li>
+                        <li>Be respectful in comments and messages</li>
+                    </ul>
+                </div>
+
+                <h3>10.3 Blocking Users</h3>
+                <p>If someone is bothering you, you can block them:</p>
+                <ol class="step-list">
+                    <li>
+                        <strong>Navigate to Blocked Users</strong>
+                        <p>Find the blocked users page in settings.</p>
+                    </li>
+                    <li>
+                        <strong>Add User</strong>
+                        <p>Search for and select the user to block.</p>
+                    </li>
+                    <li>
+                        <strong>Confirm Block</strong>
+                        <p>They won't be able to contact you or see your content.</p>
+                    </li>
+                </ol>
+
+                <div class="screenshot-container">
+                    <div class="screenshot-placeholder">
+                        📸 Screenshot: Blocked Users
+                        <br><em>Place blocked_users_page.dart screenshot here</em>
+                    </div>
+                    <div class="screenshot-caption">Fig 10.1: Blocked Users Management</div>
+                </div>
+            </div>
+
+            <!-- Section 11: Troubleshooting -->
+            <div class="section" id="troubleshooting">
+                <h2>11. Troubleshooting</h2>
+
+                <h3>11.1 Common Issues</h3>
+
+                <div class="feature-box">
+                    <h4>❌ Can't Sign In</h4>
+                    <p><strong>Solution:</strong></p>
+                    <ul>
+                        <li>Verify your email and password are correct</li>
+                        <li>Check if you've verified your email address</li>
+                        <li>Try resetting your password</li>
+                        <li>Ensure you have an active internet connection</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h4>❌ Images Not Loading</h4>
+                    <p><strong>Solution:</strong></p>
+                    <ul>
+                        <li>Check your internet connection</li>
+                        <li>Try refreshing the page/screen</li>
+                        <li>Clear app cache (on mobile devices)</li>
+                        <li>Ensure images are in supported formats (JPG, PNG)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h4>❌ Posts Not Appearing</h4>
+                    <p><strong>Solution:</strong></p>
+                    <ul>
+                        <li>Pull down to refresh the feed</li>
+                        <li>Check if you're connected to the internet</li>
+                        <li>Log out and log back in</li>
+                        <li>Make sure the post was successfully created (check for error messages)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h4>❌ Friend Requests Not Working</h4>
+                    <p><strong>Solution:</strong></p>
+                    <ul>
+                        <li>Refresh the friends page</li>
+                        <li>Check if you already sent a request to that user</li>
+                        <li>Verify the user hasn't blocked you</li>
+                    </ul>
+                </div>
+
+                <h3>11.2 Error Messages</h3>
+                <table>
+                    <tr>
+                        <th>Error</th>
+                        <th>Meaning</th>
+                        <th>Solution</th>
+                    </tr>
+                    <tr>
+                        <td>Please fill all required fields</td>
+                        <td>Missing information in a form</td>
+                        <td>Complete all fields marked as required</td>
+                    </tr>
+                    <tr>
+                        <td>Passwords do not match</td>
+                        <td>Password and confirmation don't match</td>
+                        <td>Retype passwords to match exactly</td>
+                    </tr>
+                    <tr>
+                        <td>No changes to update</td>
+                        <td>No modifications made to profile</td>
+                        <td>Change at least one field before saving</td>
+                    </tr>
+                    <tr>
+                        <td>Failed to load profile</td>
+                        <td>Server connection issue</td>
+                        <td>Check internet and try again</td>
+                    </tr>
+                </table>
+
+                <h3>11.3 Getting Help</h3>
+                <div class="warning">
+                    <strong>⚠️ Need More Help?</strong>
+                    <p>If you continue to experience issues:</p>
+                    <ul>
+                        <li>Contact your campus IT support</li>
+                        <li>Report bugs through the app's feedback form</li>
+                        <li>Check the FAQ section on the website</li>
+                    </ul>
+                </div>
+
+                <h3>11.4 Tips for Best Performance</h3>
+                <div class="tip">
+                    <strong>💡 Performance Tips:</strong>
+                    <ul>
+                        <li>Keep the app updated to the latest version</li>
+                        <li>Use a stable WiFi connection when possible</li>
+                        <li>Close and restart the app if it becomes slow</li>
+                        <li>Clear cache periodically</li>
+                        <li>Compress images before uploading to reduce load times</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="section">
+                <h2>🎉 Conclusion</h2>
+                <p>Congratulations! You're now ready to make the most of AU Connect. Connect with your campus community, stay productive, and enjoy all the features designed to enhance your university experience.</p>
+                
+                <div class="feature-box">
+                    <h4>Quick Reference - Navigation Bar</h4>
+                    <ul>
+                        <li><strong>Home:</strong> View and create posts</li>
+                        <li><strong>Campus Corner:</strong> Access all campus tools</li>
+                        <li><strong>Messages:</strong> Chat with friends</li>
+                        <li><strong>Profile:</strong> Manage your account</li>
+                    </ul>
+                </div>
+
+                <div style="text-align: center; margin: 40px 0;">
+                    <p style="font-size: 1.2em; color: #667eea;">
+                        <strong>Happy Connecting! 🚀</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>AU Connect</strong> - Campus Social & Productivity Platform</p>
+            <p style="margin-top: 10px;">Version 1.0 | © 2025 AU Connect</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                For support, visit <a href="#" style="color: #667eea;">support@auconnect.com</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Smooth scrolling for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
