@@ -5,8 +5,46 @@ import 'upcoming_event_page.dart';
 import 'au_poll_page.dart';
 import 'study_sessions_page_simple.dart';
 import 'shop_and_lost_found_page.dart';
+import '../services/user_service.dart';
 
-class CampusCornerPage extends StatelessWidget {
+class CampusCornerPage extends StatefulWidget {
+  @override
+  State<CampusCornerPage> createState() => _CampusCornerPageState();
+}
+
+class _CampusCornerPageState extends State<CampusCornerPage> {
+  bool _isLoading = true;
+  String _userName = 'User';
+  String _userEmail = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final response = await UserService.getCurrentUser();
+      final userData = response['data'];
+
+      if (mounted) {
+        setState(() {
+          _userName = userData['email']?.split('@')[0] ?? 'User';
+          _userEmail = userData['email'] ?? '';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading user data: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,14 +71,21 @@ class CampusCornerPage extends StatelessWidget {
                           CircleAvatar(
                             radius: 32,
                             backgroundColor: Colors.blue[300],
-                            child: Text(
-                              'JD',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            child: _isLoading
+                                ? CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  )
+                                : Text(
+                                    _userName.isNotEmpty
+                                        ? _userName[0].toUpperCase()
+                                        : 'U',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
                           SizedBox(width: 16),
                           Expanded(
@@ -48,7 +93,7 @@ class CampusCornerPage extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Jane Doe',
+                                  _userName,
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
@@ -56,7 +101,7 @@ class CampusCornerPage extends StatelessWidget {
                                 ),
                                 SizedBox(height: 4),
                                 Text(
-                                  'Learning enthusiast',
+                                  _userEmail,
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Colors.grey[700],

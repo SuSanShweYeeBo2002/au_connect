@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/post_service.dart';
+import '../services/user_service.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -10,7 +11,10 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   List<Post> _userPosts = [];
   bool _isLoadingPosts = true;
+  bool _isLoadingProfile = true;
   String? _userId;
+  String? _userName;
+  String? _userEmail;
   int _currentPage = 1;
   bool _hasMorePosts = true;
 
@@ -21,12 +25,37 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _loadUserData() async {
-    final userId = await AuthService.instance.getUserId();
-    setState(() {
-      _userId = userId;
-    });
-    if (userId != null) {
-      await _loadUserPosts();
+    try {
+      setState(() {
+        _isLoadingProfile = true;
+      });
+
+      final response = await UserService.getCurrentUser();
+      final userData = response['data'];
+
+      setState(() {
+        _userId = userData['_id'];
+        _userName = userData['email']?.split('@')[0] ?? 'User';
+        _userEmail = userData['email'];
+        _isLoadingProfile = false;
+      });
+
+      if (_userId != null) {
+        await _loadUserPosts();
+      }
+    } catch (e) {
+      setState(() {
+        _isLoadingProfile = false;
+      });
+      print('Error loading user data: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load profile: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -165,6 +194,153 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> _showEditProfileDialog() async {
+    String? errorMessage;
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        final emailController = TextEditingController(text: _userEmail);
+        final passwordController = TextEditingController();
+        final confirmPasswordController = TextEditingController();
+
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.edit, color: Colors.blue),
+                SizedBox(width: 12),
+                Text('Edit Profile'),
+              ],
+            ),
+            content: Container(
+              width: MediaQuery.of(context).size.width * 0.9,
+              constraints: BoxConstraints(maxWidth: 500),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (errorMessage != null)
+                      Container(
+                        margin: EdgeInsets.only(bottom: 16),
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.red),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: Colors.red,
+                              size: 20,
+                            ),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                errorMessage!,
+                                style: TextStyle(color: Colors.red.shade900),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    TextField(
+                      controller: emailController,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.email),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    SizedBox(height: 16),
+                    TextField(
+                      controller: passwordController,
+                      decoration: InputDecoration(
+                        labelText: 'New Password (optional)',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.lock),
+                      ),
+                      obscureText: true,
+                    ),
+                    SizedBox(height: 16),
+                    TextField(
+                      controller: confirmPasswordController,
+                      decoration: InputDecoration(
+                        labelText: 'Confirm Password',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.lock_outline),
+                      ),
+                      obscureText: true,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final email = emailController.text.trim();
+                  final password = passwordController.text;
+                  final confirmPassword = confirmPasswordController.text;
+
+                  // Validation
+                  if (email.isEmpty) {
+                    setState(() => errorMessage = 'Email is required');
+                    return;
+                  }
+
+                  if (password.isNotEmpty && password != confirmPassword) {
+                    setState(() => errorMessage = 'Passwords do not match');
+                    return;
+                  }
+
+                  if (email == _userEmail && password.isEmpty) {
+                    setState(() => errorMessage = 'No changes to update');
+                    return;
+                  }
+
+                  setState(() => errorMessage = null);
+
+                  try {
+                    await UserService.updateCurrentUser(
+                      email: email != _userEmail ? email : null,
+                      password: password.isNotEmpty ? password : null,
+                    );
+
+                    Navigator.pop(context);
+
+                    // Reload user data
+                    await _loadUserData();
+
+                    if (mounted) {
+                      ScaffoldMessenger.of(this.context).showSnackBar(
+                        SnackBar(
+                          content: Text('Profile updated successfully!'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    setState(() => errorMessage = 'Error: $e');
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                child: Text('Save'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -208,14 +384,17 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     const SizedBox(height: 45),
 
-                    Text("Baki Hanma", style: TextStyle(fontSize: 22)),
-
-                    const SizedBox(height: 4),
-                    Text(
-                      "Software Engineer at Google!!",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 18),
-                    ),
+                    if (_isLoadingProfile)
+                      CircularProgressIndicator()
+                    else ...[
+                      Text(_userName ?? "User", style: TextStyle(fontSize: 22)),
+                      const SizedBox(height: 4),
+                      Text(
+                        _userEmail ?? "",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                      ),
+                    ],
 
                     const SizedBox(height: 10),
                     Row(
@@ -229,7 +408,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                             ),
-                            onPressed: () {},
+                            onPressed: _isLoadingProfile
+                                ? null
+                                : _showEditProfileDialog,
                             child: Text(
                               "Edit",
                               style: TextStyle(color: Colors.white),
