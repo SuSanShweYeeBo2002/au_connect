@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/sell_item_service.dart';
 import '../services/lost_item_service.dart';
+import '../services/auth_service.dart';
 
 class ShopAndLostFoundPage extends StatefulWidget {
   @override
@@ -10,6 +11,8 @@ class ShopAndLostFoundPage extends StatefulWidget {
 class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final GlobalKey<_SellItemsTabState> _sellTabKey = GlobalKey();
+  final GlobalKey<_LostAndFoundTabState> _lostTabKey = GlobalKey();
 
   @override
   void initState() {
@@ -53,7 +56,10 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [SellItemsTab(), LostAndFoundTab()],
+        children: [
+          SellItemsTab(key: _sellTabKey),
+          LostAndFoundTab(key: _lostTabKey),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -71,576 +77,511 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
   }
 
   void _showCreateSellItemDialog(BuildContext context) {
-    final titleController = TextEditingController();
-    final descriptionController = TextEditingController();
-    final priceController = TextEditingController();
-    final phoneController = TextEditingController();
-    final emailController = TextEditingController();
-    List<TextEditingController> imageControllers = [TextEditingController()];
-    String selectedCategory = 'Electronics';
-    String selectedCondition = 'Good';
+    String? errorMessage;
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.85,
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.9,
-          ),
-          child: StatefulBuilder(
-            builder: (context, setState) => Column(
-              mainAxisSize: MainAxisSize.min,
+      builder: (dialogContext) {
+        final titleController = TextEditingController();
+        final descriptionController = TextEditingController();
+        final priceController = TextEditingController();
+        final phoneController = TextEditingController();
+        final emailController = TextEditingController();
+        List<TextEditingController> imageControllers = [
+          TextEditingController(),
+        ];
+        String selectedCategory = 'Electronics';
+        String selectedCondition = 'Good';
+
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Row(
               children: [
-                Container(
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.shopping_bag, color: Colors.white, size: 28),
-                      SizedBox(width: 12),
-                      Text(
-                        'Create Sell Item',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                Icon(Icons.shopping_bag, color: Colors.blue),
+                SizedBox(width: 12),
+                Text('Create Sell Item'),
+              ],
+            ),
+            content: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.8,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      decoration: InputDecoration(
+                        labelText: 'Title',
+                        border: OutlineInputBorder(),
                       ),
-                    ],
-                  ),
-                ),
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextField(
-                          controller: titleController,
-                          decoration: InputDecoration(
-                            labelText: 'Title',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        SizedBox(height: 12),
-                        TextField(
-                          controller: descriptionController,
-                          decoration: InputDecoration(
-                            labelText: 'Description',
-                            border: OutlineInputBorder(),
-                          ),
-                          maxLines: 3,
-                        ),
-                        SizedBox(height: 12),
-                        TextField(
-                          controller: priceController,
-                          decoration: InputDecoration(
-                            labelText: 'Price',
-                            border: OutlineInputBorder(),
-                            prefixText: '฿',
-                          ),
-                          keyboardType: TextInputType.number,
-                        ),
-                        SizedBox(height: 12),
-                        DropdownButtonFormField<String>(
-                          value: selectedCategory,
-                          decoration: InputDecoration(
-                            labelText: 'Category',
-                            border: OutlineInputBorder(),
-                          ),
-                          items:
-                              [
-                                    'Electronics',
-                                    'Books',
-                                    'Clothing',
-                                    'Furniture',
-                                    'Sports',
-                                    'Other',
-                                  ]
-                                  .map(
-                                    (cat) => DropdownMenuItem(
-                                      value: cat,
-                                      child: Text(cat),
-                                    ),
-                                  )
-                                  .toList(),
-                          onChanged: (val) =>
-                              setState(() => selectedCategory = val!),
-                        ),
-                        SizedBox(height: 12),
-                        DropdownButtonFormField<String>(
-                          value: selectedCondition,
-                          decoration: InputDecoration(
-                            labelText: 'Condition',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: ['New', 'Like New', 'Good', 'Fair', 'Poor']
+                    ),
+                    SizedBox(height: 12),
+                    TextField(
+                      controller: descriptionController,
+                      decoration: InputDecoration(
+                        labelText: 'Description',
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 3,
+                    ),
+                    SizedBox(height: 12),
+                    TextField(
+                      controller: priceController,
+                      decoration: InputDecoration(
+                        labelText: 'Price',
+                        border: OutlineInputBorder(),
+                        prefixText: '฿',
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: selectedCategory,
+                      decoration: InputDecoration(
+                        labelText: 'Category',
+                        border: OutlineInputBorder(),
+                      ),
+                      items:
+                          [
+                                'Electronics',
+                                'Books',
+                                'Clothing',
+                                'Furniture',
+                                'Sports',
+                                'Other',
+                              ]
                               .map(
-                                (cond) => DropdownMenuItem(
-                                  value: cond,
-                                  child: Text(cond),
+                                (cat) => DropdownMenuItem(
+                                  value: cat,
+                                  child: Text(cat),
                                 ),
                               )
                               .toList(),
-                          onChanged: (val) =>
-                              setState(() => selectedCondition = val!),
+                      onChanged: (val) =>
+                          setState(() => selectedCategory = val!),
+                    ),
+                    SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: selectedCondition,
+                      decoration: InputDecoration(
+                        labelText: 'Condition',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: ['New', 'Like New', 'Good', 'Fair', 'Poor']
+                          .map(
+                            (cond) => DropdownMenuItem(
+                              value: cond,
+                              child: Text(cond),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (val) =>
+                          setState(() => selectedCondition = val!),
+                    ),
+                    SizedBox(height: 12),
+                    TextField(
+                      controller: phoneController,
+                      decoration: InputDecoration(
+                        labelText: 'Phone',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.phone,
+                    ),
+                    SizedBox(height: 12),
+                    TextField(
+                      controller: emailController,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Text(
+                          'Image URLs',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 12),
-                        TextField(
-                          controller: phoneController,
-                          decoration: InputDecoration(
-                            labelText: 'Phone',
-                            border: OutlineInputBorder(),
+                        Spacer(),
+                        IconButton(
+                          icon: Icon(Icons.add_circle, color: Colors.blue),
+                          onPressed: () => setState(
+                            () => imageControllers.add(TextEditingController()),
                           ),
-                          keyboardType: TextInputType.phone,
+                          tooltip: 'Add image URL',
                         ),
-                        SizedBox(height: 12),
-                        TextField(
-                          controller: emailController,
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-                        SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Text(
-                              'Image URLs',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Spacer(),
-                            IconButton(
-                              icon: Icon(Icons.add_circle, color: Colors.blue),
-                              onPressed: () {
-                                setState(() {
-                                  imageControllers.add(TextEditingController());
-                                });
-                              },
-                              tooltip: 'Add image URL',
-                            ),
-                          ],
-                        ),
-                        ...imageControllers.asMap().entries.map((entry) {
-                          int idx = entry.key;
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 8),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: entry.value,
-                                    decoration: InputDecoration(
-                                      labelText: 'Image URL ${idx + 1}',
-                                      hintText: 'https://example.com/image.jpg',
-                                      border: OutlineInputBorder(),
-                                      prefixIcon: Icon(Icons.image),
-                                    ),
-                                  ),
-                                ),
-                                if (imageControllers.length > 1)
-                                  IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () {
-                                      setState(() {
-                                        imageControllers.removeAt(idx);
-                                      });
-                                    },
-                                  ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
                       ],
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                        ),
-                        child: Text('Cancel', style: TextStyle(fontSize: 16)),
-                      ),
-                      SizedBox(width: 12),
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (titleController.text.isEmpty ||
-                              descriptionController.text.isEmpty ||
-                              priceController.text.isEmpty ||
-                              phoneController.text.isEmpty ||
-                              emailController.text.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Please fill all fields')),
-                            );
-                            return;
-                          }
-
-                          try {
-                            final imageUrls = imageControllers
-                                .map((controller) => controller.text.trim())
-                                .where(
-                                  (url) =>
-                                      url.isNotEmpty &&
-                                      (url.startsWith('http://') ||
-                                          url.startsWith('https://')),
-                                )
-                                .toList();
-
-                            await SellItemService.createSellItem(
-                              title: titleController.text,
-                              description: descriptionController.text,
-                              price: double.parse(priceController.text),
-                              category: selectedCategory,
-                              condition: selectedCondition,
-                              phone: phoneController.text,
-                              email: emailController.text,
-                              images: imageUrls.isNotEmpty ? imageUrls : null,
-                            );
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Item created successfully!'),
+                    ...imageControllers.asMap().entries.map((entry) {
+                      int idx = entry.key;
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: entry.value,
+                                decoration: InputDecoration(
+                                  labelText: 'Image URL ${idx + 1}',
+                                  hintText: 'https://example.com/image.jpg',
+                                  border: OutlineInputBorder(),
+                                  prefixIcon: Icon(Icons.image),
+                                ),
                               ),
-                            );
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error: $e')),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                            ),
+                            if (imageControllers.length > 1)
+                              IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => setState(
+                                  () => imageControllers.removeAt(idx),
+                                ),
+                              ),
+                          ],
                         ),
-                        child: Text('Create', style: TextStyle(fontSize: 16)),
+                      );
+                    }).toList(),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              if (errorMessage != null)
+                Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.only(bottom: 8),
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.error_outline, color: Colors.red, size: 20),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          errorMessage!,
+                          style: TextStyle(color: Colors.red.shade900),
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  if (titleController.text.isEmpty ||
+                      descriptionController.text.isEmpty ||
+                      priceController.text.isEmpty ||
+                      phoneController.text.isEmpty ||
+                      emailController.text.isEmpty) {
+                    setState(() => errorMessage = 'Please fill all fields');
+                    return;
+                  }
+
+                  setState(() => errorMessage = null);
+
+                  try {
+                    final imageUrls = imageControllers
+                        .map((controller) => controller.text.trim())
+                        .where(
+                          (url) =>
+                              url.isNotEmpty &&
+                              (url.startsWith('http://') ||
+                                  url.startsWith('https://')),
+                        )
+                        .toList();
+
+                    await SellItemService.createSellItem(
+                      title: titleController.text,
+                      description: descriptionController.text,
+                      price: double.parse(priceController.text),
+                      category: selectedCategory,
+                      condition: selectedCondition,
+                      phone: phoneController.text,
+                      email: emailController.text,
+                      images: imageUrls.isNotEmpty ? imageUrls : null,
+                    );
+                    Navigator.pop(context);
+                    _sellTabKey.currentState?._loadSellItems();
+                  } catch (e) {
+                    setState(() => errorMessage = 'Error: $e');
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                child: Text('Create'),
+              ),
+            ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   void _showCreateLostItemDialog(BuildContext context) {
-    final titleController = TextEditingController();
-    final descriptionController = TextEditingController();
-    final locationController = TextEditingController();
-    final phoneController = TextEditingController();
-    final emailController = TextEditingController();
-    List<TextEditingController> imageControllers = [TextEditingController()];
-    String selectedCategory = 'Electronics';
-    String selectedType = 'Lost';
+    String? errorMessage;
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.85,
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.9,
-          ),
-          child: StatefulBuilder(
-            builder: (context, setState) => Column(
-              mainAxisSize: MainAxisSize.min,
+      builder: (dialogContext) {
+        final titleController = TextEditingController();
+        final descriptionController = TextEditingController();
+        final locationController = TextEditingController();
+        final phoneController = TextEditingController();
+        final emailController = TextEditingController();
+        List<TextEditingController> imageControllers = [
+          TextEditingController(),
+        ];
+        String selectedCategory = 'Electronics';
+        String selectedType = 'Lost';
+
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Row(
               children: [
-                Container(
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.find_in_page, color: Colors.white, size: 28),
-                      SizedBox(width: 12),
-                      Text(
-                        'Report Lost/Found Item',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                Icon(Icons.find_in_page, color: Colors.orange),
+                SizedBox(width: 12),
+                Text('Report Lost/Found Item'),
+              ],
+            ),
+            content: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.8,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      decoration: InputDecoration(
+                        labelText: 'Title',
+                        border: OutlineInputBorder(),
                       ),
-                    ],
-                  ),
-                ),
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextField(
-                          controller: titleController,
-                          decoration: InputDecoration(
-                            labelText: 'Title',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        SizedBox(height: 12),
-                        TextField(
-                          controller: descriptionController,
-                          decoration: InputDecoration(
-                            labelText: 'Description',
-                            border: OutlineInputBorder(),
-                          ),
-                          maxLines: 3,
-                        ),
-                        SizedBox(height: 12),
-                        DropdownButtonFormField<String>(
-                          value: selectedType,
-                          decoration: InputDecoration(
-                            labelText: 'Type',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: ['Lost', 'Found']
+                    ),
+                    SizedBox(height: 12),
+                    TextField(
+                      controller: descriptionController,
+                      decoration: InputDecoration(
+                        labelText: 'Description',
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 3,
+                    ),
+                    SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: selectedType,
+                      decoration: InputDecoration(
+                        labelText: 'Type',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: ['Lost', 'Found']
+                          .map(
+                            (type) => DropdownMenuItem(
+                              value: type,
+                              child: Text(type),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (val) => setState(() => selectedType = val!),
+                    ),
+                    SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: selectedCategory,
+                      decoration: InputDecoration(
+                        labelText: 'Category',
+                        border: OutlineInputBorder(),
+                      ),
+                      items:
+                          [
+                                'Electronics',
+                                'Documents',
+                                'Keys',
+                                'Bags',
+                                'Clothing',
+                                'Jewelry',
+                                'Books',
+                                'Other',
+                              ]
                               .map(
-                                (type) => DropdownMenuItem(
-                                  value: type,
-                                  child: Text(type),
+                                (cat) => DropdownMenuItem(
+                                  value: cat,
+                                  child: Text(cat),
                                 ),
                               )
                               .toList(),
-                          onChanged: (val) =>
-                              setState(() => selectedType = val!),
+                      onChanged: (val) =>
+                          setState(() => selectedCategory = val!),
+                    ),
+                    SizedBox(height: 12),
+                    TextField(
+                      controller: locationController,
+                      decoration: InputDecoration(
+                        labelText: 'Location',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    TextField(
+                      controller: phoneController,
+                      decoration: InputDecoration(
+                        labelText: 'Phone',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.phone,
+                    ),
+                    SizedBox(height: 12),
+                    TextField(
+                      controller: emailController,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Text(
+                          'Image URLs',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 12),
-                        DropdownButtonFormField<String>(
-                          value: selectedCategory,
-                          decoration: InputDecoration(
-                            labelText: 'Category',
-                            border: OutlineInputBorder(),
+                        Spacer(),
+                        IconButton(
+                          icon: Icon(Icons.add_circle, color: Colors.orange),
+                          onPressed: () => setState(
+                            () => imageControllers.add(TextEditingController()),
                           ),
-                          items:
-                              [
-                                    'Electronics',
-                                    'Documents',
-                                    'Keys',
-                                    'Bags',
-                                    'Clothing',
-                                    'Jewelry',
-                                    'Books',
-                                    'Other',
-                                  ]
-                                  .map(
-                                    (cat) => DropdownMenuItem(
-                                      value: cat,
-                                      child: Text(cat),
-                                    ),
-                                  )
-                                  .toList(),
-                          onChanged: (val) =>
-                              setState(() => selectedCategory = val!),
+                          tooltip: 'Add image URL',
                         ),
-                        SizedBox(height: 12),
-                        TextField(
-                          controller: locationController,
-                          decoration: InputDecoration(
-                            labelText: 'Location',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        SizedBox(height: 12),
-                        TextField(
-                          controller: phoneController,
-                          decoration: InputDecoration(
-                            labelText: 'Phone',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.phone,
-                        ),
-                        SizedBox(height: 12),
-                        TextField(
-                          controller: emailController,
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-                        SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Text(
-                              'Image URLs',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Spacer(),
-                            IconButton(
-                              icon: Icon(Icons.add_circle, color: Colors.blue),
-                              onPressed: () {
-                                setState(() {
-                                  imageControllers.add(TextEditingController());
-                                });
-                              },
-                              tooltip: 'Add image URL',
-                            ),
-                          ],
-                        ),
-                        ...imageControllers.asMap().entries.map((entry) {
-                          int idx = entry.key;
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 8),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: entry.value,
-                                    decoration: InputDecoration(
-                                      labelText: 'Image URL ${idx + 1}',
-                                      hintText: 'https://example.com/image.jpg',
-                                      border: OutlineInputBorder(),
-                                      prefixIcon: Icon(Icons.image),
-                                    ),
-                                  ),
-                                ),
-                                if (imageControllers.length > 1)
-                                  IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () {
-                                      setState(() {
-                                        imageControllers.removeAt(idx);
-                                      });
-                                    },
-                                  ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
                       ],
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                        ),
-                        child: Text('Cancel', style: TextStyle(fontSize: 16)),
-                      ),
-                      SizedBox(width: 12),
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (titleController.text.isEmpty ||
-                              descriptionController.text.isEmpty ||
-                              locationController.text.isEmpty ||
-                              phoneController.text.isEmpty ||
-                              emailController.text.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Please fill all fields')),
-                            );
-                            return;
-                          }
-
-                          try {
-                            final imageUrls = imageControllers
-                                .map((controller) => controller.text.trim())
-                                .where(
-                                  (url) =>
-                                      url.isNotEmpty &&
-                                      (url.startsWith('http://') ||
-                                          url.startsWith('https://')),
-                                )
-                                .toList();
-
-                            await LostItemService.createLostItem(
-                              title: titleController.text,
-                              description: descriptionController.text,
-                              category: selectedCategory,
-                              type: selectedType,
-                              location: locationController.text,
-                              phone: phoneController.text,
-                              email: emailController.text,
-                              images: imageUrls.isNotEmpty ? imageUrls : null,
-                            );
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Item reported successfully!'),
+                    ...imageControllers.asMap().entries.map((entry) {
+                      int idx = entry.key;
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: entry.value,
+                                decoration: InputDecoration(
+                                  labelText: 'Image URL ${idx + 1}',
+                                  hintText: 'https://example.com/image.jpg',
+                                  border: OutlineInputBorder(),
+                                  prefixIcon: Icon(Icons.image),
+                                ),
                               ),
-                            );
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error: $e')),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                            ),
+                            if (imageControllers.length > 1)
+                              IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => setState(
+                                  () => imageControllers.removeAt(idx),
+                                ),
+                              ),
+                          ],
                         ),
-                        child: Text('Report', style: TextStyle(fontSize: 16)),
+                      );
+                    }).toList(),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              if (errorMessage != null)
+                Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.only(bottom: 8),
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.error_outline, color: Colors.red, size: 20),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          errorMessage!,
+                          style: TextStyle(color: Colors.red.shade900),
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  if (titleController.text.isEmpty ||
+                      descriptionController.text.isEmpty ||
+                      locationController.text.isEmpty ||
+                      phoneController.text.isEmpty ||
+                      emailController.text.isEmpty) {
+                    setState(() => errorMessage = 'Please fill all fields');
+                    return;
+                  }
+
+                  setState(() => errorMessage = null);
+
+                  try {
+                    final imageUrls = imageControllers
+                        .map((controller) => controller.text.trim())
+                        .where(
+                          (url) =>
+                              url.isNotEmpty &&
+                              (url.startsWith('http://') ||
+                                  url.startsWith('https://')),
+                        )
+                        .toList();
+
+                    await LostItemService.createLostItem(
+                      title: titleController.text,
+                      description: descriptionController.text,
+                      category: selectedCategory,
+                      type: selectedType,
+                      location: locationController.text,
+                      phone: phoneController.text,
+                      email: emailController.text,
+                      images: imageUrls.isNotEmpty ? imageUrls : null,
+                    );
+                    Navigator.pop(context);
+                    _lostTabKey.currentState?._loadLostItems();
+                  } catch (e) {
+                    setState(() => errorMessage = 'Error: $e');
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                child: Text('Report'),
+              ),
+            ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
 // Sell Items Tab
 class SellItemsTab extends StatefulWidget {
+  const SellItemsTab({Key? key}) : super(key: key);
+
   @override
   _SellItemsTabState createState() => _SellItemsTabState();
 }
@@ -651,6 +592,7 @@ class _SellItemsTabState extends State<SellItemsTab> {
   String? _selectedCategory;
   String? _selectedCondition;
   String? _selectedStatus;
+  String? _currentUserId;
   TextEditingController _searchController = TextEditingController();
 
   final List<String> _categories = [
@@ -675,7 +617,19 @@ class _SellItemsTabState extends State<SellItemsTab> {
   @override
   void initState() {
     super.initState();
+    _loadCurrentUser();
     _loadSellItems();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    try {
+      final userId = await AuthService.instance.getUserId();
+      setState(() {
+        _currentUserId = userId;
+      });
+    } catch (e) {
+      print('Error loading current user: $e');
+    }
   }
 
   Future<void> _loadSellItems() async {
@@ -792,9 +746,14 @@ class _SellItemsTabState extends State<SellItemsTab> {
   ) {
     return PopupMenuButton<String>(
       child: Chip(
-        label: Text(selected ?? label),
-        deleteIcon: Icon(Icons.arrow_drop_down, size: 18),
-        onDeleted: () {},
+        label: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(selected ?? label),
+            SizedBox(width: 4),
+            Icon(Icons.arrow_drop_down, size: 18),
+          ],
+        ),
         backgroundColor: selected != null ? Colors.blue[100] : Colors.white,
       ),
       onSelected: (value) {
@@ -915,6 +874,52 @@ class _SellItemsTabState extends State<SellItemsTab> {
       default:
         return Colors.grey;
     }
+  }
+
+  Future<void> _deleteSellItem(SellItem item) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Item'),
+        content: Text('Are you sure you want to delete "${item.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await SellItemService.deleteSellItem(item.id);
+        Navigator.pop(context); // Close details dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Item deleted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadSellItems();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _editSellItem(SellItem item) {
+    Navigator.pop(context); // Close details dialog
+    _showEditSellItemDialog(item);
   }
 
   void _showItemDetails(SellItem item) {
@@ -1062,6 +1067,40 @@ class _SellItemsTabState extends State<SellItemsTab> {
                   SizedBox(height: 8),
                   Text(item.sellerName!, style: TextStyle(fontSize: 16)),
                 ],
+                // Edit and Delete buttons for owner
+                if (_currentUserId != null &&
+                    _currentUserId == item.sellerId) ...[
+                  SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _editSellItem(item),
+                          icon: Icon(Icons.edit),
+                          label: Text('Edit'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _deleteSellItem(item),
+                          icon: Icon(Icons.delete),
+                          label: Text('Delete'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -1155,10 +1194,328 @@ class _SellItemsTabState extends State<SellItemsTab> {
     _searchController.dispose();
     super.dispose();
   }
+
+  void _showEditSellItemDialog(SellItem item) {
+    final titleController = TextEditingController(text: item.title);
+    final descriptionController = TextEditingController(text: item.description);
+    final priceController = TextEditingController(text: item.price.toString());
+    final phoneController = TextEditingController(
+      text: item.contactInfo['phone'],
+    );
+    final emailController = TextEditingController(
+      text: item.contactInfo['email'],
+    );
+    List<TextEditingController> imageControllers = item.images.isEmpty
+        ? [TextEditingController()]
+        : item.images.map((url) => TextEditingController(text: url)).toList();
+    String selectedCategory = item.category;
+    String selectedCondition = item.condition;
+    String selectedStatus = item.status;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.85,
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.9,
+          ),
+          child: StatefulBuilder(
+            builder: (context, setState) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, color: Colors.white, size: 28),
+                      SizedBox(width: 12),
+                      Text(
+                        'Edit Sell Item',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: titleController,
+                          decoration: InputDecoration(
+                            labelText: 'Title',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        TextField(
+                          controller: descriptionController,
+                          decoration: InputDecoration(
+                            labelText: 'Description',
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 3,
+                        ),
+                        SizedBox(height: 12),
+                        TextField(
+                          controller: priceController,
+                          decoration: InputDecoration(
+                            labelText: 'Price',
+                            border: OutlineInputBorder(),
+                            prefixText: '฿',
+                          ),
+                          keyboardType: TextInputType.number,
+                        ),
+                        SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          value: selectedCategory,
+                          decoration: InputDecoration(
+                            labelText: 'Category',
+                            border: OutlineInputBorder(),
+                          ),
+                          items:
+                              [
+                                    'Electronics',
+                                    'Books',
+                                    'Clothing',
+                                    'Furniture',
+                                    'Sports',
+                                    'Other',
+                                  ]
+                                  .map(
+                                    (cat) => DropdownMenuItem(
+                                      value: cat,
+                                      child: Text(cat),
+                                    ),
+                                  )
+                                  .toList(),
+                          onChanged: (val) =>
+                              setState(() => selectedCategory = val!),
+                        ),
+                        SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          value: selectedCondition,
+                          decoration: InputDecoration(
+                            labelText: 'Condition',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: ['New', 'Like New', 'Good', 'Fair', 'Poor']
+                              .map(
+                                (cond) => DropdownMenuItem(
+                                  value: cond,
+                                  child: Text(cond),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (val) =>
+                              setState(() => selectedCondition = val!),
+                        ),
+                        SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          value: selectedStatus,
+                          decoration: InputDecoration(
+                            labelText: 'Status',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: ['Available', 'Sold', 'Reserved']
+                              .map(
+                                (status) => DropdownMenuItem(
+                                  value: status,
+                                  child: Text(status),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (val) =>
+                              setState(() => selectedStatus = val!),
+                        ),
+                        SizedBox(height: 12),
+                        TextField(
+                          controller: phoneController,
+                          decoration: InputDecoration(
+                            labelText: 'Phone',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.phone,
+                        ),
+                        SizedBox(height: 12),
+                        TextField(
+                          controller: emailController,
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'Images (URLs)',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        ...List.generate(
+                          imageControllers.length,
+                          (index) => Padding(
+                            padding: EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: imageControllers[index],
+                                    decoration: InputDecoration(
+                                      hintText: 'Image URL ${index + 1}',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ),
+                                if (imageControllers.length > 1)
+                                  IconButton(
+                                    icon: Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () => setState(() {
+                                      imageControllers[index].dispose();
+                                      imageControllers.removeAt(index);
+                                    }),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => setState(() {
+                            imageControllers.add(TextEditingController());
+                          }),
+                          icon: Icon(Icons.add),
+                          label: Text('Add Another Image'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            for (var controller in imageControllers) {
+                              controller.dispose();
+                            }
+                            titleController.dispose();
+                            descriptionController.dispose();
+                            priceController.dispose();
+                            phoneController.dispose();
+                            emailController.dispose();
+                            Navigator.pop(context);
+                          },
+                          child: Text('Cancel'),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            if (titleController.text.isEmpty ||
+                                descriptionController.text.isEmpty ||
+                                priceController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Please fill in required fields',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+
+                            try {
+                              final images = imageControllers
+                                  .map((c) => c.text)
+                                  .where((text) => text.isNotEmpty)
+                                  .toList();
+
+                              await SellItemService.updateSellItem(item.id, {
+                                'title': titleController.text,
+                                'description': descriptionController.text,
+                                'price': double.parse(priceController.text),
+                                'category': selectedCategory,
+                                'condition': selectedCondition,
+                                'status': selectedStatus,
+                                'contactInfo': {
+                                  'phone': phoneController.text,
+                                  'email': emailController.text,
+                                },
+                                if (images.isNotEmpty) 'images': images,
+                              });
+
+                              for (var controller in imageControllers) {
+                                controller.dispose();
+                              }
+                              titleController.dispose();
+                              descriptionController.dispose();
+                              priceController.dispose();
+                              phoneController.dispose();
+                              emailController.dispose();
+
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Item updated successfully!'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                              _loadSellItems();
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error: ${e.toString()}'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
+                          child: Text('Update'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // Lost and Found Tab
 class LostAndFoundTab extends StatefulWidget {
+  const LostAndFoundTab({Key? key}) : super(key: key);
+
   @override
   _LostAndFoundTabState createState() => _LostAndFoundTabState();
 }
@@ -1169,6 +1526,7 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
   String? _selectedCategory;
   String? _selectedType;
   String? _selectedStatus;
+  String? _currentUserId;
   TextEditingController _searchController = TextEditingController();
 
   final List<String> _categories = [
@@ -1188,7 +1546,19 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
   @override
   void initState() {
     super.initState();
+    _loadCurrentUser();
     _loadLostItems();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    try {
+      final userId = await AuthService.instance.getUserId();
+      setState(() {
+        _currentUserId = userId;
+      });
+    } catch (e) {
+      print('Error loading current user: $e');
+    }
   }
 
   Future<void> _loadLostItems() async {
@@ -1301,9 +1671,14 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
   ) {
     return PopupMenuButton<String>(
       child: Chip(
-        label: Text(selected ?? label),
-        deleteIcon: Icon(Icons.arrow_drop_down, size: 18),
-        onDeleted: () {},
+        label: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(selected ?? label),
+            SizedBox(width: 4),
+            Icon(Icons.arrow_drop_down, size: 18),
+          ],
+        ),
         backgroundColor: selected != null ? Colors.blue[100] : Colors.white,
       ),
       onSelected: (value) {
@@ -1432,6 +1807,52 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
       default:
         return Colors.grey;
     }
+  }
+
+  Future<void> _deleteLostItem(LostItem item) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Item'),
+        content: Text('Are you sure you want to delete "${item.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await LostItemService.deleteLostItem(item.id);
+        Navigator.pop(context); // Close details dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Item deleted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadLostItems();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _editLostItem(LostItem item) {
+    Navigator.pop(context); // Close details dialog
+    _showEditLostItemDialog(item);
   }
 
   void _showItemDetails(LostItem item) {
@@ -1591,6 +2012,40 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
                   SizedBox(height: 8),
                   Text(item.reporterName!, style: TextStyle(fontSize: 16)),
                 ],
+                // Edit and Delete buttons for owner
+                if (_currentUserId != null &&
+                    _currentUserId == item.reporterId) ...[
+                  SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _editLostItem(item),
+                          icon: Icon(Icons.edit),
+                          label: Text('Edit'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _deleteLostItem(item),
+                          icon: Icon(Icons.delete),
+                          label: Text('Delete'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -1683,5 +2138,346 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _showEditLostItemDialog(LostItem item) {
+    final titleController = TextEditingController(text: item.title);
+    final descriptionController = TextEditingController(text: item.description);
+    final locationController = TextEditingController(text: item.location);
+    final phoneController = TextEditingController(
+      text: item.contactInfo['phone'],
+    );
+    final emailController = TextEditingController(
+      text: item.contactInfo['email'],
+    );
+    List<TextEditingController> imageControllers = item.images.isEmpty
+        ? [TextEditingController()]
+        : item.images.map((url) => TextEditingController(text: url)).toList();
+    String selectedCategory = item.category;
+    String selectedType = item.type;
+    String selectedStatus = item.status;
+    DateTime selectedDate = item.dateReported;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.85,
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.9,
+          ),
+          child: StatefulBuilder(
+            builder: (context, setState) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, color: Colors.white, size: 28),
+                      SizedBox(width: 12),
+                      Text(
+                        'Edit Lost/Found Item',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: titleController,
+                          decoration: InputDecoration(
+                            labelText: 'Title',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        TextField(
+                          controller: descriptionController,
+                          decoration: InputDecoration(
+                            labelText: 'Description',
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 3,
+                        ),
+                        SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          value: selectedType,
+                          decoration: InputDecoration(
+                            labelText: 'Type',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: ['Lost', 'Found']
+                              .map(
+                                (type) => DropdownMenuItem(
+                                  value: type,
+                                  child: Text(type),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (val) =>
+                              setState(() => selectedType = val!),
+                        ),
+                        SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          value: selectedCategory,
+                          decoration: InputDecoration(
+                            labelText: 'Category',
+                            border: OutlineInputBorder(),
+                          ),
+                          items:
+                              [
+                                    'Electronics',
+                                    'Documents',
+                                    'Keys',
+                                    'Bags',
+                                    'Clothing',
+                                    'Jewelry',
+                                    'Books',
+                                    'Other',
+                                  ]
+                                  .map(
+                                    (cat) => DropdownMenuItem(
+                                      value: cat,
+                                      child: Text(cat),
+                                    ),
+                                  )
+                                  .toList(),
+                          onChanged: (val) =>
+                              setState(() => selectedCategory = val!),
+                        ),
+                        SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          value: selectedStatus,
+                          decoration: InputDecoration(
+                            labelText: 'Status',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: ['Active', 'Resolved', 'Closed']
+                              .map(
+                                (status) => DropdownMenuItem(
+                                  value: status,
+                                  child: Text(status),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (val) =>
+                              setState(() => selectedStatus = val!),
+                        ),
+                        SizedBox(height: 12),
+                        TextField(
+                          controller: locationController,
+                          decoration: InputDecoration(
+                            labelText: 'Location',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        ListTile(
+                          title: Text('Date Reported'),
+                          subtitle: Text(
+                            '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                          ),
+                          trailing: Icon(Icons.calendar_today),
+                          onTap: () async {
+                            final date = await showDatePicker(
+                              context: context,
+                              initialDate: selectedDate,
+                              firstDate: DateTime(2020),
+                              lastDate: DateTime.now(),
+                            );
+                            if (date != null) {
+                              setState(() => selectedDate = date);
+                            }
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(color: Colors.grey),
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        TextField(
+                          controller: phoneController,
+                          decoration: InputDecoration(
+                            labelText: 'Phone',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.phone,
+                        ),
+                        SizedBox(height: 12),
+                        TextField(
+                          controller: emailController,
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'Images (URLs)',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        ...List.generate(
+                          imageControllers.length,
+                          (index) => Padding(
+                            padding: EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: imageControllers[index],
+                                    decoration: InputDecoration(
+                                      hintText: 'Image URL ${index + 1}',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ),
+                                if (imageControllers.length > 1)
+                                  IconButton(
+                                    icon: Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () => setState(() {
+                                      imageControllers[index].dispose();
+                                      imageControllers.removeAt(index);
+                                    }),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => setState(() {
+                            imageControllers.add(TextEditingController());
+                          }),
+                          icon: Icon(Icons.add),
+                          label: Text('Add Another Image'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            for (var controller in imageControllers) {
+                              controller.dispose();
+                            }
+                            titleController.dispose();
+                            descriptionController.dispose();
+                            locationController.dispose();
+                            phoneController.dispose();
+                            emailController.dispose();
+                            Navigator.pop(context);
+                          },
+                          child: Text('Cancel'),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            if (titleController.text.isEmpty ||
+                                descriptionController.text.isEmpty ||
+                                locationController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Please fill in required fields',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+
+                            try {
+                              final images = imageControllers
+                                  .map((c) => c.text)
+                                  .where((text) => text.isNotEmpty)
+                                  .toList();
+
+                              await LostItemService.updateLostItem(item.id, {
+                                'title': titleController.text,
+                                'description': descriptionController.text,
+                                'category': selectedCategory,
+                                'type': selectedType,
+                                'status': selectedStatus,
+                                'location': locationController.text,
+                                'dateReported': selectedDate.toIso8601String(),
+                                'contactInfo': {
+                                  'phone': phoneController.text,
+                                  'email': emailController.text,
+                                },
+                                if (images.isNotEmpty) 'images': images,
+                              });
+
+                              for (var controller in imageControllers) {
+                                controller.dispose();
+                              }
+                              titleController.dispose();
+                              descriptionController.dispose();
+                              locationController.dispose();
+                              phoneController.dispose();
+                              emailController.dispose();
+
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Item updated successfully!'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                              _loadLostItems();
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error: ${e.toString()}'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
+                          child: Text('Update'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
