@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/auth_service.dart';
 import '../services/post_service.dart';
 import '../services/user_service.dart';
@@ -15,8 +16,10 @@ class _ProfilePageState extends State<ProfilePage> {
   String? _userId;
   String? _userName;
   String? _userEmail;
+  String? _profileImageUrl;
   int _currentPage = 1;
   bool _hasMorePosts = true;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -37,6 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
         _userId = userData['_id'];
         _userName = userData['email']?.split('@')[0] ?? 'User';
         _userEmail = userData['email'];
+        _profileImageUrl = userData['profileImage'];
         _isLoadingProfile = false;
       });
 
@@ -341,6 +345,181 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  Future<void> _pickAndUploadImage() async {
+    print('_pickAndUploadImage called');
+    try {
+      // Pick image - directly from gallery for web compatibility
+      print('Opening image picker...');
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      print('Image selected: ${image?.path}');
+      if (image == null) {
+        print('No image selected');
+        return;
+      }
+
+      // Show loading indicator
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      // Upload image
+      final response = await UserService.uploadProfileImage(image);
+
+      // Close loading dialog
+      if (mounted) {
+        Navigator.pop(context);
+      }
+
+      // Update profile image URL
+      setState(() {
+        _profileImageUrl = response['data']['profileImage'];
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Profile image uploaded successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog if open
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      print('Error uploading image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to upload image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteProfileImage() async {
+    // Show confirmation dialog
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Profile Image'),
+        content: Text('Are you sure you want to delete your profile image?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      // Show loading indicator
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      await UserService.deleteProfileImage();
+
+      // Close loading dialog
+      if (mounted) {
+        Navigator.pop(context);
+      }
+
+      // Clear profile image URL
+      setState(() {
+        _profileImageUrl = null;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Profile image deleted successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog if open
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      print('Error deleting image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showImageOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_profileImageUrl != null)
+              ListTile(
+                leading: Icon(Icons.delete, color: Colors.red),
+                title: Text('Delete Profile Image'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _deleteProfileImage();
+                },
+              ),
+            ListTile(
+              leading: Icon(Icons.photo_library),
+              title: Text(
+                _profileImageUrl != null
+                    ? 'Change Profile Image'
+                    : 'Upload Profile Image',
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _pickAndUploadImage();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.cancel),
+              title: Text('Cancel'),
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -373,11 +552,56 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         Positioned(
                           bottom: -40,
-                          child: CircleAvatar(
-                            radius: 40,
-                            backgroundImage: NetworkImage(
-                              "https://win.gg/wp-content/uploads/2022/03/baki-hanma.jpg.webp",
-                            ),
+                          child: Stack(
+                            children: [
+                              CircleAvatar(
+                                radius: 40,
+                                backgroundColor: Colors.grey[300],
+                                backgroundImage: _profileImageUrl != null
+                                    ? NetworkImage(_profileImageUrl!)
+                                    : null,
+                                child: _profileImageUrl == null
+                                    ? Icon(
+                                        Icons.person,
+                                        size: 40,
+                                        color: Colors.grey[600],
+                                      )
+                                    : null,
+                              ),
+                              Positioned(
+                                bottom: -5,
+                                right: -5,
+                                child: InkWell(
+                                  onTap: () {
+                                    print('Camera icon tapped!');
+                                    _pickAndUploadImage();
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 3,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 4,
+                                          offset: Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      Icons.camera_alt,
+                                      size: 20,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -395,6 +619,26 @@ class _ProfilePageState extends State<ProfilePage> {
                         style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                       ),
                     ],
+
+                    const SizedBox(height: 10),
+
+                    // Upload Photo Button
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        print('Upload photo button clicked!');
+                        _pickAndUploadImage();
+                      },
+                      icon: Icon(Icons.camera_alt),
+                      label: Text('Upload Profile Photo'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
 
                     const SizedBox(height: 10),
                     Row(
