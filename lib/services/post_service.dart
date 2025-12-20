@@ -1,6 +1,8 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
+import 'package:image_picker/image_picker.dart';
+import 'package:http_parser/http_parser.dart';
 import 'auth_service.dart';
 
 class PostService {
@@ -11,30 +13,113 @@ class PostService {
     return await AuthService.instance.getAuthToken();
   }
 
+  // Upload post image
+  static Future<String> uploadPostImage(XFile imageFile) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/posts'),
+      );
+
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Get file extension
+      String fileName = imageFile.name;
+      String extension = fileName.split('.').last.toLowerCase();
+
+      // Map extension to MIME type
+      String mimeType = 'image/jpeg';
+      if (extension == 'png') {
+        mimeType = 'image/png';
+      } else if (extension == 'gif') {
+        mimeType = 'image/gif';
+      } else if (extension == 'webp') {
+        mimeType = 'image/webp';
+      }
+
+      // Read bytes for web compatibility
+      final bytes = await imageFile.readAsBytes();
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'image',
+          bytes,
+          filename: fileName,
+          contentType: MediaType.parse(mimeType),
+        ),
+      );
+
+      final streamedResponse = await request.send().timeout(
+        Duration(seconds: 30),
+      );
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success' &&
+            responseJson['data']?['image'] != null) {
+          return responseJson['data']['image'];
+        }
+      }
+      throw Exception('Failed to upload image');
+    } catch (e) {
+      throw Exception('Image upload failed: $e');
+    }
+  }
+
   // Create a post
   static Future<Post> createPost({
     required String content,
-    String? image,
+    XFile? imageFile,
   }) async {
     try {
       final token = await _getToken();
       if (token == null) throw Exception('No authentication token found');
 
-      final requestBody = <String, dynamic>{'content': content};
-      if (image != null && image.isNotEmpty) {
-        requestBody['image'] = image;
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/posts'),
+      );
+
+      request.headers['Authorization'] = 'Bearer $token';
+      request.fields['content'] = content;
+
+      // Add image if provided
+      if (imageFile != null) {
+        // Get file extension
+        String fileName = imageFile.name;
+        String extension = fileName.split('.').last.toLowerCase();
+
+        // Map extension to MIME type
+        String mimeType = 'image/jpeg';
+        if (extension == 'png') {
+          mimeType = 'image/png';
+        } else if (extension == 'gif') {
+          mimeType = 'image/gif';
+        } else if (extension == 'webp') {
+          mimeType = 'image/webp';
+        }
+
+        // Read bytes for web compatibility
+        final bytes = await imageFile.readAsBytes();
+
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            bytes,
+            filename: fileName,
+            contentType: MediaType.parse(mimeType),
+          ),
+        );
       }
 
-      final response = await http
-          .post(
-            Uri.parse('$baseUrl/posts'),
-            headers: {
-              'Authorization': 'Bearer $token',
-              'Content-Type': 'application/json',
-            },
-            body: json.encode(requestBody),
-          )
-          .timeout(Duration(seconds: 10));
+      final streamedResponse = await request.send().timeout(
+        Duration(seconds: 30),
+      );
+      final response = await http.Response.fromStream(streamedResponse);
 
       print('Create post response status: ${response.statusCode}');
       print('Create post response body: ${response.body}');

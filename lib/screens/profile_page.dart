@@ -784,18 +784,25 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Text(post.content, style: TextStyle(fontSize: 16)),
                 ),
                 if (post.image != null && post.image!.isNotEmpty)
-                  Image.network(
-                    post.image!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 200,
-                        color: Colors.grey[300],
-                        child: Center(
-                          child: Icon(Icons.broken_image, size: 64),
-                        ),
-                      );
-                    },
+                  AspectRatio(
+                    aspectRatio: 1, // Square aspect ratio for profile posts
+                    child: Image.network(
+                      post.image!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: Center(
+                            child: Icon(
+                              Icons.broken_image,
+                              size: 64,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 Padding(
                   padding: EdgeInsets.all(8),

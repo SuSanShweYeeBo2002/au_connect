@@ -307,11 +307,12 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 if (post.image != null)
-                  AspectRatio(
-                    aspectRatio: 16 / 9,
+                  Container(
+                    width: double.infinity,
+                    color: Colors.grey[200],
                     child: Image.network(
                       post.image!,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                       width: double.infinity,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
