@@ -558,6 +558,7 @@ class Post {
   final String authorId;
   final String authorEmail;
   final String authorName;
+  final String? authorProfileImage;
   final String content;
   final String? image;
   final int likeCount;
@@ -571,6 +572,7 @@ class Post {
     required this.authorId,
     required this.authorEmail,
     required this.authorName,
+    this.authorProfileImage,
     required this.content,
     this.image,
     required this.likeCount,
@@ -589,6 +591,7 @@ class Post {
       authorId: json['author']?['_id'] ?? '',
       authorEmail: authorEmail,
       authorName: authorName,
+      authorProfileImage: json['author']?['profileImage'],
       content: json['content'] ?? '',
       image: json['image'],
       likeCount: json['likeCount'] ?? 0,

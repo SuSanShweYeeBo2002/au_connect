@@ -242,13 +242,18 @@ class _HomePageState extends State<HomePage> {
                 ListTile(
                   leading: CircleAvatar(
                     backgroundColor: Theme.of(context).primaryColor,
-                    child: Text(
-                      post.authorName[0].toUpperCase(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    backgroundImage: post.authorProfileImage != null
+                        ? NetworkImage(post.authorProfileImage!)
+                        : null,
+                    child: post.authorProfileImage == null
+                        ? Text(
+                            post.authorName[0].toUpperCase(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : null,
                   ),
                   title: Text(
                     post.authorName,
