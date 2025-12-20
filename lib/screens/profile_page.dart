@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import '../services/auth_service.dart';
 import '../services/post_service.dart';
 import '../services/user_service.dart';
@@ -363,6 +365,43 @@ class _ProfilePageState extends State<ProfilePage> {
         return;
       }
 
+      XFile finalImage = image;
+
+      // Crop image on mobile only (not on web)
+      if (!kIsWeb) {
+        print('Opening image cropper for mobile...');
+        final CroppedFile? croppedFile = await ImageCropper().cropImage(
+          sourcePath: image.path,
+          aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+          uiSettings: [
+            AndroidUiSettings(
+              toolbarTitle: 'Crop Profile Image',
+              toolbarColor: Colors.blue,
+              toolbarWidgetColor: Colors.white,
+              initAspectRatio: CropAspectRatioPreset.square,
+              lockAspectRatio: true,
+              cropStyle: CropStyle.circle,
+            ),
+            IOSUiSettings(
+              title: 'Crop Profile Image',
+              aspectRatioLockEnabled: true,
+              resetAspectRatioEnabled: false,
+              cropStyle: CropStyle.circle,
+            ),
+          ],
+        );
+
+        if (croppedFile == null) {
+          print('Cropping cancelled');
+          return;
+        }
+
+        print('Image cropped: ${croppedFile.path}');
+        finalImage = XFile(croppedFile.path);
+      } else {
+        print('Skipping crop on web platform');
+      }
+
       // Show loading indicator
       if (mounted) {
         showDialog(
@@ -373,7 +412,7 @@ class _ProfilePageState extends State<ProfilePage> {
       }
 
       // Upload image
-      final response = await UserService.uploadProfileImage(image);
+      final response = await UserService.uploadProfileImage(finalImage);
       print('Upload response: $response');
 
       // Close loading dialog
@@ -556,56 +595,19 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         Positioned(
                           bottom: -40,
-                          child: Stack(
-                            children: [
-                              CircleAvatar(
-                                radius: 40,
-                                backgroundColor: Colors.grey[300],
-                                backgroundImage: _profileImageUrl != null
-                                    ? NetworkImage(_profileImageUrl!)
-                                    : null,
-                                child: _profileImageUrl == null
-                                    ? Icon(
-                                        Icons.person,
-                                        size: 40,
-                                        color: Colors.grey[600],
-                                      )
-                                    : null,
-                              ),
-                              Positioned(
-                                bottom: -5,
-                                right: -5,
-                                child: InkWell(
-                                  onTap: () {
-                                    print('Camera icon tapped!');
-                                    _pickAndUploadImage();
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.white,
-                                        width: 3,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          blurRadius: 4,
-                                          offset: Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Icon(
-                                      Icons.camera_alt,
-                                      size: 20,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          child: CircleAvatar(
+                            radius: 40,
+                            backgroundColor: Colors.grey[300],
+                            backgroundImage: _profileImageUrl != null
+                                ? NetworkImage(_profileImageUrl!)
+                                : null,
+                            child: _profileImageUrl == null
+                                ? Icon(
+                                    Icons.person,
+                                    size: 40,
+                                    color: Colors.grey[600],
+                                  )
+                                : null,
                           ),
                         ),
                       ],
