@@ -374,6 +374,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       // Upload image
       final response = await UserService.uploadProfileImage(image);
+      print('Upload response: $response');
 
       // Close loading dialog
       if (mounted) {
@@ -381,9 +382,12 @@ class _ProfilePageState extends State<ProfilePage> {
       }
 
       // Update profile image URL
+      final newImageUrl = response['data']['profileImage'];
+      print('New profile image URL: $newImageUrl');
       setState(() {
-        _profileImageUrl = response['data']['profileImage'];
+        _profileImageUrl = newImageUrl;
       });
+      print('State updated with URL: $_profileImageUrl');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
