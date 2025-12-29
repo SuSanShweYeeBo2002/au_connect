@@ -1,0 +1,700 @@
+\documentclass[12pt,a4paper]{article}
+
+% ---------- PACKAGES ----------
+\usepackage[left=3cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+\usepackage{titlesec}
+
+% ---------- FORMATTING ----------
+\onehalfspacing
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+
+% Section spacing
+\titlespacing*{\section}{0pt}{12pt}{6pt}
+\titlespacing*{\subsection}{0pt}{8pt}{4pt}
+
+% ---------- DOCUMENT ----------
+\begin{document}
+
+% ================= TITLE PAGE =================
+\begin{titlepage}
+\begin{flushright}
+\vspace*{1.3cm}
+
+{\fontsize{35}{39}\selectfont \textbf{Software Requirements Specification}}\\[0.7cm]
+
+{\large for}\\[0.5cm]
+{\Large \textbf{AU Connect}}\\[1.5cm]
+
+{\large Campus Social \& Productivity Platform}\\[1cm]
+
+Prepared by:\\[0.3cm]
+Su San Shwe Yee Bo\\
+Swan Htet Aung\\
+Phone Myint Myat\\
+Myat Phone Kyaw\\[1cm]
+
+Faculty of Engineering\\
+Assumption University of Thailand\\[1cm]
+
+December 2025\\[2cm]
+
+{\small Version 1.0}
+
+\end{flushright}
+\vfill
+\end{titlepage}
+
+% ================= TABLE OF CONTENTS =================
+\tableofcontents
+\newpage
+
+% ================= REVISION HISTORY =================
+\section*{Revision History}
+\addcontentsline{toc}{section}{Revision History}
+
+\begin{longtable}{|p{3cm}|p{3cm}|p{6cm}|p{2cm}|}
+\hline
+\textbf{Name} & \textbf{Date} & \textbf{Reason for Changes} & \textbf{Version} \\
+\hline
+AU Connect Team & December 2025 & Initial SRS creation & 1.0 \\
+\hline
+\end{longtable}
+
+\newpage
+
+% ================= 1. INTRODUCTION =================
+\section{Introduction}
+
+\subsection{Purpose}
+This Software Requirements Specification (SRS) document describes the functional and non-functional requirements of the AU Connect application. The purpose of this document is to define system behavior, constraints, and requirements for developers, project supervisors, testers, and stakeholders. This SRS serves as the foundation for system development, testing, and validation.
+
+\subsection{Document Conventions}
+The keywords \textbf{shall}, \textbf{should}, and \textbf{may} are used as defined by IEEE standards:
+\begin{itemize}
+    \item \textbf{Shall}: Mandatory requirement that must be implemented
+    \item \textbf{Should}: Recommended requirement that is highly desired
+    \item \textbf{May}: Optional requirement that is nice to have
+\end{itemize}
+
+Priority levels are indicated as:
+\begin{itemize}
+    \item \textbf{High}: Critical to system operation
+    \item \textbf{Medium}: Important but not critical
+    \item \textbf{Low}: Desirable enhancement
+\end{itemize}
+
+\subsection{Intended Audience}
+This document is intended for:
+\begin{itemize}
+    \item Software developers implementing the system
+    \item Project advisors and supervisors
+    \item Quality assurance and testing teams
+    \item System maintainers and future developers
+    \item Project stakeholders and university administration
+\end{itemize}
+
+\subsection{Product Scope}
+AU Connect is a comprehensive campus-focused social networking and productivity platform designed exclusively for Assumption University students. The system integrates social interaction features (posts, messaging, friend management), campus utilities (events, polls, study sessions), marketplace functionality (shop listings, lost \& found), and productivity tools into a unified cross-platform application accessible via web browsers and mobile devices.
+
+The primary goals are to:
+\begin{itemize}
+    \item Enhance student communication and collaboration
+    \item Facilitate campus resource sharing
+    \item Improve student productivity and time management
+    \item Create a unified digital campus community
+\end{itemize}
+
+\subsection{References}
+\begin{itemize}
+    \item IEEE Std 830-1998 – Software Requirements Specification
+    \item Flutter Documentation, \url{https://flutter.dev/docs}
+    \item Node.js API Documentation, \url{https://nodejs.org/docs}
+    \item MongoDB Documentation, \url{https://docs.mongodb.com}
+    \item AWS S3 API Reference, \url{https://docs.aws.amazon.com/s3}
+\end{itemize}
+
+% ================= 2. OVERALL DESCRIPTION =================
+\section{Overall Description}
+
+\subsection{Product Perspective}
+AU Connect is a standalone client-server application built using modern web and mobile technologies. The system architecture consists of:
+
+\begin{itemize}
+    \item \textbf{Frontend}: Flutter framework for cross-platform mobile (Android/iOS) and web applications
+    \item \textbf{Backend}: Node.js with Express framework providing RESTful APIs
+    \item \textbf{Database}: MongoDB for persistent data storage
+    \item \textbf{Storage}: AWS S3 for image and media file storage
+    \item \textbf{Authentication}: JWT-based token authentication
+    \item \textbf{Email Service}: SMTP for email verification (Gmail for development, AWS SES for production)
+    \item \textbf{Real-time Communication}: WebSocket/Socket.io for instant messaging
+\end{itemize}
+
+The system operates independently and does not integrate with existing university systems but is designed to complement them.
+
+\subsection{Product Functions}
+Major system functions include:
+
+\textbf{Core Social Features:}
+\begin{itemize}
+    \item User registration with email verification
+    \item Secure authentication and session management
+    \item Profile creation and management
+    \item Social feed with multi-image posts (up to 5 images)
+    \item Post interactions (likes, comments)
+    \item Friend request system
+    \item Real-time one-on-one messaging
+    \item User blocking functionality
+\end{itemize}
+
+\textbf{Campus Tools:}
+\begin{itemize}
+    \item Study session creation and management
+    \item Campus polling system
+    \item Event creation with RSVP functionality
+\end{itemize}
+
+\textbf{Marketplace Features:}
+\begin{itemize}
+    \item Shop listings with multi-image support (up to 5 images)
+    \item Lost \& found item reporting with multi-image support
+    \item Advanced image management (add, keep, delete during updates)
+    \item Category and status filtering
+\end{itemize}
+
+\textbf{Productivity Tools:}
+\begin{itemize}
+    \item Scientific calculator
+    \item Pomodoro timer (future enhancement)
+\end{itemize}
+
+\subsection{User Classes and Characteristics}
+\begin{itemize}
+    \item \textbf{Students}: Primary users with full access to all features. Expected to be tech-savvy with smartphone/computer access. Daily active users.
+    \item \textbf{Content Creators}: Students who actively create posts, listings, and campus content
+    \item \textbf{System Administrators}: Technical staff managing system infrastructure and moderation (future role)
+\end{itemize}
+
+\subsection{Operating Environment}
+\textbf{Client-Side Requirements:}
+\begin{itemize}
+    \item \textbf{Web Browsers}: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
+    \item \textbf{Android}: Version 6.0 (API 23) or higher
+    \item \textbf{iOS}: Version 12.0 or higher
+    \item \textbf{Screen Resolution}: Minimum 360x640 pixels (mobile), 1024x768 (desktop)
+    \item \textbf{Internet}: Broadband connection (minimum 1 Mbps)
+\end{itemize}
+
+\textbf{Server-Side Requirements:}
+\begin{itemize}
+    \item Node.js runtime environment (v14.0 or higher)
+    \item MongoDB database (v4.4 or higher)
+    \item AWS S3 compatible storage service
+\end{itemize}
+
+\subsection{Design and Implementation Constraints}
+\begin{itemize}
+    \item Registration requires valid Assumption University email address (@au.edu, @g.swu.ac.th, @gmail.com for development)
+    \item Maximum 5 images per post or marketplace item
+    \item Image upload size limited to prevent server overload
+    \item System must comply with university data protection policies
+    \item Deep linking scheme: \texttt{auconnect://} for mobile platforms
+    \item Cross-platform compatibility required (web, Android, iOS)
+\end{itemize}
+
+\subsection{Assumptions and Dependencies}
+\textbf{Assumptions:}
+\begin{itemize}
+    \item Users have continuous internet connectivity
+    \item Users possess valid university email addresses
+    \item Users can access email for verification
+    \item Mobile devices support image capture/selection
+\end{itemize}
+
+\textbf{Dependencies:}
+\begin{itemize}
+    \item Email service availability (Gmail SMTP/AWS SES)
+    \item AWS S3 service availability
+    \item MongoDB database accessibility
+    \item Third-party package availability (Flutter, Node.js modules)
+\end{itemize}
+
+% ================= 3. EXTERNAL INTERFACE REQUIREMENTS =================
+\section{External Interface Requirements}
+
+\subsection{User Interface}
+The system shall provide a responsive, intuitive, and mobile-first user interface with the following characteristics:
+
+\textbf{Navigation:}
+\begin{itemize}
+    \item Bottom navigation bar for primary features (Home, Friends, Campus Corner, Shop \& Lost Found, Profile)
+    \item Floating action buttons for quick content creation
+    \item Hamburger menu for settings and utilities
+\end{itemize}
+
+\textbf{Visual Design:}
+\begin{itemize}
+    \item Consistent color scheme (Blue primary theme)
+    \item Material Design principles
+    \item Responsive layouts adapting to screen sizes
+    \item Touch-optimized controls (minimum 48x48 dp touch targets)
+\end{itemize}
+
+\textbf{Accessibility:}
+\begin{itemize}
+    \item Clear visual feedback for user actions
+    \item Error messages displayed prominently
+    \item Loading indicators for asynchronous operations
+\end{itemize}
+
+\subsection{Hardware Interfaces}
+\begin{itemize}
+    \item \textbf{Camera}: Access device camera for image capture
+    \item \textbf{Storage}: Access device storage for image selection
+    \item \textbf{Network}: WiFi or cellular data connectivity
+    \item \textbf{Display}: Touch-enabled screen for mobile, mouse/keyboard for web
+\end{itemize}
+
+\subsection{Software Interfaces}
+\textbf{Backend API:}
+\begin{itemize}
+    \item RESTful API endpoints using HTTP/HTTPS
+    \item JSON data format for request/response
+    \item JWT tokens in Authorization headers
+    \item Multipart form-data for file uploads
+\end{itemize}
+
+\textbf{Database Interface:}
+\begin{itemize}
+    \item MongoDB native drivers
+    \item Mongoose ODM for data modeling
+\end{itemize}
+
+\textbf{Cloud Storage:}
+\begin{itemize}
+    \item AWS S3 SDK for image storage
+    \item Separate folders for different content types (posts, lost-items, sell-items, profile-images)
+\end{itemize}
+
+\textbf{Email Service:}
+\begin{itemize}
+    \item Nodemailer for email sending
+    \item Gmail SMTP (development) / AWS SES (production)
+\end{itemize}
+
+\subsection{Communications Interfaces}
+\begin{itemize}
+    \item \textbf{HTTP/HTTPS}: All API communications use HTTPS in production
+    \item \textbf{WebSocket}: Real-time messaging using Socket.io protocol
+    \item \textbf{SMTP}: Email delivery using port 587 (TLS)
+    \item \textbf{Port}: Backend server on port 8383, configurable
+\end{itemize}
+
+% ================= 4. SYSTEM FEATURES =================
+\section{System Features (Functional Requirements)}
+
+\subsection{User Authentication and Authorization}
+\textbf{Description:} Secure user registration, email verification, login, and password management.
+
+\textbf{Priority:} High
+
+\textbf{Functional Requirements:}
+
+\begin{itemize}
+    \item \textbf{FR-1.1}: The system shall allow new users to register using name, email, and password.
+    \item \textbf{FR-1.2}: The system shall validate email addresses to ensure they belong to Assumption University domain.
+    \item \textbf{FR-1.3}: The system shall send a verification email containing a unique verification link upon registration.
+    \item \textbf{FR-1.4}: The system shall activate user accounts only after email verification is completed.
+    \item \textbf{FR-1.5}: The system shall allow users to resend verification emails with a 60-second cooldown period.
+    \item \textbf{FR-1.6}: The system shall support deep linking (auconnect://signin) to redirect users after email verification on mobile devices.
+    \item \textbf{FR-1.7}: The system shall allow registered and verified users to log in using email and password.
+    \item \textbf{FR-1.8}: The system shall generate and return JWT tokens upon successful authentication.
+    \item \textbf{FR-1.9}: The system shall prevent unverified users from accessing protected features.
+    \item \textbf{FR-1.10}: The system shall provide a "Forgot Password" feature allowing users to reset passwords via email.
+    \item \textbf{FR-1.11}: The system shall securely hash and store user passwords.
+    \item \textbf{FR-1.12}: The system shall maintain user sessions using JWT tokens.
+    \item \textbf{FR-1.13}: The system shall allow users to log out, invalidating their session.
+\end{itemize}
+
+\subsection{Home Feed and Social Posting}
+\textbf{Description:} Central social feed for viewing and creating campus-related posts.
+
+\textbf{Priority:} High
+
+\textbf{Functional Requirements:}
+
+\begin{itemize}
+    \item \textbf{FR-2.1}: The system shall display a paginated feed of posts from friends and the campus community.
+    \item \textbf{FR-2.2}: The system shall allow users to create text posts with optional descriptions.
+    \item \textbf{FR-2.3}: The system shall allow users to upload up to 5 images per post.
+    \item \textbf{FR-2.4}: The system shall support multiple image formats (JPEG, PNG, GIF, WebP).
+    \item \textbf{FR-2.5}: The system shall display post author information (name, profile picture).
+    \item \textbf{FR-2.6}: The system shall display post timestamps.
+    \item \textbf{FR-2.7}: The system shall allow users to like posts.
+    \item \textbf{FR-2.8}: The system shall allow users to unlike posts.
+    \item \textbf{FR-2.9}: The system shall display the number of likes on each post.
+    \item \textbf{FR-2.10}: The system shall allow users to comment on posts.
+    \item \textbf{FR-2.11}: The system shall display all comments on posts.
+    \item \textbf{FR-2.12}: The system shall allow users to delete their own posts.
+    \item \textbf{FR-2.13}: The system shall allow users to delete their own comments.
+    \item \textbf{FR-2.14}: The system shall display images in a carousel/gallery format.
+    \item \textbf{FR-2.15}: The system shall store images in AWS S3 cloud storage.
+\end{itemize}
+
+\subsection{Profile Management}
+\textbf{Description:} User profile viewing and editing capabilities.
+
+\textbf{Priority:} High
+
+\textbf{Functional Requirements:}
+
+\begin{itemize}
+    \item \textbf{FR-3.1}: The system shall display user profile information including name and email.
+    \item \textbf{FR-3.2}: The system shall allow users to update their profile picture.
+    \item \textbf{FR-3.3}: The system shall allow users to update their email address.
+    \item \textbf{FR-3.4}: The system shall allow users to change their password.
+    \item \textbf{FR-3.5}: The system shall require old password verification before changing passwords.
+    \item \textbf{FR-3.6}: The system shall display all posts created by the user on their profile.
+    \item \textbf{FR-3.7}: The system shall display user statistics (number of friends, posts).
+\end{itemize}
+
+\subsection{Friends Management}
+\textbf{Description:} Social connection management between users.
+
+\textbf{Priority:} High
+
+\textbf{Functional Requirements:}
+
+\begin{itemize}
+    \item \textbf{FR-4.1}: The system shall allow users to search for other users.
+    \item \textbf{FR-4.2}: The system shall allow users to send friend requests to other users.
+    \item \textbf{FR-4.3}: The system shall notify users of incoming friend requests.
+    \item \textbf{FR-4.4}: The system shall allow users to accept friend requests.
+    \item \textbf{FR-4.5}: The system shall allow users to decline friend requests.
+    \item \textbf{FR-4.6}: The system shall display a list of all friends.
+    \item \textbf{FR-4.7}: The system shall display pending friend requests separately.
+    \item \textbf{FR-4.8}: The system shall allow users to unfriend other users.
+    \item \textbf{FR-4.9}: The system shall update friend lists in real-time.
+\end{itemize}
+
+\subsection{Real-Time Messaging}
+\textbf{Description:} One-on-one instant messaging between friends.
+
+\textbf{Priority:} High
+
+\textbf{Functional Requirements:}
+
+\begin{itemize}
+    \item \textbf{FR-5.1}: The system shall provide real-time text messaging between friends.
+    \item \textbf{FR-5.2}: The system shall display conversation history.
+    \item \textbf{FR-5.3}: The system shall show online/offline status of users.
+    \item \textbf{FR-5.4}: The system shall display message timestamps.
+    \item \textbf{FR-5.5}: The system shall indicate message delivery status.
+    \item \textbf{FR-5.6}: The system shall maintain persistent WebSocket connections for real-time updates.
+    \item \textbf{FR-5.7}: The system shall display typing indicators (future enhancement).
+    \item \textbf{FR-5.8}: The system shall allow message deletion (future enhancement).
+\end{itemize}
+
+\subsection{Study Sessions}
+\textbf{Description:} Collaborative study session organization and management.
+
+\textbf{Priority:} Medium
+
+\textbf{Functional Requirements:}
+
+\begin{itemize}
+    \item \textbf{FR-6.1}: The system shall allow users to create study sessions with title and subject.
+    \item \textbf{FR-6.2}: The system shall allow users to specify study session date, time, and location.
+    \item \textbf{FR-6.3}: The system shall display all available study sessions.
+    \item \textbf{FR-6.4}: The system shall allow users to join study sessions.
+    \item \textbf{FR-6.5}: The system shall display the number of participants in each session.
+    \item \textbf{FR-6.6}: The system shall allow session creators to edit session details.
+    \item \textbf{FR-6.7}: The system shall allow session creators to delete sessions.
+\end{itemize}
+
+\subsection{Campus Polls}
+\textbf{Description:} Survey and voting system for campus opinions.
+
+\textbf{Priority:} Medium
+
+\textbf{Functional Requirements:}
+
+\begin{itemize}
+    \item \textbf{FR-7.1}: The system shall allow users to create polls with questions and multiple options.
+    \item \textbf{FR-7.2}: The system shall allow users to vote on active polls.
+    \item \textbf{FR-7.3}: The system shall display poll results in real-time.
+    \item \textbf{FR-7.4}: The system shall prevent users from voting multiple times on the same poll.
+    \item \textbf{FR-7.5}: The system shall display the total number of votes.
+    \item \textbf{FR-7.6}: The system shall allow poll creators to delete their polls.
+\end{itemize}
+
+\subsection{Campus Events}
+\textbf{Description:} Event management with RSVP functionality.
+
+\textbf{Priority:} Medium
+
+\textbf{Functional Requirements:}
+
+\begin{itemize}
+    \item \textbf{FR-8.1}: The system shall allow users to create events with title, description, date, time, and location.
+    \item \textbf{FR-8.2}: The system shall display upcoming events.
+    \item \textbf{FR-8.3}: The system shall allow users to RSVP to events.
+    \item \textbf{FR-8.4}: The system shall display the number of attendees for each event.
+    \item \textbf{FR-8.5}: The system shall allow event creators to edit event details.
+    \item \textbf{FR-8.6}: The system shall allow event creators to cancel events.
+\end{itemize}
+
+\subsection{Shop Listings (Marketplace)}
+\textbf{Description:} Student marketplace for buying and selling items.
+
+\textbf{Priority:} High
+
+\textbf{Functional Requirements:}
+
+\begin{itemize}
+    \item \textbf{FR-9.1}: The system shall allow users to create shop listings with title, description, and price.
+    \item \textbf{FR-9.2}: The system shall allow users to upload up to 5 images per listing.
+    \item \textbf{FR-9.3}: The system shall allow users to specify item category (Electronics, Books, Clothing, Furniture, Sports, Other).
+    \item \textbf{FR-9.4}: The system shall allow users to specify item condition (New, Like New, Good, Fair, Poor).
+    \item \textbf{FR-9.5}: The system shall allow users to specify listing status (Available, Sold, Reserved).
+    \item \textbf{FR-9.6}: The system shall allow users to provide contact information (phone, email).
+    \item \textbf{FR-9.7}: The system shall allow users to edit their listings.
+    \item \textbf{FR-9.8}: The system shall allow users to delete their listings.
+    \item \textbf{FR-9.9}: The system shall allow users to manage images during updates (keep, delete, add new).
+    \item \textbf{FR-9.10}: The system shall display existing images with visual indicators during editing.
+    \item \textbf{FR-9.11}: The system shall allow users to filter listings by category.
+    \item \textbf{FR-9.12}: The system shall allow users to filter listings by condition.
+    \item \textbf{FR-9.13}: The system shall allow users to filter listings by status.
+    \item \textbf{FR-9.14}: The system shall display seller information on listings.
+    \item \textbf{FR-9.15}: The system shall restrict editing and deletion to listing owners only.
+\end{itemize}
+
+\subsection{Lost and Found}
+\textbf{Description:} System for reporting and finding lost items.
+
+\textbf{Priority:} High
+
+\textbf{Functional Requirements:}
+
+\begin{itemize}
+    \item \textbf{FR-10.1}: The system shall allow users to report lost items with title and description.
+    \item \textbf{FR-10.2}: The system shall allow users to report found items with title and description.
+    \item \textbf{FR-10.3}: The system shall allow users to upload up to 5 images per report.
+    \item \textbf{FR-10.4}: The system shall allow users to specify item category (Electronics, Documents, Keys, Bags, Clothing, Jewelry, Books, Other).
+    \item \textbf{FR-10.5}: The system shall allow users to specify item type (Lost or Found).
+    \item \textbf{FR-10.6}: The system shall allow users to specify location where item was lost/found.
+    \item \textbf{FR-10.7}: The system shall allow users to specify date reported.
+    \item \textbf{FR-10.8}: The system shall allow users to specify status (Active, Resolved, Closed).
+    \item \textbf{FR-10.9}: The system shall allow users to provide contact information (phone, email).
+    \item \textbf{FR-10.10}: The system shall allow users to edit their reports.
+    \item \textbf{FR-10.11}: The system shall allow users to delete their reports.
+    \item \textbf{FR-10.12}: The system shall allow users to manage images during updates (keep, delete, add new).
+    \item \textbf{FR-10.13}: The system shall allow users to filter by item type (Lost/Found).
+    \item \textbf{FR-10.14}: The system shall allow users to filter by category.
+    \item \textbf{FR-10.15}: The system shall restrict editing and deletion to report owners only.
+\end{itemize}
+
+\subsection{User Blocking and Privacy}
+\textbf{Description:} Privacy controls and user safety features.
+
+\textbf{Priority:} High
+
+\textbf{Functional Requirements:}
+
+\begin{itemize}
+    \item \textbf{FR-11.1}: The system shall allow users to block other users.
+    \item \textbf{FR-11.2}: The system shall prevent blocked users from sending messages to the blocker.
+    \item \textbf{FR-11.3}: The system shall prevent blocked users from viewing the blocker's posts.
+    \item \textbf{FR-11.4}: The system shall prevent blocked users from sending friend requests.
+    \item \textbf{FR-11.5}: The system shall allow users to unblock previously blocked users.
+    \item \textbf{FR-11.6}: The system shall display a list of blocked users.
+\end{itemize}
+
+\subsection{Calculator Tool}
+\textbf{Description:} Built-in scientific calculator for student use.
+
+\textbf{Priority:} Low
+
+\textbf{Functional Requirements:}
+
+\begin{itemize}
+    \item \textbf{FR-12.1}: The system shall provide a calculator with basic arithmetic operations.
+    \item \textbf{FR-12.2}: The system shall support scientific calculator functions.
+    \item \textbf{FR-12.3}: The system shall display calculation history.
+\end{itemize}
+
+% ================= 5. NON-FUNCTIONAL REQUIREMENTS =================
+\section{Non-Functional Requirements}
+
+\subsection{Performance Requirements}
+\begin{itemize}
+    \item \textbf{NFR-1.1}: The system shall support at least 5,000 concurrent users without performance degradation.
+    \item \textbf{NFR-1.2}: Page load time shall not exceed 3 seconds under normal network conditions.
+    \item \textbf{NFR-1.3}: API response time shall not exceed 500ms for 95\% of requests.
+    \item \textbf{NFR-1.4}: Real-time messages shall be delivered within 1 second under normal conditions.
+    \item \textbf{NFR-1.5}: Image upload shall complete within 10 seconds for images up to 5MB.
+    \item \textbf{NFR-1.6}: The system shall handle up to 1000 image uploads per hour.
+\end{itemize}
+
+\subsection{Security Requirements}
+\begin{itemize}
+    \item \textbf{NFR-2.1}: All user passwords shall be hashed using bcrypt with minimum 10 salt rounds.
+    \item \textbf{NFR-2.2}: All API communications shall use HTTPS in production environments.
+    \item \textbf{NFR-2.3}: JWT tokens shall expire after 7 days of inactivity.
+    \item \textbf{NFR-2.4}: User data shall be encrypted in transit using TLS 1.2 or higher.
+    \item \textbf{NFR-2.5}: AWS S3 stored images shall have appropriate access controls.
+    \item \textbf{NFR-2.6}: The system shall validate all user inputs to prevent injection attacks.
+    \item \textbf{NFR-2.7}: Email verification tokens shall expire after 24 hours.
+    \item \textbf{NFR-2.8}: The system shall implement rate limiting to prevent abuse.
+\end{itemize}
+
+\subsection{Usability Requirements}
+\begin{itemize}
+    \item \textbf{NFR-3.1}: The system shall be usable by first-time users without training.
+    \item \textbf{NFR-3.2}: User interface shall be consistent across all platforms.
+    \item \textbf{NFR-3.3}: Error messages shall be clear and actionable.
+    \item \textbf{NFR-3.4}: The system shall provide visual feedback for all user actions within 100ms.
+    \item \textbf{NFR-3.5}: Navigation shall require no more than 3 clicks to reach any feature.
+    \item \textbf{NFR-3.6}: Forms shall provide inline validation feedback.
+    \item \textbf{NFR-3.7}: The system shall support both light and dark themes (future enhancement).
+\end{itemize}
+
+\subsection{Reliability Requirements}
+\begin{itemize}
+    \item \textbf{NFR-4.1}: System uptime shall be at least 99\% excluding planned maintenance.
+    \item \textbf{NFR-4.2}: The system shall recover from crashes within 5 minutes.
+    \item \textbf{NFR-4.3}: Data loss shall not exceed 1 hour of transactions in case of failure.
+    \item \textbf{NFR-4.4}: The system shall handle network disconnections gracefully.
+    \item \textbf{NFR-4.5}: Failed image uploads shall not corrupt user data.
+\end{itemize}
+
+\subsection{Availability Requirements}
+\begin{itemize}
+    \item \textbf{NFR-5.1}: The system shall be available 24/7 except for scheduled maintenance.
+    \item \textbf{NFR-5.2}: Scheduled maintenance shall not exceed 4 hours per month.
+    \item \textbf{NFR-5.3}: Users shall be notified 48 hours before scheduled maintenance.
+\end{itemize}
+
+\subsection{Maintainability Requirements}
+\begin{itemize}
+    \item \textbf{NFR-6.1}: Code shall follow consistent coding standards and style guides.
+    \item \textbf{NFR-6.2}: All functions shall be documented with inline comments.
+    \item \textbf{NFR-6.3}: API endpoints shall be documented with request/response examples.
+    \item \textbf{NFR-6.4}: The system shall maintain separation of concerns (MVC architecture).
+    \item \textbf{NFR-6.5}: Database schema changes shall be versioned and reversible.
+\end{itemize}
+
+\subsection{Portability Requirements}
+\begin{itemize}
+    \item \textbf{NFR-7.1}: The Flutter application shall compile and run on Android and iOS.
+    \item \textbf{NFR-7.2}: The web application shall be responsive and work on all screen sizes.
+    \item \textbf{NFR-7.3}: The backend shall be deployable on any platform supporting Node.js.
+    \item \textbf{NFR-7.4}: The database shall be MongoDB 4.4 or higher.
+\end{itemize}
+
+\subsection{Scalability Requirements}
+\begin{itemize}
+    \item \textbf{NFR-8.1}: The system shall support horizontal scaling of backend services.
+    \item \textbf{NFR-8.2}: The database shall support sharding for future growth.
+    \item \textbf{NFR-8.3}: Image storage shall scale to handle millions of images.
+    \item \textbf{NFR-8.4}: The system shall support adding new features without major refactoring.
+\end{itemize}
+
+% ================= 6. OTHER REQUIREMENTS =================
+\section{Other Requirements}
+
+\subsection{Database Requirements}
+\begin{itemize}
+    \item MongoDB collections: users, posts, messages, friendRequests, studySessions, polls, events, sellItems, lostItems
+    \item Indexes on frequently queried fields (userId, createdAt, email)
+    \item Automatic timestamps (createdAt, updatedAt)
+    \item Data validation using Mongoose schemas
+\end{itemize}
+
+\subsection{Legal and Compliance}
+\begin{itemize}
+    \item Compliance with university data protection policies
+    \item User consent for data collection and processing
+    \item Copyright compliance for uploaded images
+    \item Terms of service and privacy policy (to be defined)
+\end{itemize}
+
+\subsection{Future Enhancements}
+\begin{itemize}
+    \item Push notifications for messages and friend requests
+    \item AI-based content recommendations
+    \item Advanced analytics dashboard
+    \item Admin moderation panel
+    \item Group messaging
+    \item Video posts
+    \item Advanced search and filtering
+    \item Integration with university systems
+    \item Pomodoro timer implementation
+    \item Dark mode support
+\end{itemize}
+
+% ================= APPENDICES =================
+\appendix
+
+\section{Glossary}
+\begin{itemize}
+    \item \textbf{AU}: Assumption University
+    \item \textbf{AU Connect}: Campus social and productivity platform
+    \item \textbf{API}: Application Programming Interface
+    \item \textbf{AWS S3}: Amazon Web Services Simple Storage Service
+    \item \textbf{Flutter}: Cross-platform UI framework by Google
+    \item \textbf{JWT}: JSON Web Token for authentication
+    \item \textbf{MongoDB}: NoSQL document database
+    \item \textbf{Node.js}: JavaScript runtime environment
+    \item \textbf{RESTful}: Representational State Transfer architectural style
+    \item \textbf{RSVP}: Répondez s'il vous plaît (event attendance confirmation)
+    \item \textbf{SRS}: Software Requirements Specification
+    \item \textbf{WebSocket}: Protocol for real-time bidirectional communication
+\end{itemize}
+
+\section{Acronyms and Abbreviations}
+\begin{itemize}
+    \item \textbf{API}: Application Programming Interface
+    \item \textbf{AWS}: Amazon Web Services
+    \item \textbf{HTTPS}: Hypertext Transfer Protocol Secure
+    \item \textbf{IEEE}: Institute of Electrical and Electronics Engineers
+    \item \textbf{JWT}: JSON Web Token
+    \item \textbf{ODM}: Object Document Mapper
+    \item \textbf{REST}: Representational State Transfer
+    \item \textbf{S3}: Simple Storage Service
+    \item \textbf{SDK}: Software Development Kit
+    \item \textbf{SMTP}: Simple Mail Transfer Protocol
+    \item \textbf{TLS}: Transport Layer Security
+    \item \textbf{UI}: User Interface
+    \item \textbf{URL}: Uniform Resource Locator
+\end{itemize}
+
+\section{Analysis Models}
+\subsection{Use Case Diagram}
+\textit{[To be added: High-level use case diagram showing actors and main system functions]}
+
+\subsection{Data Flow Diagram}
+\textit{[To be added: System data flow showing interactions between components]}
+
+\subsection{Entity Relationship Diagram}
+\textit{[To be added: Database schema and relationships]}
+
+\section{To Be Determined}
+\begin{itemize}
+    \item Admin dashboard features and requirements
+    \item Content moderation policies and implementation
+    \item Data retention and backup policies
+    \item Disaster recovery procedures
+    \item Performance metrics and monitoring tools
+    \item User analytics and reporting requirements
+    \item Integration with university authentication systems
+    \item Mobile app store deployment requirements
+\end{itemize}
+
+\end{document}
