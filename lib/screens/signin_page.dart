@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../services/auth_service.dart';
+import 'email_verification_page.dart';
 
 class SignInPage extends StatefulWidget {
   @override
@@ -105,17 +106,19 @@ class _SignInPageState extends State<SignInPage> {
         } else {
           // Parse the error message from response
           String errorMessage = 'Invalid credentials';
+          bool isEmailNotVerified = false;
+
           try {
             final responseData = json.decode(response.body);
             if (responseData['message'] != null) {
-              if (responseData['message'].toString().toLowerCase().contains(
-                'password',
-              )) {
+              String message = responseData['message'].toString().toLowerCase();
+              if (message.contains('not verified') ||
+                  message.contains('verify')) {
+                errorMessage = 'Please verify your email before signing in';
+                isEmailNotVerified = true;
+              } else if (message.contains('password')) {
                 errorMessage = 'Incorrect password';
-              } else if (responseData['message']
-                  .toString()
-                  .toLowerCase()
-                  .contains('email')) {
+              } else if (message.contains('email')) {
                 errorMessage = 'Email not found';
               }
             }
@@ -132,12 +135,28 @@ class _SignInPageState extends State<SignInPage> {
                   Expanded(child: Text(errorMessage)),
                 ],
               ),
-              duration: Duration(seconds: 2),
+              duration: Duration(seconds: 3),
               backgroundColor: Colors.red[400],
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
+              action: isEmailNotVerified
+                  ? SnackBarAction(
+                      label: 'Verify Now',
+                      textColor: Colors.white,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EmailVerificationPage(
+                              email: _emailController.text,
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  : null,
             ),
           );
         }

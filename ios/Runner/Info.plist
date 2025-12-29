@@ -51,5 +51,18 @@
 	<string>This app needs access to your photo library to select profile pictures.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app does not require microphone access.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.auconnect.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>auconnect</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

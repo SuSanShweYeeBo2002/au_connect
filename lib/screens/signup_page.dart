@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'email_verification_page.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -81,45 +82,32 @@ class _SignUpPageState extends State<SignUpPage> {
         });
 
         if (response.statusCode == 200 || response.statusCode == 201) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  Icon(Icons.check_circle_outline, color: Colors.white),
-                  SizedBox(width: 8),
-                  Text('Account created successfully!'),
-                ],
-              ),
-              duration: Duration(seconds: 2),
-              backgroundColor: Color(0xFF0288D1),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+          // Navigate to email verification page
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  EmailVerificationPage(email: _emailController.text),
             ),
           );
-          // Navigate to sign in page or home page
-          Navigator.pushNamed(context, '/signin');
         } else {
           // Parse the error message from response
           String errorMessage = 'Sign up failed';
           try {
             final responseData = json.decode(response.body);
             if (responseData['message'] != null) {
-              if (responseData['message'].toString().toLowerCase().contains(
-                'exists',
-              )) {
+              String message = responseData['message'].toString().toLowerCase();
+              if (message.contains('exists')) {
                 errorMessage = 'Email already registered';
-              } else if (responseData['message']
-                  .toString()
-                  .toLowerCase()
-                  .contains('email')) {
+              } else if (message.contains('domain')) {
+                errorMessage =
+                    'Email domain not allowed. Use your university email.';
+              } else if (message.contains('email')) {
                 errorMessage = 'Invalid email format';
-              } else if (responseData['message']
-                  .toString()
-                  .toLowerCase()
-                  .contains('password')) {
+              } else if (message.contains('password')) {
                 errorMessage = 'Password too weak';
+              } else {
+                errorMessage = responseData['message'];
               }
             }
           } catch (e) {

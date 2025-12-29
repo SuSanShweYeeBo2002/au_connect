@@ -158,4 +158,24 @@ class UserService {
       throw Exception('Failed to load user: ${response.body}');
     }
   }
+
+  // Resend verification email
+  static Future<Map<String, dynamic>> resendVerificationEmail(
+    String email,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/users/resend-verification'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'email': email}),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      final errorData = json.decode(response.body);
+      throw Exception(
+        errorData['message'] ?? 'Failed to resend verification email',
+      );
+    }
+  }
 }

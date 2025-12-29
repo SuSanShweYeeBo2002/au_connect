@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:async';
+import 'package:uni_links/uni_links.dart';
 import 'screens/signin_page.dart';
 import 'screens/signup_page.dart';
 import 'screens/main_tab_page.dart';
@@ -9,12 +12,108 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  StreamSubscription? _deepLinkSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _initDeepLinkListener();
+  }
+
+  void _initDeepLinkListener() {
+    // Deep links only work on mobile platforms (Android/iOS)
+    if (kIsWeb) {
+      print('Deep linking not supported on web platform');
+      return;
+    }
+
+    // Handle deep links when app is already running
+    _deepLinkSubscription = uriLinkStream.listen(
+      (Uri? uri) {
+        if (uri != null) {
+          _handleDeepLink(uri);
+        }
+      },
+      onError: (err) {
+        print('Deep link error: $err');
+      },
+    );
+
+    // Handle initial deep link when app is opened from closed state
+    _handleInitialDeepLink();
+  }
+
+  Future<void> _handleInitialDeepLink() async {
+    try {
+      final initialUri = await getInitialUri();
+      if (initialUri != null) {
+        _handleDeepLink(initialUri);
+      }
+    } catch (e) {
+      print('Error getting initial deep link: $e');
+    }
+  }
+
+  void _handleDeepLink(Uri uri) {
+    print('Deep link received: $uri');
+
+    // Handle auconnect://signin
+    if (uri.scheme == 'auconnect' && uri.host == 'signin') {
+      // Navigate to signin page
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        '/signin',
+        (route) => false,
+      );
+
+      // Show success message
+      Future.delayed(Duration(milliseconds: 500), () {
+        final context = navigatorKey.currentContext;
+        if (context != null && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle_outline, color: Colors.white),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Email verified successfully! You can now sign in.',
+                    ),
+                  ),
+                ],
+              ),
+              duration: Duration(seconds: 4),
+              backgroundColor: Colors.green[600],
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _deepLinkSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'AU Connect',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
