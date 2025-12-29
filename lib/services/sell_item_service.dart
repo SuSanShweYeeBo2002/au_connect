@@ -1,5 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
+import 'package:http_parser/http_parser.dart';
 import 'auth_service.dart';
 
 class SellItem {
@@ -93,34 +95,61 @@ class SellItemService {
     required String condition,
     required String phone,
     required String email,
-    List<String>? images,
+    List<XFile>? imageFiles,
     String status = 'Available',
   }) async {
     try {
       final token = await _getToken();
       if (token == null) throw Exception('No authentication token found');
 
-      final requestBody = {
-        'title': title,
-        'description': description,
-        'price': price,
-        'category': category,
-        'condition': condition,
-        'contactInfo': {'phone': phone, 'email': email},
-        'status': status,
-        if (images != null && images.isNotEmpty) 'images': images,
-      };
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/sell-items'),
+      );
 
-      final response = await http
-          .post(
-            Uri.parse('$baseUrl/sell-items'),
-            headers: {
-              'Authorization': 'Bearer $token',
-              'Content-Type': 'application/json',
-            },
-            body: json.encode(requestBody),
-          )
-          .timeout(Duration(seconds: 10));
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Add form fields
+      request.fields['title'] = title;
+      request.fields['description'] = description;
+      request.fields['price'] = price.toString();
+      request.fields['category'] = category;
+      request.fields['condition'] = condition;
+      request.fields['contactInfo[phone]'] = phone;
+      request.fields['contactInfo[email]'] = email;
+      request.fields['status'] = status;
+
+      // Add multiple images if provided (max 5)
+      if (imageFiles != null && imageFiles.isNotEmpty) {
+        for (var imageFile in imageFiles.take(5)) {
+          String fileName = imageFile.name;
+          String extension = fileName.split('.').last.toLowerCase();
+
+          String mimeType = 'image/jpeg';
+          if (extension == 'png') {
+            mimeType = 'image/png';
+          } else if (extension == 'gif') {
+            mimeType = 'image/gif';
+          } else if (extension == 'webp') {
+            mimeType = 'image/webp';
+          }
+
+          final bytes = await imageFile.readAsBytes();
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'images',
+              bytes,
+              filename: fileName,
+              contentType: MediaType.parse(mimeType),
+            ),
+          );
+        }
+      }
+
+      final streamedResponse = await request.send().timeout(
+        Duration(seconds: 30),
+      );
+      final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseJson = json.decode(response.body);
@@ -128,7 +157,7 @@ class SellItemService {
           return SellItem.fromJson(responseJson['data']);
         }
       }
-      throw Exception('Failed to create sell item');
+      throw Exception('Failed to create sell item: ${response.body}');
     } catch (e) {
       throw Exception('Error creating sell item: $e');
     }
@@ -210,23 +239,77 @@ class SellItemService {
 
   // Update sell item
   static Future<SellItem> updateSellItem(
-    String itemId,
-    Map<String, dynamic> updateData,
-  ) async {
+    String itemId, {
+    String? title,
+    String? description,
+    double? price,
+    String? category,
+    String? condition,
+    String? phone,
+    String? email,
+    String? status,
+    List<String>? keptImageUrls,
+    List<XFile>? imageFiles,
+  }) async {
     try {
       final token = await _getToken();
       if (token == null) throw Exception('No authentication token found');
 
-      final response = await http
-          .put(
-            Uri.parse('$baseUrl/sell-items/$itemId'),
-            headers: {
-              'Authorization': 'Bearer $token',
-              'Content-Type': 'application/json',
-            },
-            body: json.encode(updateData),
-          )
-          .timeout(Duration(seconds: 10));
+      final request = http.MultipartRequest(
+        'PUT',
+        Uri.parse('$baseUrl/sell-items/$itemId'),
+      );
+
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Add form fields only if provided
+      if (title != null) request.fields['title'] = title;
+      if (description != null) request.fields['description'] = description;
+      if (price != null) request.fields['price'] = price.toString();
+      if (category != null) request.fields['category'] = category;
+      if (condition != null) request.fields['condition'] = condition;
+      if (status != null) request.fields['status'] = status;
+      if (phone != null) request.fields['contactInfo[phone]'] = phone;
+      if (email != null) request.fields['contactInfo[email]'] = email;
+
+      // Add kept image URLs
+      if (keptImageUrls != null) {
+        for (var i = 0; i < keptImageUrls.length; i++) {
+          request.fields['images[$i]'] = keptImageUrls[i];
+        }
+      }
+
+      // Add multiple images if provided (max 5)
+      if (imageFiles != null && imageFiles.isNotEmpty) {
+        for (var imageFile in imageFiles.take(5)) {
+          String fileName = imageFile.name;
+          String extension = fileName.split('.').last.toLowerCase();
+
+          String mimeType = 'image/jpeg';
+          if (extension == 'png') {
+            mimeType = 'image/png';
+          } else if (extension == 'gif') {
+            mimeType = 'image/gif';
+          } else if (extension == 'webp') {
+            mimeType = 'image/webp';
+          }
+
+          final bytes = await imageFile.readAsBytes();
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'images',
+              bytes,
+              filename: fileName,
+              contentType: MediaType.parse(mimeType),
+            ),
+          );
+        }
+      }
+
+      final streamedResponse = await request.send().timeout(
+        Duration(seconds: 30),
+      );
+      final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
@@ -234,7 +317,7 @@ class SellItemService {
           return SellItem.fromJson(responseJson['data']);
         }
       }
-      throw Exception('Failed to update sell item');
+      throw Exception('Failed to update sell item: ${response.body}');
     } catch (e) {
       throw Exception('Error updating sell item: $e');
     }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/sell_item_service.dart';
 import '../services/lost_item_service.dart';
 import '../services/auth_service.dart';
@@ -88,9 +89,7 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
         final priceController = TextEditingController();
         final phoneController = TextEditingController();
         final emailController = TextEditingController();
-        List<TextEditingController> imageControllers = [
-          TextEditingController(),
-        ];
+        List<XFile> selectedImages = [];
         String selectedCategory = 'Electronics';
         String selectedCondition = 'Good';
 
@@ -204,47 +203,105 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
                     Row(
                       children: [
                         Text(
-                          'Image URLs',
+                          'Images (max 5)',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Spacer(),
-                        IconButton(
-                          icon: Icon(Icons.add_circle, color: Colors.blue),
-                          onPressed: () => setState(
-                            () => imageControllers.add(TextEditingController()),
-                          ),
-                          tooltip: 'Add image URL',
+                        ElevatedButton.icon(
+                          icon: Icon(Icons.add_photo_alternate),
+                          label: Text('Add Images'),
+                          onPressed: selectedImages.length >= 5
+                              ? null
+                              : () async {
+                                  final ImagePicker picker = ImagePicker();
+                                  final List<XFile> images = await picker
+                                      .pickMultiImage();
+                                  if (images.isNotEmpty) {
+                                    setState(() {
+                                      // Add new images, but limit to 5 total
+                                      int remainingSlots =
+                                          5 - selectedImages.length;
+                                      selectedImages.addAll(
+                                        images.take(remainingSlots),
+                                      );
+                                    });
+                                  }
+                                },
                         ),
                       ],
                     ),
-                    ...imageControllers.asMap().entries.map((entry) {
-                      int idx = entry.key;
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: entry.value,
-                                decoration: InputDecoration(
-                                  labelText: 'Image URL ${idx + 1}',
-                                  hintText: 'https://example.com/image.jpg',
-                                  border: OutlineInputBorder(),
-                                  prefixIcon: Icon(Icons.image),
+                    if (selectedImages.isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(top: 8),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: selectedImages
+                              .asMap()
+                              .entries
+                              .map(
+                                (entry) => Stack(
+                                  children: [
+                                    Container(
+                                      width: 80,
+                                      height: 80,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.grey.shade300,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          entry.value.path,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Icon(
+                                                    Icons.image,
+                                                    color: Colors.grey,
+                                                  ),
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 2,
+                                      right: 2,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            selectedImages.removeAt(entry.key);
+                                          });
+                                        },
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          padding: EdgeInsets.all(4),
+                                          child: Icon(
+                                            Icons.close,
+                                            size: 16,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ),
-                            if (imageControllers.length > 1)
-                              IconButton(
-                                icon: Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => setState(
-                                  () => imageControllers.removeAt(idx),
-                                ),
-                              ),
-                          ],
+                              )
+                              .toList(),
                         ),
-                      );
-                    }).toList(),
+                      ),
+                    if (selectedImages.isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: Text(
+                          '${selectedImages.length} image(s) selected',
+                          style: TextStyle(color: Colors.green, fontSize: 12),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -291,16 +348,6 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
                   setState(() => errorMessage = null);
 
                   try {
-                    final imageUrls = imageControllers
-                        .map((controller) => controller.text.trim())
-                        .where(
-                          (url) =>
-                              url.isNotEmpty &&
-                              (url.startsWith('http://') ||
-                                  url.startsWith('https://')),
-                        )
-                        .toList();
-
                     await SellItemService.createSellItem(
                       title: titleController.text,
                       description: descriptionController.text,
@@ -309,7 +356,9 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
                       condition: selectedCondition,
                       phone: phoneController.text,
                       email: emailController.text,
-                      images: imageUrls.isNotEmpty ? imageUrls : null,
+                      imageFiles: selectedImages.isEmpty
+                          ? null
+                          : selectedImages,
                     );
                     Navigator.pop(context);
                     _sellTabKey.currentState?._loadSellItems();
@@ -339,9 +388,7 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
         final locationController = TextEditingController();
         final phoneController = TextEditingController();
         final emailController = TextEditingController();
-        List<TextEditingController> imageControllers = [
-          TextEditingController(),
-        ];
+        List<XFile> selectedImages = [];
         String selectedCategory = 'Electronics';
         String selectedType = 'Lost';
 
@@ -454,47 +501,105 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
                     Row(
                       children: [
                         Text(
-                          'Image URLs',
+                          'Images (max 5)',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Spacer(),
-                        IconButton(
-                          icon: Icon(Icons.add_circle, color: Colors.orange),
-                          onPressed: () => setState(
-                            () => imageControllers.add(TextEditingController()),
-                          ),
-                          tooltip: 'Add image URL',
+                        ElevatedButton.icon(
+                          icon: Icon(Icons.add_photo_alternate),
+                          label: Text('Add Images'),
+                          onPressed: selectedImages.length >= 5
+                              ? null
+                              : () async {
+                                  final ImagePicker picker = ImagePicker();
+                                  final List<XFile> images = await picker
+                                      .pickMultiImage();
+                                  if (images.isNotEmpty) {
+                                    setState(() {
+                                      // Add new images, but limit to 5 total
+                                      int remainingSlots =
+                                          5 - selectedImages.length;
+                                      selectedImages.addAll(
+                                        images.take(remainingSlots),
+                                      );
+                                    });
+                                  }
+                                },
                         ),
                       ],
                     ),
-                    ...imageControllers.asMap().entries.map((entry) {
-                      int idx = entry.key;
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: entry.value,
-                                decoration: InputDecoration(
-                                  labelText: 'Image URL ${idx + 1}',
-                                  hintText: 'https://example.com/image.jpg',
-                                  border: OutlineInputBorder(),
-                                  prefixIcon: Icon(Icons.image),
+                    if (selectedImages.isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(top: 8),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: selectedImages
+                              .asMap()
+                              .entries
+                              .map(
+                                (entry) => Stack(
+                                  children: [
+                                    Container(
+                                      width: 80,
+                                      height: 80,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.grey.shade300,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          entry.value.path,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Icon(
+                                                    Icons.image,
+                                                    color: Colors.grey,
+                                                  ),
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 2,
+                                      right: 2,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            selectedImages.removeAt(entry.key);
+                                          });
+                                        },
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          padding: EdgeInsets.all(4),
+                                          child: Icon(
+                                            Icons.close,
+                                            size: 16,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ),
-                            if (imageControllers.length > 1)
-                              IconButton(
-                                icon: Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => setState(
-                                  () => imageControllers.removeAt(idx),
-                                ),
-                              ),
-                          ],
+                              )
+                              .toList(),
                         ),
-                      );
-                    }).toList(),
+                      ),
+                    if (selectedImages.isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: Text(
+                          '${selectedImages.length} image(s) selected',
+                          style: TextStyle(color: Colors.green, fontSize: 12),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -541,16 +646,6 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
                   setState(() => errorMessage = null);
 
                   try {
-                    final imageUrls = imageControllers
-                        .map((controller) => controller.text.trim())
-                        .where(
-                          (url) =>
-                              url.isNotEmpty &&
-                              (url.startsWith('http://') ||
-                                  url.startsWith('https://')),
-                        )
-                        .toList();
-
                     await LostItemService.createLostItem(
                       title: titleController.text,
                       description: descriptionController.text,
@@ -559,7 +654,9 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
                       location: locationController.text,
                       phone: phoneController.text,
                       email: emailController.text,
-                      images: imageUrls.isNotEmpty ? imageUrls : null,
+                      imageFiles: selectedImages.isEmpty
+                          ? null
+                          : selectedImages,
                     );
                     Navigator.pop(context);
                     _lostTabKey.currentState?._loadLostItems();
@@ -1205,9 +1302,8 @@ class _SellItemsTabState extends State<SellItemsTab> {
     final emailController = TextEditingController(
       text: item.contactInfo['email'],
     );
-    List<TextEditingController> imageControllers = item.images.isEmpty
-        ? [TextEditingController()]
-        : item.images.map((url) => TextEditingController(text: url)).toList();
+    List<XFile> selectedImages = [];
+    List<String> keptImageUrls = List.from(item.images);
     String selectedCategory = item.category;
     String selectedCondition = item.condition;
     String selectedStatus = item.status;
@@ -1363,48 +1459,218 @@ class _SellItemsTabState extends State<SellItemsTab> {
                           keyboardType: TextInputType.emailAddress,
                         ),
                         SizedBox(height: 16),
-                        Text(
-                          'Images (URLs)',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        ...List.generate(
-                          imageControllers.length,
-                          (index) => Padding(
-                            padding: EdgeInsets.only(bottom: 8),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: imageControllers[index],
-                                    decoration: InputDecoration(
-                                      hintText: 'Image URL ${index + 1}',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                ),
-                                if (imageControllers.length > 1)
-                                  IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () => setState(() {
-                                      imageControllers[index].dispose();
-                                      imageControllers.removeAt(index);
-                                    }),
-                                  ),
-                              ],
+                        if (item.images.isNotEmpty) ...[
+                          Text(
+                            'Current Images (${keptImageUrls.length}/${item.images.length})',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
                             ),
                           ),
+                          SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: item.images
+                                .map(
+                                  (imageUrl) => Stack(
+                                    children: [
+                                      Container(
+                                        width: 80,
+                                        height: 80,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color:
+                                                keptImageUrls.contains(imageUrl)
+                                                ? Colors.blue
+                                                : Colors.red.shade300,
+                                            width: 2,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                          child: Opacity(
+                                            opacity:
+                                                keptImageUrls.contains(imageUrl)
+                                                ? 1.0
+                                                : 0.4,
+                                            child: Image.network(
+                                              imageUrl,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => Icon(
+                                                    Icons.image,
+                                                    color: Colors.grey,
+                                                  ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 2,
+                                        right: 2,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              if (keptImageUrls.contains(
+                                                imageUrl,
+                                              )) {
+                                                keptImageUrls.remove(imageUrl);
+                                              } else {
+                                                keptImageUrls.add(imageUrl);
+                                              }
+                                            });
+                                          },
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  keptImageUrls.contains(
+                                                    imageUrl,
+                                                  )
+                                                  ? Colors.red
+                                                  : Colors.green,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            padding: EdgeInsets.all(4),
+                                            child: Icon(
+                                              keptImageUrls.contains(imageUrl)
+                                                  ? Icons.close
+                                                  : Icons.undo,
+                                              size: 16,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                          SizedBox(height: 12),
+                        ],
+                        Row(
+                          children: [
+                            Text(
+                              'Add New Images (${selectedImages.length}/5)',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Spacer(),
+                            ElevatedButton.icon(
+                              icon: Icon(Icons.add_photo_alternate),
+                              label: Text('Add Images'),
+                              onPressed: selectedImages.length >= 5
+                                  ? null
+                                  : () async {
+                                      final ImagePicker picker = ImagePicker();
+                                      final List<XFile> images = await picker
+                                          .pickMultiImage();
+                                      if (images.isNotEmpty) {
+                                        setState(() {
+                                          int remainingSlots =
+                                              5 - selectedImages.length;
+                                          selectedImages.addAll(
+                                            images.take(remainingSlots),
+                                          );
+                                        });
+                                      }
+                                    },
+                            ),
+                          ],
                         ),
-                        TextButton.icon(
-                          onPressed: () => setState(() {
-                            imageControllers.add(TextEditingController());
-                          }),
-                          icon: Icon(Icons.add),
-                          label: Text('Add Another Image'),
-                        ),
+                        if (selectedImages.isNotEmpty)
+                          Padding(
+                            padding: EdgeInsets.only(top: 8),
+                            child: Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: selectedImages
+                                  .asMap()
+                                  .entries
+                                  .map(
+                                    (entry) => Stack(
+                                      children: [
+                                        Container(
+                                          width: 80,
+                                          height: 80,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: Colors.grey.shade300,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            child: Image.network(
+                                              entry.value.path,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => Icon(
+                                                    Icons.image,
+                                                    color: Colors.grey,
+                                                  ),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 2,
+                                          right: 2,
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                selectedImages.removeAt(
+                                                  entry.key,
+                                                );
+                                              });
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              padding: EdgeInsets.all(4),
+                                              child: Icon(
+                                                Icons.close,
+                                                size: 16,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
+                        if (selectedImages.isNotEmpty)
+                          Padding(
+                            padding: EdgeInsets.only(top: 4),
+                            child: Text(
+                              '${selectedImages.length} new image(s) to upload',
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -1416,9 +1682,6 @@ class _SellItemsTabState extends State<SellItemsTab> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () {
-                            for (var controller in imageControllers) {
-                              controller.dispose();
-                            }
                             titleController.dispose();
                             descriptionController.dispose();
                             priceController.dispose();
@@ -1448,28 +1711,22 @@ class _SellItemsTabState extends State<SellItemsTab> {
                             }
 
                             try {
-                              final images = imageControllers
-                                  .map((c) => c.text)
-                                  .where((text) => text.isNotEmpty)
-                                  .toList();
+                              await SellItemService.updateSellItem(
+                                item.id,
+                                title: titleController.text,
+                                description: descriptionController.text,
+                                price: double.parse(priceController.text),
+                                category: selectedCategory,
+                                condition: selectedCondition,
+                                status: selectedStatus,
+                                phone: phoneController.text,
+                                email: emailController.text,
+                                keptImageUrls: keptImageUrls,
+                                imageFiles: selectedImages.isEmpty
+                                    ? null
+                                    : selectedImages,
+                              );
 
-                              await SellItemService.updateSellItem(item.id, {
-                                'title': titleController.text,
-                                'description': descriptionController.text,
-                                'price': double.parse(priceController.text),
-                                'category': selectedCategory,
-                                'condition': selectedCondition,
-                                'status': selectedStatus,
-                                'contactInfo': {
-                                  'phone': phoneController.text,
-                                  'email': emailController.text,
-                                },
-                                if (images.isNotEmpty) 'images': images,
-                              });
-
-                              for (var controller in imageControllers) {
-                                controller.dispose();
-                              }
                               titleController.dispose();
                               descriptionController.dispose();
                               priceController.dispose();
@@ -2150,9 +2407,8 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
     final emailController = TextEditingController(
       text: item.contactInfo['email'],
     );
-    List<TextEditingController> imageControllers = item.images.isEmpty
-        ? [TextEditingController()]
-        : item.images.map((url) => TextEditingController(text: url)).toList();
+    List<XFile> selectedImages = [];
+    List<String> keptImageUrls = List.from(item.images);
     String selectedCategory = item.category;
     String selectedType = item.type;
     String selectedStatus = item.status;
@@ -2332,48 +2588,218 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
                           keyboardType: TextInputType.emailAddress,
                         ),
                         SizedBox(height: 16),
-                        Text(
-                          'Images (URLs)',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        ...List.generate(
-                          imageControllers.length,
-                          (index) => Padding(
-                            padding: EdgeInsets.only(bottom: 8),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: imageControllers[index],
-                                    decoration: InputDecoration(
-                                      hintText: 'Image URL ${index + 1}',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                ),
-                                if (imageControllers.length > 1)
-                                  IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () => setState(() {
-                                      imageControllers[index].dispose();
-                                      imageControllers.removeAt(index);
-                                    }),
-                                  ),
-                              ],
+                        if (item.images.isNotEmpty) ...[
+                          Text(
+                            'Current Images (${keptImageUrls.length}/${item.images.length})',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
                             ),
                           ),
+                          SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: item.images
+                                .map(
+                                  (imageUrl) => Stack(
+                                    children: [
+                                      Container(
+                                        width: 80,
+                                        height: 80,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color:
+                                                keptImageUrls.contains(imageUrl)
+                                                ? Colors.orange
+                                                : Colors.red.shade300,
+                                            width: 2,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                          child: Opacity(
+                                            opacity:
+                                                keptImageUrls.contains(imageUrl)
+                                                ? 1.0
+                                                : 0.4,
+                                            child: Image.network(
+                                              imageUrl,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => Icon(
+                                                    Icons.image,
+                                                    color: Colors.grey,
+                                                  ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 2,
+                                        right: 2,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              if (keptImageUrls.contains(
+                                                imageUrl,
+                                              )) {
+                                                keptImageUrls.remove(imageUrl);
+                                              } else {
+                                                keptImageUrls.add(imageUrl);
+                                              }
+                                            });
+                                          },
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  keptImageUrls.contains(
+                                                    imageUrl,
+                                                  )
+                                                  ? Colors.red
+                                                  : Colors.green,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            padding: EdgeInsets.all(4),
+                                            child: Icon(
+                                              keptImageUrls.contains(imageUrl)
+                                                  ? Icons.close
+                                                  : Icons.undo,
+                                              size: 16,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                          SizedBox(height: 12),
+                        ],
+                        Row(
+                          children: [
+                            Text(
+                              'Add New Images (${selectedImages.length}/5)',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Spacer(),
+                            ElevatedButton.icon(
+                              icon: Icon(Icons.add_photo_alternate),
+                              label: Text('Add Images'),
+                              onPressed: selectedImages.length >= 5
+                                  ? null
+                                  : () async {
+                                      final ImagePicker picker = ImagePicker();
+                                      final List<XFile> images = await picker
+                                          .pickMultiImage();
+                                      if (images.isNotEmpty) {
+                                        setState(() {
+                                          int remainingSlots =
+                                              5 - selectedImages.length;
+                                          selectedImages.addAll(
+                                            images.take(remainingSlots),
+                                          );
+                                        });
+                                      }
+                                    },
+                            ),
+                          ],
                         ),
-                        TextButton.icon(
-                          onPressed: () => setState(() {
-                            imageControllers.add(TextEditingController());
-                          }),
-                          icon: Icon(Icons.add),
-                          label: Text('Add Another Image'),
-                        ),
+                        if (selectedImages.isNotEmpty)
+                          Padding(
+                            padding: EdgeInsets.only(top: 8),
+                            child: Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: selectedImages
+                                  .asMap()
+                                  .entries
+                                  .map(
+                                    (entry) => Stack(
+                                      children: [
+                                        Container(
+                                          width: 80,
+                                          height: 80,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: Colors.grey.shade300,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            child: Image.network(
+                                              entry.value.path,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => Icon(
+                                                    Icons.image,
+                                                    color: Colors.grey,
+                                                  ),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 2,
+                                          right: 2,
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                selectedImages.removeAt(
+                                                  entry.key,
+                                                );
+                                              });
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              padding: EdgeInsets.all(4),
+                                              child: Icon(
+                                                Icons.close,
+                                                size: 16,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
+                        if (selectedImages.isNotEmpty)
+                          Padding(
+                            padding: EdgeInsets.only(top: 4),
+                            child: Text(
+                              '${selectedImages.length} new image(s) to upload',
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -2385,9 +2811,6 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () {
-                            for (var controller in imageControllers) {
-                              controller.dispose();
-                            }
                             titleController.dispose();
                             descriptionController.dispose();
                             locationController.dispose();
@@ -2417,29 +2840,22 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
                             }
 
                             try {
-                              final images = imageControllers
-                                  .map((c) => c.text)
-                                  .where((text) => text.isNotEmpty)
-                                  .toList();
+                              await LostItemService.updateLostItem(
+                                item.id,
+                                title: titleController.text,
+                                description: descriptionController.text,
+                                category: selectedCategory,
+                                type: selectedType,
+                                status: selectedStatus,
+                                location: locationController.text,
+                                phone: phoneController.text,
+                                email: emailController.text,
+                                keptImageUrls: keptImageUrls,
+                                imageFiles: selectedImages.isEmpty
+                                    ? null
+                                    : selectedImages,
+                              );
 
-                              await LostItemService.updateLostItem(item.id, {
-                                'title': titleController.text,
-                                'description': descriptionController.text,
-                                'category': selectedCategory,
-                                'type': selectedType,
-                                'status': selectedStatus,
-                                'location': locationController.text,
-                                'dateReported': selectedDate.toIso8601String(),
-                                'contactInfo': {
-                                  'phone': phoneController.text,
-                                  'email': emailController.text,
-                                },
-                                if (images.isNotEmpty) 'images': images,
-                              });
-
-                              for (var controller in imageControllers) {
-                                controller.dispose();
-                              }
                               titleController.dispose();
                               descriptionController.dispose();
                               locationController.dispose();

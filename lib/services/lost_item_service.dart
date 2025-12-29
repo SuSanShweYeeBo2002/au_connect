@@ -1,5 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
+import 'package:http_parser/http_parser.dart';
 import 'auth_service.dart';
 
 class LostItem {
@@ -100,36 +102,64 @@ class LostItemService {
     required String phone,
     required String email,
     DateTime? dateReported,
-    List<String>? images,
+    List<XFile>? imageFiles,
     String status = 'Active',
   }) async {
     try {
       final token = await _getToken();
       if (token == null) throw Exception('No authentication token found');
 
-      final requestBody = {
-        'title': title,
-        'description': description,
-        'category': category,
-        'type': type,
-        'location': location,
-        'contactInfo': {'phone': phone, 'email': email},
-        'status': status,
-        if (dateReported != null)
-          'dateReported': dateReported.toIso8601String(),
-        if (images != null && images.isNotEmpty) 'images': images,
-      };
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/lost-items'),
+      );
 
-      final response = await http
-          .post(
-            Uri.parse('$baseUrl/lost-items'),
-            headers: {
-              'Authorization': 'Bearer $token',
-              'Content-Type': 'application/json',
-            },
-            body: json.encode(requestBody),
-          )
-          .timeout(Duration(seconds: 10));
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Add form fields
+      request.fields['title'] = title;
+      request.fields['description'] = description;
+      request.fields['category'] = category;
+      request.fields['type'] = type;
+      request.fields['location'] = location;
+      request.fields['contactInfo[phone]'] = phone;
+      request.fields['contactInfo[email]'] = email;
+      request.fields['status'] = status;
+      if (dateReported != null) {
+        request.fields['dateReported'] = dateReported.toIso8601String();
+      }
+
+      // Add multiple images if provided (max 5)
+      if (imageFiles != null && imageFiles.isNotEmpty) {
+        for (var imageFile in imageFiles.take(5)) {
+          String fileName = imageFile.name;
+          String extension = fileName.split('.').last.toLowerCase();
+
+          String mimeType = 'image/jpeg';
+          if (extension == 'png') {
+            mimeType = 'image/png';
+          } else if (extension == 'gif') {
+            mimeType = 'image/gif';
+          } else if (extension == 'webp') {
+            mimeType = 'image/webp';
+          }
+
+          final bytes = await imageFile.readAsBytes();
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'images',
+              bytes,
+              filename: fileName,
+              contentType: MediaType.parse(mimeType),
+            ),
+          );
+        }
+      }
+
+      final streamedResponse = await request.send().timeout(
+        Duration(seconds: 30),
+      );
+      final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseJson = json.decode(response.body);
@@ -137,7 +167,7 @@ class LostItemService {
           return LostItem.fromJson(responseJson['data']);
         }
       }
-      throw Exception('Failed to create lost item');
+      throw Exception('Failed to create lost item: ${response.body}');
     } catch (e) {
       throw Exception('Error creating lost item: $e');
     }
@@ -215,23 +245,77 @@ class LostItemService {
 
   // Update lost item
   static Future<LostItem> updateLostItem(
-    String itemId,
-    Map<String, dynamic> updateData,
-  ) async {
+    String itemId, {
+    String? title,
+    String? description,
+    String? category,
+    String? type,
+    String? location,
+    String? phone,
+    String? email,
+    String? status,
+    List<String>? keptImageUrls,
+    List<XFile>? imageFiles,
+  }) async {
     try {
       final token = await _getToken();
       if (token == null) throw Exception('No authentication token found');
 
-      final response = await http
-          .put(
-            Uri.parse('$baseUrl/lost-items/$itemId'),
-            headers: {
-              'Authorization': 'Bearer $token',
-              'Content-Type': 'application/json',
-            },
-            body: json.encode(updateData),
-          )
-          .timeout(Duration(seconds: 10));
+      final request = http.MultipartRequest(
+        'PUT',
+        Uri.parse('$baseUrl/lost-items/$itemId'),
+      );
+
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Add form fields only if provided
+      if (title != null) request.fields['title'] = title;
+      if (description != null) request.fields['description'] = description;
+      if (category != null) request.fields['category'] = category;
+      if (type != null) request.fields['type'] = type;
+      if (location != null) request.fields['location'] = location;
+      if (status != null) request.fields['status'] = status;
+      if (phone != null) request.fields['contactInfo[phone]'] = phone;
+      if (email != null) request.fields['contactInfo[email]'] = email;
+
+      // Add kept image URLs
+      if (keptImageUrls != null) {
+        for (var i = 0; i < keptImageUrls.length; i++) {
+          request.fields['images[$i]'] = keptImageUrls[i];
+        }
+      }
+
+      // Add multiple images if provided (max 5)
+      if (imageFiles != null && imageFiles.isNotEmpty) {
+        for (var imageFile in imageFiles.take(5)) {
+          String fileName = imageFile.name;
+          String extension = fileName.split('.').last.toLowerCase();
+
+          String mimeType = 'image/jpeg';
+          if (extension == 'png') {
+            mimeType = 'image/png';
+          } else if (extension == 'gif') {
+            mimeType = 'image/gif';
+          } else if (extension == 'webp') {
+            mimeType = 'image/webp';
+          }
+
+          final bytes = await imageFile.readAsBytes();
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'images',
+              bytes,
+              filename: fileName,
+              contentType: MediaType.parse(mimeType),
+            ),
+          );
+        }
+      }
+
+      final streamedResponse = await request.send().timeout(
+        Duration(seconds: 30),
+      );
+      final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
@@ -239,7 +323,7 @@ class LostItemService {
           return LostItem.fromJson(responseJson['data']);
         }
       }
-      throw Exception('Failed to update lost item');
+      throw Exception('Failed to update lost item: ${response.body}');
     } catch (e) {
       throw Exception('Error updating lost item: $e');
     }
