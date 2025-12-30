@@ -4,7 +4,7 @@ import 'dart:async';
 import 'auth_service.dart';
 
 class StudySessionService {
-  static const String baseUrl = 'http://localhost:8383';
+  static const String baseUrl = 'http://127.0.0.1:8383';
   static const String endpoint = '/study-sessions';
 
   static StudySessionService? _instance;

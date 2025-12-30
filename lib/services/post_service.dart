@@ -4,7 +4,7 @@ import 'dart:async';
 import 'auth_service.dart';
 
 class PostService {
-  static const String baseUrl = 'http://localhost:8383';
+  static const String baseUrl = 'http://127.0.0.1:8383';
 
   // Get the token from AuthService
   static Future<String?> _getToken() async {
@@ -36,9 +36,6 @@ class PostService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Create post response status: ${response.statusCode}');
-      print('Create post response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success' &&
@@ -55,15 +52,12 @@ class PostService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error creating post: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error creating post: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error creating post: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -89,13 +83,9 @@ class PostService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Get posts response status: ${response.statusCode}');
-      print('Get posts response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success') {
-          // Handle both empty and non-empty data arrays
           return PostsResponse.fromJson(responseJson);
         } else {
           throw Exception(
@@ -106,15 +96,12 @@ class PostService {
         throw Exception('Failed to load posts: ${response.statusCode}');
       }
     } on TimeoutException catch (e) {
-      print('Timeout error loading posts: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error loading posts: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error loading posts: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -146,9 +133,6 @@ class PostService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Get posts by author response status: ${response.statusCode}');
-      print('Get posts by author response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success') {
@@ -164,15 +148,12 @@ class PostService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error loading posts by author: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error loading posts by author: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error loading posts by author: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -198,9 +179,6 @@ class PostService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Like post response status: ${response.statusCode}');
-      print('Like post response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success' &&
@@ -217,15 +195,12 @@ class PostService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error liking post: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error liking post: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error liking post: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -251,11 +226,7 @@ class PostService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Delete post response status: ${response.statusCode}');
-      print('Delete post response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 204) {
-        // Some APIs return 200 with success response, others return 204 (No Content)
         if (response.body.isNotEmpty) {
           final responseJson = json.decode(response.body);
           if (responseJson['status'] == 'success') {
@@ -266,7 +237,6 @@ class PostService {
             );
           }
         } else {
-          // 204 No Content - deletion successful
           return true;
         }
       } else {
@@ -275,15 +245,12 @@ class PostService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error deleting post: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error deleting post: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error deleting post: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -319,9 +286,6 @@ class PostService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Add comment response status: ${response.statusCode}');
-      print('Add comment response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success' &&
@@ -338,15 +302,12 @@ class PostService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error adding comment: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error adding comment: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error adding comment: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -375,9 +336,6 @@ class PostService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Get comments response status: ${response.statusCode}');
-      print('Get comments response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success') {
@@ -391,15 +349,12 @@ class PostService {
         throw Exception('Failed to load comments: ${response.statusCode}');
       }
     } on TimeoutException catch (e) {
-      print('Timeout error loading comments: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error loading comments: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error loading comments: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -425,11 +380,7 @@ class PostService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Delete comment response status: ${response.statusCode}');
-      print('Delete comment response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 204) {
-        // Some APIs return 200 with success response, others return 204 (No Content)
         if (response.body.isNotEmpty) {
           final responseJson = json.decode(response.body);
           if (responseJson['status'] == 'success') {
@@ -440,7 +391,6 @@ class PostService {
             );
           }
         } else {
-          // 204 No Content - deletion successful
           return true;
         }
       } else {
@@ -449,15 +399,12 @@ class PostService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error deleting comment: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error deleting comment: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error deleting comment: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',

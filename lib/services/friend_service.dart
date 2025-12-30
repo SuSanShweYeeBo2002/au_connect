@@ -4,7 +4,7 @@ import 'dart:async';
 import 'auth_service.dart';
 
 class FriendService {
-  static const String baseUrl = 'http://localhost:8383';
+  static const String baseUrl = 'http://127.0.0.1:8383';
 
   // Get the token from AuthService
   static Future<String?> _getToken() async {
@@ -28,9 +28,6 @@ class FriendService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Send friend request response status: ${response.statusCode}');
-      print('Send friend request response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success' &&
@@ -48,15 +45,12 @@ class FriendService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error sending friend request: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error sending friend request: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error sending friend request: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -82,9 +76,6 @@ class FriendService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Get pending requests response status: ${response.statusCode}');
-      print('Get pending requests response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success') {
@@ -100,15 +91,12 @@ class FriendService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error loading pending requests: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error loading pending requests: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error loading pending requests: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -134,9 +122,6 @@ class FriendService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Get sent requests response status: ${response.statusCode}');
-      print('Get sent requests response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success') {
@@ -150,15 +135,12 @@ class FriendService {
         throw Exception('Failed to load sent requests: ${response.statusCode}');
       }
     } on TimeoutException catch (e) {
-      print('Timeout error loading sent requests: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error loading sent requests: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error loading sent requests: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -188,9 +170,6 @@ class FriendService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Update friend request response status: ${response.statusCode}');
-      print('Update friend request response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success' &&
@@ -208,15 +187,12 @@ class FriendService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error updating friend request: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error updating friend request: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error updating friend request: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -242,9 +218,6 @@ class FriendService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Cancel friend request response status: ${response.statusCode}');
-      print('Cancel friend request response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 204) {
         if (response.body.isNotEmpty) {
           final responseJson = json.decode(response.body);
@@ -264,15 +237,12 @@ class FriendService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error canceling friend request: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error canceling friend request: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error canceling friend request: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -298,9 +268,6 @@ class FriendService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Get friends list response status: ${response.statusCode}');
-      print('Get friends list response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success') {
@@ -314,15 +281,12 @@ class FriendService {
         throw Exception('Failed to load friends list: ${response.statusCode}');
       }
     } on TimeoutException catch (e) {
-      print('Timeout error loading friends list: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error loading friends list: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error loading friends list: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -348,9 +312,6 @@ class FriendService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Unfriend response status: ${response.statusCode}');
-      print('Unfriend response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 204) {
         if (response.body.isNotEmpty) {
           final responseJson = json.decode(response.body);
@@ -368,15 +329,12 @@ class FriendService {
         throw Exception('Failed to unfriend: ${response.statusCode}');
       }
     } on TimeoutException catch (e) {
-      print('Timeout error unfriending: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error unfriending: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error unfriending: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -403,9 +361,6 @@ class FriendService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Block user response status: ${response.statusCode}');
-      print('Block user response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success' &&
@@ -421,15 +376,12 @@ class FriendService {
         throw Exception(errorBody['message'] ?? 'Failed to block user');
       }
     } on TimeoutException catch (e) {
-      print('Timeout error blocking user: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error blocking user: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error blocking user: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -455,9 +407,6 @@ class FriendService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Unblock user response status: ${response.statusCode}');
-      print('Unblock user response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 204) {
         if (response.body.isNotEmpty) {
           final responseJson = json.decode(response.body);
@@ -475,15 +424,12 @@ class FriendService {
         throw Exception('Failed to unblock user: ${response.statusCode}');
       }
     } on TimeoutException catch (e) {
-      print('Timeout error unblocking user: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error unblocking user: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error unblocking user: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -509,9 +455,6 @@ class FriendService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Get blocked users response status: ${response.statusCode}');
-      print('Get blocked users response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success') {
@@ -525,15 +468,12 @@ class FriendService {
         throw Exception('Failed to load blocked users: ${response.statusCode}');
       }
     } on TimeoutException catch (e) {
-      print('Timeout error loading blocked users: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error loading blocked users: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error loading blocked users: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -559,9 +499,6 @@ class FriendService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Get users who blocked me response status: ${response.statusCode}');
-      print('Get users who blocked me response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success') {
@@ -577,15 +514,12 @@ class FriendService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error loading users who blocked me: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error loading users who blocked me: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error loading users who blocked me: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -614,7 +548,6 @@ class FriendService {
       );
 
       if (youBlockedThem) {
-        print('You have blocked user: $userId');
         return true;
       }
 
@@ -624,13 +557,11 @@ class FriendService {
       );
 
       if (theyBlockedYou) {
-        print('User $userId has blocked you');
         return true;
       }
 
       return false;
     } catch (e) {
-      print('Error checking block status: $e');
       return false; // Assume not blocked on error
     }
   }

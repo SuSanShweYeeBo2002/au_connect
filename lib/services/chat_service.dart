@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'auth_service.dart';
 
 class ChatService {
-  static const String baseUrl = 'http://localhost:8383';
+  static const String baseUrl = 'http://127.0.0.1:8383';
 
   // Get the token from AuthService
   static Future<String?> _getToken() async {
@@ -42,25 +42,18 @@ class ChatService {
   }
 
   // Send a message
-  // Helper to format error messages for users
   static String _formatErrorMessage(String errorMessage) {
-    // Parse blocked user errors
     if (errorMessage.contains('User is blocked') ||
         errorMessage.contains('has blocked you')) {
       return 'Unable to send message. You cannot message this user due to blocking restrictions.';
     }
-
-    // Parse other common errors
     if (errorMessage.contains('No authentication token')) {
       return 'Please sign in again to send messages.';
     }
-
     if (errorMessage.contains('Network error') ||
         errorMessage.contains('connection')) {
       return 'Connection error. Please check your internet and try again.';
     }
-
-    // Return original message if no match
     return errorMessage;
   }
 
@@ -81,9 +74,6 @@ class ChatService {
         body: json.encode({'receiverId': receiverId, 'content': content}),
       );
 
-      print('Send message response status: ${response.statusCode}');
-      print('Send message response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success' &&
@@ -94,7 +84,6 @@ class ChatService {
           throw Exception(_formatErrorMessage(errorMsg));
         }
       } else {
-        // Try to parse error message from response body
         try {
           final errorJson = json.decode(response.body);
           final errorMsg = errorJson['message'] ?? 'Failed to send message';
@@ -104,8 +93,6 @@ class ChatService {
         }
       }
     } catch (e) {
-      print('Error sending message: $e');
-      // Check if error is already formatted
       if (e is Exception &&
           e.toString().startsWith('Exception: Unable to send message')) {
         rethrow;
@@ -125,11 +112,7 @@ class ChatService {
         headers: {'Authorization': 'Bearer $token'},
       );
 
-      print('Delete message response status: ${response.statusCode}');
-      print('Delete message response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 204) {
-        // Some APIs return 200 with success response, others return 204 (No Content)
         if (response.body.isNotEmpty) {
           final responseJson = json.decode(response.body);
           if (responseJson['status'] == 'success') {
@@ -140,7 +123,6 @@ class ChatService {
             );
           }
         } else {
-          // 204 No Content - deletion successful
           return true;
         }
       } else {
@@ -149,7 +131,6 @@ class ChatService {
         );
       }
     } catch (e) {
-      print('Error deleting message: $e');
       throw Exception('Failed to delete message: $e');
     }
   }
@@ -164,9 +145,6 @@ class ChatService {
         Uri.parse('$baseUrl/messages/read/$receiverId'),
         headers: {'Authorization': 'Bearer $token'},
       );
-
-      print('Mark as read response status: ${response.statusCode}');
-      print('Mark as read response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
@@ -183,7 +161,6 @@ class ChatService {
         );
       }
     } catch (e) {
-      print('Error marking messages as read: $e');
       throw Exception('Failed to mark messages as read: $e');
     }
   }
@@ -265,7 +242,6 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     final email = json['email'] ?? '';
-    // Generate a display name from email if name is not provided
     final name = json['name'] ?? email.split('@')[0];
 
     return User(
@@ -310,13 +286,9 @@ class Message {
     );
   }
 
-  // Helper method to parse UTC timestamp and convert to local time
   static DateTime _parseUtcTimestamp(String timestamp) {
     try {
-      // Parse the timestamp (handles both UTC 'Z' format and ISO format)
       final dateTime = DateTime.parse(timestamp);
-
-      // If the timestamp doesn't have timezone info, treat it as UTC
       if (dateTime.timeZoneOffset == Duration.zero &&
           !timestamp.endsWith('Z')) {
         return DateTime.utc(
@@ -329,11 +301,8 @@ class Message {
           dateTime.millisecond,
         ).toLocal();
       }
-
-      // If it's already UTC (with 'Z') or has timezone info, convert to local
       return dateTime.toLocal();
     } catch (e) {
-      print('❌ Error parsing timestamp: $timestamp, error: $e');
       return DateTime.now();
     }
   }

@@ -4,7 +4,7 @@ import 'dart:async';
 import 'auth_service.dart';
 
 class PollService {
-  static const String baseUrl = 'http://localhost:8383';
+  static const String baseUrl = 'http://127.0.0.1:8383';
 
   // Get the token from AuthService
   static Future<String?> _getToken() async {
@@ -41,9 +41,6 @@ class PollService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Create poll response status: ${response.statusCode}');
-      print('Create poll response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success' &&
@@ -60,15 +57,12 @@ class PollService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error creating poll: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error creating poll: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error creating poll: $e');
       throw Exception('Failed to create poll: $e');
     }
   }
@@ -89,9 +83,6 @@ class PollService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Get polls response status: ${response.statusCode}');
-      print('Get polls response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success') {
@@ -105,15 +96,12 @@ class PollService {
         throw Exception('Failed to load polls: ${response.statusCode}');
       }
     } on TimeoutException catch (e) {
-      print('Timeout error loading polls: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error loading polls: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error loading polls: $e');
       throw Exception('Failed to load polls: $e');
     }
   }
@@ -138,9 +126,6 @@ class PollService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Vote poll response status: ${response.statusCode}');
-      print('Vote poll response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success' &&
@@ -157,15 +142,12 @@ class PollService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error voting: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error voting: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error voting: $e');
       throw Exception('Failed to vote: $e');
     }
   }
@@ -186,9 +168,6 @@ class PollService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Delete poll response status: ${response.statusCode}');
-      print('Delete poll response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 204) {
         if (response.body.isNotEmpty) {
           final responseJson = json.decode(response.body);
@@ -208,15 +187,12 @@ class PollService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error deleting poll: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error deleting poll: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error deleting poll: $e');
       throw Exception('Failed to delete poll: $e');
     }
   }
@@ -270,7 +246,6 @@ class PollOption {
   factory PollOption.fromJson(Map<String, dynamic> json) {
     final List<dynamic> votersData = json['voters'] ?? [];
     final voters = votersData.map((voter) {
-      // Handle both string IDs and user objects
       if (voter is String) {
         return Voter(id: voter, email: '', name: '');
       } else if (voter is Map<String, dynamic>) {
