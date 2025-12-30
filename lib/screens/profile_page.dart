@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/post_service.dart';
+import '../services/user_service.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -8,6 +9,9 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  UserProfile? _userProfile;
+  bool _isLoadingProfile = true;
+
   List<Post> _userPosts = [];
   bool _isLoadingPosts = true;
   String? _userId;
@@ -26,6 +30,16 @@ class _ProfilePageState extends State<ProfilePage> {
       _userId = userId;
     });
     if (userId != null) {
+      try{
+        final profile = await UserService.getUserProfile(userId);
+        setState(() {
+          _userProfile = profile;
+          _isLoadingProfile = false;
+        });
+      } catch (e) {
+        print('Error loading user profile: $e');
+        setState(() => _isLoadingProfile = false);
+      }
       await _loadUserPosts();
     }
   }
@@ -199,22 +213,25 @@ class _ProfilePageState extends State<ProfilePage> {
                           bottom: -40,
                           child: CircleAvatar(
                             radius: 40,
-                            backgroundImage: NetworkImage(
-                              "https://win.gg/wp-content/uploads/2022/03/baki-hanma.jpg.webp",
-                            ),
+                            backgroundImage: _userProfile?.avatar != null
+                              ? NetworkImage(_userProfile!.avatar!)
+                                : null,
+                            child: _userProfile?.avatar == null
+                              ? Icon(Icons.person, size: 40)
+                                : null,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 45),
 
-                    Text("Baki Hanma", style: TextStyle(fontSize: 22)),
+                    Text(_userProfile?.name ?? "Loading...", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
 
                     const SizedBox(height: 4),
                     Text(
-                      "Software Engineer at Google!!",
+                      _userProfile?.bio ?? "No bio available",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: 18, color: Colors.grey[700]),
                     ),
 
                     const SizedBox(height: 10),

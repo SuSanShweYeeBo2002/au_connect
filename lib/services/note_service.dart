@@ -100,7 +100,7 @@ class NotesPagination {
 }
 
 class NoteService {
-  static const String baseUrl = 'http://localhost:8383';
+  static const String baseUrl = 'http://127.0.0.1:8383';
 
   // Get the token from AuthService
   static Future<String?> _getToken() async {
@@ -129,9 +129,6 @@ class NoteService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Create note response status: ${response.statusCode}');
-      print('Create note response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success' &&
@@ -148,15 +145,12 @@ class NoteService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error creating note: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error creating note: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error creating note: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -182,9 +176,6 @@ class NoteService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Get notes response status: ${response.statusCode}');
-      print('Get notes response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success') {
@@ -198,15 +189,12 @@ class NoteService {
         throw Exception('Failed to load notes: ${response.statusCode}');
       }
     } on TimeoutException catch (e) {
-      print('Timeout error loading notes: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error loading notes: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error loading notes: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -232,9 +220,6 @@ class NoteService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Get note response status: ${response.statusCode}');
-      print('Get note response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success' &&
@@ -249,15 +234,12 @@ class NoteService {
         throw Exception('Failed to load note: ${response.statusCode}');
       }
     } on TimeoutException catch (e) {
-      print('Timeout error loading note: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error loading note: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error loading note: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -290,9 +272,6 @@ class NoteService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Update note response status: ${response.statusCode}');
-      print('Update note response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseJson = json.decode(response.body);
         if (responseJson['status'] == 'success' &&
@@ -309,15 +288,12 @@ class NoteService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error updating note: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error updating note: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error updating note: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
@@ -343,9 +319,6 @@ class NoteService {
           )
           .timeout(Duration(seconds: 10));
 
-      print('Delete note response status: ${response.statusCode}');
-      print('Delete note response body: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 204) {
         if (response.body.isNotEmpty) {
           final responseJson = json.decode(response.body);
@@ -357,7 +330,6 @@ class NoteService {
             );
           }
         } else {
-          // 204 No Content - deletion successful
           return true;
         }
       } else {
@@ -366,15 +338,12 @@ class NoteService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout error deleting note: $e');
       throw Exception('Request timeout: Server is taking too long to respond');
     } on http.ClientException catch (e) {
-      print('Network error deleting note: $e');
       throw Exception(
         'Network error: Please check your internet connection and try again',
       );
     } catch (e) {
-      print('Error deleting note: $e');
       if (e.toString().contains('Failed to fetch')) {
         throw Exception(
           'Cannot connect to server. Please check if the backend is running.',
