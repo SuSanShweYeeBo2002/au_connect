@@ -4,7 +4,8 @@ import 'auth_service.dart';
 class SocketService {
   static SocketService? _instance;
   IO.Socket? _socket;
-  final String _serverUrl = 'http://localhost:8383'; // Local development server
+  final String _serverUrl =
+      'https://au-connect-api.onrender.com'; // Production server
   String? _pendingRoomId;
 
   static SocketService get instance {

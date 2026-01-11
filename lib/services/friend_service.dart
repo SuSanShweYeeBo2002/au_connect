@@ -4,7 +4,7 @@ import 'dart:async';
 import 'auth_service.dart';
 
 class FriendService {
-  static const String baseUrl = 'http://localhost:8383';
+  static const String baseUrl = 'https://au-connect-api.onrender.com';
 
   // Get the token from AuthService
   static Future<String?> _getToken() async {
