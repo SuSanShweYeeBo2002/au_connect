@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'webview_page.dart';
 
 class UpcomingEventPage extends StatelessWidget {
   const UpcomingEventPage({super.key});
@@ -12,72 +13,91 @@ class UpcomingEventPage extends StatelessWidget {
         'imageUrl': 'assets/images/au_logo.jpg',
         'isAsset': true,
         'url': 'https://www.au.edu/',
+        'useWebView': false,
       },
       {
         'title': 'AUSO Instagram',
         'imageUrl': 'assets/images/au_insta.webp',
         'isAsset': true,
         'url': 'https://www.instagram.com/ausoabac',
+        'useWebView': false,
       },
       {
         'title': 'AU Facebook',
         'imageUrl': 'assets/images/au_facebook.jpg',
         'isAsset': true,
         'url': 'https://www.facebook.com/assumptionuniversity/',
+        'useWebView': false,
       },
       {
         'title': 'AU YouTube',
         'imageUrl': 'assets/images/au_YT.jpg',
         'isAsset': true,
         'url': 'https://www.youtube.com/@assumptionuniversityofthailand',
+        'useWebView': false,
       },
       {
         'title': 'AU OIA',
         'imageUrl': 'assets/images/au_oia.jpg',
         'isAsset': true,
         'url': 'https://oia.au.edu/contact',
+        'useWebView': false,
       },
       {
         'title': 'AU Lms',
         'imageUrl': 'assets/images/au_logo.jpg',
         'isAsset': true,
         'url': 'https://aulms.au.edu/login/index.php',
+        'useWebView': false,
       },
       {
         'title': 'LMS (MSME)',
         'imageUrl': 'assets/images/au_lmsMSME.png',
         'isAsset': true,
         'url': 'https://lms.msme.au.edu/',
+        'useWebView': false,
       },
       {
         'title': 'AU (ITs Line Account)',
         'imageUrl': 'assets/images/au_IT.jpg',
         'isAsset': true,
         'url': 'https://line.me/R/ti/p/@076cezgn',
+        'useWebView': false,
       },
       {
         'title': 'AU (Registrar)',
         'imageUrl': 'assets/images/au_logo.jpg',
         'isAsset': true,
         'url': 'https://registrar.au.edu/',
+        'useWebView': false,
       },
       {
         'title': 'AU Spark',
         'imageUrl': 'assets/images/au_auspark.jpg',
         'isAsset': true,
         'url': 'https://auspark.au.edu/Account/Login?ReturnUrl=%2F',
+        'useWebView': false,
       },
       {
         'title': 'AUISC (FB)',
         'imageUrl': 'assets/images/au_auisc.jpg',
         'isAsset': true,
         'url': 'https://www.facebook.com/share/17jao9RHpz/',
+        'useWebView': false,
       },
       {
         'title': 'Graduate Studies',
         'imageUrl': 'assets/images/au_facebook.jpg',
         'isAsset': true,
         'url': 'https://www.facebook.com/share/17jao9RHpz/',
+        'useWebView': false,
+      },
+      {
+        'title': 'Weather Forecast',
+        'imageUrl': 'assets/images/weather.jpg',
+        'isAsset': true,
+        'url': 'http://localhost:5173/',
+        'useWebView': true,
       },
     ];
 
@@ -117,10 +137,12 @@ class UpcomingEventPage extends StatelessWidget {
                 children: events
                     .map(
                       (event) => _eventCard(
+                        context: context,
                         title: event['title'] as String,
                         imageUrl: event['imageUrl'] as String,
                         isAsset: event['isAsset'] as bool,
                         url: event['url'] as String,
+                        useWebView: event['useWebView'] as bool? ?? false,
                       ),
                     )
                     .toList(),
@@ -133,10 +155,12 @@ class UpcomingEventPage extends StatelessWidget {
   }
 
   Widget _eventCard({
+    required BuildContext context,
     required String title,
     required String imageUrl,
     required bool isAsset,
     required String url,
+    bool useWebView = false,
   }) {
     return Card(
       shape: RoundedRectangleBorder(
@@ -162,12 +186,23 @@ class UpcomingEventPage extends StatelessWidget {
             InkWell(
               borderRadius: BorderRadius.circular(8),
               onTap: () async {
-                final uri = Uri.parse(url);
-                if (!await launchUrl(
-                  uri,
-                  mode: LaunchMode.externalApplication,
-                )) {
-                  debugPrint('Could not launch $uri');
+                if (useWebView) {
+                  // Navigate to WebView page for in-app browsing
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => WebViewPage(url: url, title: title),
+                    ),
+                  );
+                } else {
+                  // Launch external browser
+                  final uri = Uri.parse(url);
+                  if (!await launchUrl(
+                    uri,
+                    mode: LaunchMode.externalApplication,
+                  )) {
+                    debugPrint('Could not launch $uri');
+                  }
                 }
               },
               child: AspectRatio(
