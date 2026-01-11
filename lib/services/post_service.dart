@@ -74,6 +74,7 @@ class PostService {
   static Future<Post> createPost({
     required String content,
     XFile? imageFile,
+    List<XFile>? imageFiles,
   }) async {
     try {
       final token = await _getToken();
@@ -87,13 +88,38 @@ class PostService {
       request.headers['Authorization'] = 'Bearer $token';
       request.fields['content'] = content;
 
-      // Add image if provided
-      if (imageFile != null) {
-        // Get file extension
+      // Add multiple images if provided
+      if (imageFiles != null && imageFiles.isNotEmpty) {
+        for (var imageFile in imageFiles) {
+          String fileName = imageFile.name;
+          String extension = fileName.split('.').last.toLowerCase();
+
+          String mimeType = 'image/jpeg';
+          if (extension == 'png') {
+            mimeType = 'image/png';
+          } else if (extension == 'gif') {
+            mimeType = 'image/gif';
+          } else if (extension == 'webp') {
+            mimeType = 'image/webp';
+          }
+
+          final bytes = await imageFile.readAsBytes();
+
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'images',
+              bytes,
+              filename: fileName,
+              contentType: MediaType.parse(mimeType),
+            ),
+          );
+        }
+      }
+      // Fallback to single image for backward compatibility
+      else if (imageFile != null) {
         String fileName = imageFile.name;
         String extension = fileName.split('.').last.toLowerCase();
 
-        // Map extension to MIME type
         String mimeType = 'image/jpeg';
         if (extension == 'png') {
           mimeType = 'image/png';
@@ -103,7 +129,6 @@ class PostService {
           mimeType = 'image/webp';
         }
 
-        // Read bytes for web compatibility
         final bytes = await imageFile.readAsBytes();
 
         request.files.add(
@@ -378,6 +403,43 @@ class PostService {
     }
   }
 
+  // Report a post
+  static Future<bool> reportPost({
+    required String postId,
+    required String reason,
+  }) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/reports/post/$postId'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: json.encode({'reason': reason}),
+          )
+          .timeout(Duration(seconds: 10));
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success') {
+          return true;
+        }
+      }
+      throw Exception('Failed to report post');
+    } on TimeoutException catch (e) {
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } catch (e) {
+      if (e.toString().contains('duplicate key')) {
+        throw Exception('You have already reported this post');
+      }
+      throw Exception('Failed to report post: $e');
+    }
+  }
+
   // Add a comment to a post
   static Future<Comment> addComment({
     required String postId,
@@ -561,6 +623,7 @@ class Post {
   final String? authorProfileImage;
   final String content;
   final String? image;
+  final List<String>? images;
   final int likeCount;
   final int commentCount;
   final bool isLikedByUser;
@@ -575,6 +638,7 @@ class Post {
     this.authorProfileImage,
     required this.content,
     this.image,
+    this.images,
     required this.likeCount,
     required this.commentCount,
     required this.isLikedByUser,
@@ -597,6 +661,7 @@ class Post {
       authorProfileImage: json['author']?['profileImage'],
       content: json['content'] ?? '',
       image: json['image'],
+      images: json['images'] != null ? List<String>.from(json['images']) : null,
       likeCount: json['likeCount'] ?? 0,
       commentCount: json['commentCount'] ?? 0,
       isLikedByUser: json['isLikedByUser'] ?? false,
@@ -665,6 +730,7 @@ class Comment {
   final String userId;
   final String userName;
   final String userEmail;
+  final String? userProfileImage;
   final String content;
   final String? image;
   final DateTime createdAt;
@@ -676,6 +742,7 @@ class Comment {
     required this.userId,
     required this.userName,
     required this.userEmail,
+    this.userProfileImage,
     required this.content,
     this.image,
     required this.createdAt,
@@ -701,6 +768,8 @@ class Comment {
           '',
       userName: userName,
       userEmail: userEmail,
+      userProfileImage:
+          json['author']?['profileImage'] ?? json['user']?['profileImage'],
       content: json['content'] ?? json['text'] ?? '',
       image: json['image'],
       createdAt: json['createdAt'] != null

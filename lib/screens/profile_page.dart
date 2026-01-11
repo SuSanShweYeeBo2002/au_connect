@@ -998,7 +998,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // Filter posts that have images
     final postsWithImages = _userPosts
-        .where((post) => post.image != null && post.image!.isNotEmpty)
+        .where(
+          (post) =>
+              (post.image != null && post.image!.isNotEmpty) ||
+              (post.images != null && post.images!.isNotEmpty),
+        )
         .toList();
 
     if (postsWithImages.isEmpty) {
@@ -1034,6 +1038,10 @@ class _ProfilePageState extends State<ProfilePage> {
         itemCount: postsWithImages.length,
         itemBuilder: (context, index) {
           final post = postsWithImages[index];
+          final displayImage = post.images != null && post.images!.isNotEmpty
+              ? post.images![0]
+              : post.image!;
+
           return GestureDetector(
             onTap: () {
               // Show full image in a dialog
@@ -1051,7 +1059,17 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       Flexible(
-                        child: Image.network(post.image!, fit: BoxFit.contain),
+                        child: post.images != null && post.images!.isNotEmpty
+                            ? PageView.builder(
+                                itemCount: post.images!.length,
+                                itemBuilder: (context, imgIndex) {
+                                  return Image.network(
+                                    post.images![imgIndex],
+                                    fit: BoxFit.contain,
+                                  );
+                                },
+                              )
+                            : Image.network(post.image!, fit: BoxFit.contain),
                       ),
                       Padding(
                         padding: EdgeInsets.all(16),
@@ -1062,15 +1080,51 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               );
             },
-            child: Image.network(
-              post.image!,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: Colors.grey[300],
-                  child: Icon(Icons.broken_image, color: Colors.grey),
-                );
-              },
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(
+                  displayImage,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[300],
+                      child: Icon(Icons.broken_image, color: Colors.grey),
+                    );
+                  },
+                ),
+                if (post.images != null && post.images!.length > 1)
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.collections,
+                            color: Colors.white,
+                            size: 12,
+                          ),
+                          SizedBox(width: 2),
+                          Text(
+                            '${post.images!.length}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ),
           );
         },

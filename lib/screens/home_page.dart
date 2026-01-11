@@ -177,6 +177,388 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _showReportDialog(String postId) async {
+    final reasonController = TextEditingController();
+
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Report Post'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Please provide a reason for reporting this post:'),
+            SizedBox(height: 16),
+            TextField(
+              controller: reasonController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'Enter reason...',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final reason = reasonController.text.trim();
+
+              if (reason.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Please enter a reason'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+                return;
+              }
+
+              Navigator.pop(context);
+
+              try {
+                await PostService.reportPost(postId: postId, reason: reason);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Post reported successfully'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(e.toString().replaceAll('Exception: ', '')),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: Text('Report', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showImageGallery(List<String> images, int initialIndex) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            iconTheme: IconThemeData(color: Colors.white),
+            title: Text(
+              '${initialIndex + 1} / ${images.length}',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          body: PageView.builder(
+            controller: PageController(initialPage: initialIndex),
+            itemCount: images.length,
+            onPageChanged: (index) {
+              // Update title with current image index
+            },
+            itemBuilder: (context, index) {
+              return Center(
+                child: InteractiveViewer(
+                  child: Image.network(
+                    images[index],
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Center(
+                        child: Icon(
+                          Icons.broken_image,
+                          color: Colors.white,
+                          size: 64,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageGallery(List<String> images) {
+    if (images.isEmpty) return SizedBox.shrink();
+
+    // Single image - full width
+    if (images.length == 1) {
+      return GestureDetector(
+        onTap: () => _showImageGallery(images, 0),
+        child: Container(
+          height: 300,
+          width: double.infinity,
+          child: Image.network(
+            images[0],
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: Colors.grey[300],
+                child: Center(
+                  child: Icon(Icons.broken_image, color: Colors.grey),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    // Two images - side by side
+    if (images.length == 2) {
+      return Container(
+        height: 200,
+        child: Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () => _showImageGallery(images, 0),
+                child: Image.network(
+                  images[0],
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[300],
+                      child: Center(
+                        child: Icon(Icons.broken_image, color: Colors.grey),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            SizedBox(width: 2),
+            Expanded(
+              child: GestureDetector(
+                onTap: () => _showImageGallery(images, 1),
+                child: Image.network(
+                  images[1],
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[300],
+                      child: Center(
+                        child: Icon(Icons.broken_image, color: Colors.grey),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Three images - one large left, two stacked right
+    if (images.length == 3) {
+      return Container(
+        height: 250,
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: GestureDetector(
+                onTap: () => _showImageGallery(images, 0),
+                child: Image.network(
+                  images[0],
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[300],
+                      child: Center(
+                        child: Icon(Icons.broken_image, color: Colors.grey),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            SizedBox(width: 2),
+            Expanded(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _showImageGallery(images, 1),
+                      child: Image.network(
+                        images[1],
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[300],
+                            child: Center(
+                              child: Icon(
+                                Icons.broken_image,
+                                color: Colors.grey,
+                                size: 20,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _showImageGallery(images, 2),
+                      child: Image.network(
+                        images[2],
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[300],
+                            child: Center(
+                              child: Icon(
+                                Icons.broken_image,
+                                color: Colors.grey,
+                                size: 20,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Four or more images - 2x2 grid with "+X more" overlay on last image if more than 4
+    return Container(
+      height: 300,
+      child: Column(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _showImageGallery(images, 0),
+                    child: Image.network(
+                      images[0],
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: Center(
+                            child: Icon(Icons.broken_image, color: Colors.grey),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(width: 2),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _showImageGallery(images, 1),
+                    child: Image.network(
+                      images[1],
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: Center(
+                            child: Icon(Icons.broken_image, color: Colors.grey),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 2),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _showImageGallery(images, 2),
+                    child: Image.network(
+                      images[2],
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: Center(
+                            child: Icon(Icons.broken_image, color: Colors.grey),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(width: 2),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _showImageGallery(images, 3),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.network(
+                          images[3],
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[300],
+                              child: Center(
+                                child: Icon(
+                                  Icons.broken_image,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        if (images.length > 4)
+                          Container(
+                            color: Colors.black54,
+                            child: Center(
+                              child: Text(
+                                '+${images.length - 4}',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildContent() {
     if (isLoading) {
       return Center(child: CircularProgressIndicator());
@@ -265,11 +647,7 @@ class _HomePageState extends State<HomePage> {
                       if (value == 'delete') {
                         _deletePost(post, index);
                       } else if (value == 'report') {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Report feature coming soon!'),
-                          ),
-                        );
+                        _showReportDialog(post.id);
                       }
                     },
                     itemBuilder: (BuildContext context) {
@@ -311,7 +689,11 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                 ),
-                if (post.image != null)
+                // Display multiple images if available
+                if (post.images != null && post.images!.isNotEmpty)
+                  _buildImageGallery(post.images!)
+                // Fallback to single image for backward compatibility
+                else if (post.image != null)
                   Container(
                     width: double.infinity,
                     color: Colors.grey[200],

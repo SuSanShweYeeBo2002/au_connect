@@ -10,7 +10,7 @@ class AddPostPage extends StatefulWidget {
 class _AddPostPageState extends State<AddPostPage> {
   final TextEditingController _contentController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
-  XFile? _selectedImage;
+  List<XFile> _selectedImages = [];
   bool _isLoading = false;
 
   @override
@@ -21,15 +21,16 @@ class _AddPostPageState extends State<AddPostPage> {
 
   Future<void> _pickImage() async {
     try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
+      final List<XFile> images = await _picker.pickMultiImage(
         maxWidth: 1920,
         maxHeight: 1920,
         imageQuality: 85,
       );
-      if (image != null) {
+      if (images.isNotEmpty) {
         setState(() {
-          _selectedImage = image;
+          // Add new images, but limit to 5 total
+          int remainingSlots = 5 - _selectedImages.length;
+          _selectedImages.addAll(images.take(remainingSlots));
         });
       }
     } catch (e) {
@@ -60,7 +61,7 @@ class _AddPostPageState extends State<AddPostPage> {
     try {
       final post = await PostService.createPost(
         content: _contentController.text.trim(),
-        imageFile: _selectedImage,
+        imageFiles: _selectedImages.isNotEmpty ? _selectedImages : null,
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -146,12 +147,12 @@ class _AddPostPageState extends State<AddPostPage> {
 
               // Image picker button
               OutlinedButton.icon(
-                onPressed: _pickImage,
+                onPressed: _selectedImages.length >= 5 ? null : _pickImage,
                 icon: Icon(Icons.add_photo_alternate, size: 20),
                 label: Text(
-                  _selectedImage == null
-                      ? 'Add Image (optional)'
-                      : 'Change Image',
+                  _selectedImages.isEmpty
+                      ? 'Add Images (optional, max 5)'
+                      : 'Add More Images (${_selectedImages.length}/5)',
                 ),
                 style: OutlinedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -163,54 +164,68 @@ class _AddPostPageState extends State<AddPostPage> {
               SizedBox(height: 12),
 
               // Image preview
-              if (_selectedImage != null)
-                Stack(
-                  children: [
-                    Container(
-                      constraints: BoxConstraints(maxHeight: 300),
-                      width: double.infinity,
-                      color: Colors.grey[200],
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: FutureBuilder(
-                          future: _selectedImage!.readAsBytes(),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              return Image.memory(
-                                snapshot.data!,
-                                fit: BoxFit.contain,
-                              );
-                            }
-                            return Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(50.0),
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: CircleAvatar(
-                        backgroundColor: Colors.black54,
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.close,
-                            color: Colors.white,
-                            size: 20,
+              if (_selectedImages.isNotEmpty)
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _selectedImages.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    XFile image = entry.value;
+                    return Stack(
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _selectedImage = null;
-                            });
-                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: FutureBuilder(
+                              future: image.readAsBytes(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return Image.memory(
+                                    snapshot.data!,
+                                    fit: BoxFit.cover,
+                                  );
+                                }
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ],
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedImages.removeAt(index);
+                              });
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
                 ),
 
               SizedBox(height: 24),

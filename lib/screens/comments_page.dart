@@ -272,13 +272,18 @@ class _CommentsPageState extends State<CommentsPage> {
                 children: [
                   CircleAvatar(
                     backgroundColor: Theme.of(context).primaryColor,
-                    child: Text(
-                      widget.post.authorName[0].toUpperCase(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    backgroundImage: widget.post.authorProfileImage != null
+                        ? NetworkImage(widget.post.authorProfileImage!)
+                        : null,
+                    child: widget.post.authorProfileImage == null
+                        ? Text(
+                            widget.post.authorName[0].toUpperCase(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : null,
                   ),
                   SizedBox(width: 12),
                   Expanded(
@@ -352,14 +357,22 @@ class _CommentsPageState extends State<CommentsPage> {
                                     CircleAvatar(
                                       radius: 16,
                                       backgroundColor: Colors.grey[400],
-                                      child: Text(
-                                        comment.userName[0].toUpperCase(),
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      backgroundImage:
+                                          comment.userProfileImage != null
+                                          ? NetworkImage(
+                                              comment.userProfileImage!,
+                                            )
+                                          : null,
+                                      child: comment.userProfileImage == null
+                                          ? Text(
+                                              comment.userName[0].toUpperCase(),
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            )
+                                          : null,
                                     ),
                                     SizedBox(width: 8),
                                     Expanded(
