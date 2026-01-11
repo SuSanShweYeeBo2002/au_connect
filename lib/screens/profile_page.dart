@@ -566,6 +566,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFE3F2FD),
       body: LayoutBuilder(
         builder: (context, constraints) {
           double maxWidth = constraints.maxWidth > 600

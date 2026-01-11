@@ -136,7 +136,7 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                             },
                             child: _CampusTile(
                               title: 'Shop & Lost Found',
-                              color: Colors.white,
+                              color: Colors.blue[100],
                               icon: Icons.shopping_bag,
                             ),
                           ),
@@ -165,7 +165,7 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                               );
                             },
                             child: _CampusTile(
-                              title: 'Events',
+                              title: 'Events & Notices',
                               color: Colors.white,
                               icon: Icons.event,
                             ),
@@ -211,7 +211,7 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                             },
                             child: _CampusTile(
                               title: 'Study Buddy',
-                              color: Colors.white,
+                              color: Colors.blue[100],
                               icon: Icons.groups,
                             ),
                           ),
