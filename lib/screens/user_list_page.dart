@@ -259,9 +259,16 @@ class _UserListPageState extends State<UserListPage> {
               leading: Stack(
                 children: [
                   CircleAvatar(
-                    child: Text(
-                      user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-                    ),
+                    backgroundImage: user.profileImage != null
+                        ? NetworkImage(user.profileImage!)
+                        : null,
+                    child: user.profileImage == null
+                        ? Text(
+                            user.name.isNotEmpty
+                                ? user.name[0].toUpperCase()
+                                : '?',
+                          )
+                        : null,
                   ),
                   if (user.isOnline)
                     Positioned(

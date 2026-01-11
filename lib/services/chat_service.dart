@@ -255,24 +255,27 @@ class User {
   final String email;
   final String name;
   final bool isOnline;
+  final String? profileImage;
 
   User({
     required this.id,
     required this.email,
     required this.name,
     this.isOnline = false,
+    this.profileImage,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     final email = json['email'] ?? '';
     // Generate a display name from email if name is not provided
-    final name = json['name'] ?? email.split('@')[0];
+    final name = json['displayName'] ?? json['name'] ?? email.split('@')[0];
 
     return User(
       id: json['_id'] ?? json['id'] ?? '',
       email: email,
       name: name,
       isOnline: json['isOnline'] ?? false,
+      profileImage: json['profileImage'],
     );
   }
 }

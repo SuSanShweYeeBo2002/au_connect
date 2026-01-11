@@ -144,13 +144,20 @@ class _NewMessagePageState extends State<NewMessagePage> {
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Color(0xFF64B5F6),
-                      child: Text(
-                        user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      backgroundImage: user.profileImage != null
+                          ? NetworkImage(user.profileImage!)
+                          : null,
+                      child: user.profileImage == null
+                          ? Text(
+                              user.name.isNotEmpty
+                                  ? user.name[0].toUpperCase()
+                                  : '?',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          : null,
                       radius: 20,
                     ),
                     title: Text(

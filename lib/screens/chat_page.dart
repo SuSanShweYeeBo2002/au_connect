@@ -3,6 +3,7 @@ import '../services/chat_service.dart';
 import '../services/socket_service.dart';
 import '../services/auth_service.dart';
 import '../services/friend_service.dart';
+import '../services/user_service.dart';
 
 class ChatPage extends StatefulWidget {
   final User? receiver;
@@ -24,6 +25,7 @@ class _ChatPageState extends State<ChatPage> {
   DateTime? _lastTypingNotification;
   String? _typingUserId;
   String? _currentUserId;
+  String? _currentUserProfileImage;
   bool _isSendingMessage = false;
   bool _isBlocked = false;
   bool _isFriend = false;
@@ -84,9 +86,20 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _loadCurrentUser() async {
     final userId = await AuthService.instance.getUserId();
     print('Loaded current user ID: "$userId"');
-    setState(() {
-      _currentUserId = userId;
-    });
+
+    try {
+      final response = await UserService.getCurrentUser();
+      final userData = response['data'];
+      setState(() {
+        _currentUserId = userId;
+        _currentUserProfileImage = userData['profileImage'];
+      });
+    } catch (e) {
+      print('Error loading current user profile: $e');
+      setState(() {
+        _currentUserId = userId;
+      });
+    }
   }
 
   Future<void> _checkFriendshipStatus() async {
@@ -1174,9 +1187,16 @@ class _ChatPageState extends State<ChatPage> {
             children: [
               CircleAvatar(
                 backgroundColor: Colors.white,
-                child: Text(
-                  widget.receiver?.name.substring(0, 1).toUpperCase() ?? 'A',
-                ),
+                backgroundImage: widget.receiver?.profileImage != null
+                    ? NetworkImage(widget.receiver!.profileImage!)
+                    : null,
+                child: widget.receiver?.profileImage == null
+                    ? Text(
+                        widget.receiver?.name.substring(0, 1).toUpperCase() ??
+                            'A',
+                        style: TextStyle(color: Colors.blue),
+                      )
+                    : null,
               ),
               SizedBox(width: 10),
               Column(
@@ -1305,6 +1325,8 @@ class _ChatPageState extends State<ChatPage> {
                           onDelete: isUser
                               ? () => _deleteMessage(message)
                               : null,
+                          currentUserProfileImage: _currentUserProfileImage,
+                          receiverProfileImage: widget.receiver?.profileImage,
                         );
                       },
                     ),
@@ -1417,11 +1439,15 @@ class MessageBubble extends StatelessWidget {
   final Message message;
   final bool isUser;
   final VoidCallback? onDelete;
+  final String? currentUserProfileImage;
+  final String? receiverProfileImage;
 
   const MessageBubble({
     required this.message,
     required this.isUser,
     this.onDelete,
+    this.currentUserProfileImage,
+    this.receiverProfileImage,
   });
 
   void _showDeleteDialog(BuildContext context) {
@@ -1461,7 +1487,13 @@ class MessageBubble extends StatelessWidget {
             : MainAxisAlignment.start,
         children: [
           if (!isUser)
-            CircleAvatar(backgroundColor: Color(0xFF64B5F6), child: Text('A')),
+            CircleAvatar(
+              backgroundColor: Color(0xFF64B5F6),
+              backgroundImage: receiverProfileImage != null
+                  ? NetworkImage(receiverProfileImage!)
+                  : null,
+              child: receiverProfileImage == null ? Text('A') : null,
+            ),
           SizedBox(width: 8),
           GestureDetector(
             onLongPress: isUser ? () => _showDeleteDialog(context) : null,
@@ -1516,7 +1548,13 @@ class MessageBubble extends StatelessWidget {
           ),
           SizedBox(width: 8),
           if (isUser)
-            CircleAvatar(backgroundColor: Color(0xFF64B5F6), child: Text('U')),
+            CircleAvatar(
+              backgroundColor: Color(0xFF64B5F6),
+              backgroundImage: currentUserProfileImage != null
+                  ? NetworkImage(currentUserProfileImage!)
+                  : null,
+              child: currentUserProfileImage == null ? Text('U') : null,
+            ),
         ],
       ),
     );

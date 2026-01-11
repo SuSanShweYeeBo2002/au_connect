@@ -33,19 +33,21 @@ class UserService {
   static Future<Map<String, dynamic>> updateCurrentUser({
     String? email,
     String? password,
+    String? displayName,
   }) async {
     final token = await AuthService.instance.getAuthToken();
     if (token == null) {
       throw Exception('No authentication token found');
     }
 
-    if (email == null && password == null) {
+    if (email == null && password == null && displayName == null) {
       throw Exception('At least one field is required');
     }
 
     final body = <String, dynamic>{};
     if (email != null) body['email'] = email;
     if (password != null) body['password'] = password;
+    if (displayName != null) body['displayName'] = displayName;
 
     final response = await http.put(
       Uri.parse('$baseUrl/users/me'),

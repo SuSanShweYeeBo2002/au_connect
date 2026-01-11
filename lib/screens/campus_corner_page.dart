@@ -16,6 +16,7 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
   bool _isLoading = true;
   String _userName = 'User';
   String _userEmail = '';
+  String? _profileImageUrl;
 
   @override
   void initState() {
@@ -30,8 +31,12 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
 
       if (mounted) {
         setState(() {
-          _userName = userData['email']?.split('@')[0] ?? 'User';
+          _userName =
+              userData['displayName'] ??
+              userData['email']?.split('@')[0] ??
+              'User';
           _userEmail = userData['email'] ?? '';
+          _profileImageUrl = userData['profileImage'];
           _isLoading = false;
         });
       }
@@ -71,21 +76,26 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                           CircleAvatar(
                             radius: 32,
                             backgroundColor: Colors.blue[300],
+                            backgroundImage: _profileImageUrl != null
+                                ? NetworkImage(_profileImageUrl!)
+                                : null,
                             child: _isLoading
                                 ? CircularProgressIndicator(
                                     color: Colors.white,
                                     strokeWidth: 2,
                                   )
-                                : Text(
-                                    _userName.isNotEmpty
-                                        ? _userName[0].toUpperCase()
-                                        : 'U',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                : (_profileImageUrl == null
+                                      ? Text(
+                                          _userName.isNotEmpty
+                                              ? _userName[0].toUpperCase()
+                                              : 'U',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        )
+                                      : null),
                           ),
                           SizedBox(width: 16),
                           Expanded(
@@ -109,10 +119,6 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                                 ),
                               ],
                             ),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.settings, color: Colors.grey[800]),
-                            onPressed: () {},
                           ),
                         ],
                       ),

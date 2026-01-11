@@ -750,7 +750,7 @@ class FriendUser {
     return FriendUser(
       id: json['_id'] ?? json['id'] ?? '',
       email: email,
-      name: json['name'] ?? email.split('@')[0],
+      name: json['displayName'] ?? json['name'] ?? email.split('@')[0],
       avatar: json['avatar'],
     );
   }
@@ -841,7 +841,7 @@ class BlockedUserInfo {
     return BlockedUserInfo(
       id: json['_id'] ?? json['id'] ?? '',
       email: email,
-      name: json['name'] ?? email.split('@')[0],
+      name: json['displayName'] ?? json['name'] ?? email.split('@')[0],
     );
   }
 }

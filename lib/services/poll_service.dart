@@ -231,7 +231,7 @@ class Voter {
 
   factory Voter.fromJson(Map<String, dynamic> json) {
     final email = json['email'] ?? '';
-    final name = json['name'] ?? email.split('@')[0];
+    final name = json['displayName'] ?? json['name'] ?? email.split('@')[0];
     return Voter(id: json['_id'] ?? json['id'] ?? '', email: email, name: name);
   }
 
@@ -326,7 +326,10 @@ class Poll {
 
   factory Poll.fromJson(Map<String, dynamic> json) {
     final authorEmail = json['author']?['email'] ?? '';
-    final authorName = json['author']?['name'] ?? authorEmail.split('@')[0];
+    final authorName =
+        json['author']?['displayName'] ??
+        json['author']?['name'] ??
+        authorEmail.split('@')[0];
 
     final List<dynamic> optionsData = json['options'] ?? [];
     final options = optionsData.map((opt) => PollOption.fromJson(opt)).toList();

@@ -584,7 +584,10 @@ class Post {
 
   factory Post.fromJson(Map<String, dynamic> json) {
     final authorEmail = json['author']?['email'] ?? '';
-    final authorName = json['author']?['name'] ?? authorEmail.split('@')[0];
+    final authorName =
+        json['author']?['displayName'] ??
+        json['author']?['name'] ??
+        authorEmail.split('@')[0];
 
     return Post(
       id: json['_id'] ?? json['id'] ?? '',
@@ -682,7 +685,9 @@ class Comment {
   factory Comment.fromJson(Map<String, dynamic> json) {
     final userEmail = json['author']?['email'] ?? json['user']?['email'] ?? '';
     final userName =
+        json['author']?['displayName'] ??
         json['author']?['name'] ??
+        json['user']?['displayName'] ??
         json['user']?['name'] ??
         userEmail.split('@')[0];
 

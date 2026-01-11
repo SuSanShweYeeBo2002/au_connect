@@ -148,12 +148,18 @@ class _ChatsListPageState extends State<ChatsListPage> {
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor: Color(0xFF64B5F6),
-                          child: Text(
-                            conversation.user.name
-                                .substring(0, 1)
-                                .toUpperCase(),
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          backgroundImage:
+                              conversation.user.profileImage != null
+                              ? NetworkImage(conversation.user.profileImage!)
+                              : null,
+                          child: conversation.user.profileImage == null
+                              ? Text(
+                                  conversation.user.name
+                                      .substring(0, 1)
+                                      .toUpperCase(),
+                                  style: TextStyle(color: Colors.white),
+                                )
+                              : null,
                         ),
                         title: Text(conversation.user.name),
                         subtitle: Text(

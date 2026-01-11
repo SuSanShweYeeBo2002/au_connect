@@ -40,7 +40,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
       setState(() {
         _userId = userData['_id'];
-        _userName = userData['email']?.split('@')[0] ?? 'User';
+        _userName =
+            userData['displayName'] ??
+            userData['email']?.split('@')[0] ??
+            'User';
         _userEmail = userData['email'];
         _profileImageUrl = userData['profileImage'];
         _isLoadingProfile = false;
@@ -198,6 +201,121 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       );
     }
+  }
+
+  Future<void> _showEditDisplayNameDialog() async {
+    final displayNameController = TextEditingController(text: _userName);
+    String? errorMessage;
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.edit, color: Colors.blue),
+                SizedBox(width: 12),
+                Text('Edit Display Name'),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (errorMessage != null)
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.red),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline, color: Colors.red, size: 20),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            errorMessage!,
+                            style: TextStyle(color: Colors.red.shade900),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                TextField(
+                  controller: displayNameController,
+                  decoration: InputDecoration(
+                    labelText: 'Display Name',
+                    hintText: 'Enter your display name',
+                    prefixIcon: Icon(Icons.person),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  autofocus: true,
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'This is how your name will appear to others',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final newName = displayNameController.text.trim();
+
+                  if (newName.isEmpty) {
+                    setState(() {
+                      errorMessage = 'Display name cannot be empty';
+                    });
+                    return;
+                  }
+
+                  if (newName.length > 50) {
+                    setState(() {
+                      errorMessage =
+                          'Display name is too long (max 50 characters)';
+                    });
+                    return;
+                  }
+
+                  try {
+                    await UserService.updateCurrentUser(displayName: newName);
+                    // Update local state
+                    this.setState(() {
+                      _userName = newName;
+                    });
+
+                    Navigator.pop(dialogContext);
+
+                    ScaffoldMessenger.of(this.context).showSnackBar(
+                      SnackBar(
+                        content: Text('Display name updated successfully!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    setState(() {
+                      errorMessage = 'Failed to update display name: $e';
+                    });
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                child: Text('Save', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _showEditProfileDialog() async {
@@ -618,7 +736,25 @@ class _ProfilePageState extends State<ProfilePage> {
                     if (_isLoadingProfile)
                       CircularProgressIndicator()
                     else ...[
-                      Text(_userName ?? "User", style: TextStyle(fontSize: 22)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _userName ?? "User",
+                            style: TextStyle(fontSize: 22),
+                          ),
+                          SizedBox(width: 8),
+                          IconButton(
+                            icon: Icon(
+                              Icons.edit,
+                              size: 20,
+                              color: Colors.blue,
+                            ),
+                            onPressed: _showEditDisplayNameDialog,
+                            tooltip: 'Edit display name',
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         _userEmail ?? "",
@@ -702,8 +838,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             child: TabBarView(
                               children: [
                                 _buildPosts(),
-                                Center(child: Text("Photos will show here")),
-                                Center(child: Text("About infos")),
+                                _buildAlbum(),
+                                _buildAbout(),
                               ],
                             ),
                           ),
@@ -754,9 +890,13 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: NetworkImage(
-                      "https://win.gg/wp-content/uploads/2022/03/baki-hanma.jpg.webp",
-                    ),
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage: _profileImageUrl != null
+                        ? NetworkImage(_profileImageUrl!)
+                        : null,
+                    child: _profileImageUrl == null
+                        ? Icon(Icons.person, color: Colors.grey[600])
+                        : null,
                   ),
                   title: Text(post.authorName),
                   subtitle: Text(_formatDate(post.createdAt)),
@@ -849,5 +989,191 @@ class _ProfilePageState extends State<ProfilePage> {
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }
+  }
+
+  Widget _buildAlbum() {
+    if (_isLoadingPosts) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    // Filter posts that have images
+    final postsWithImages = _userPosts
+        .where((post) => post.image != null && post.image!.isNotEmpty)
+        .toList();
+
+    if (postsWithImages.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.photo_library, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text(
+              'No photos yet',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Photos from your posts will appear here',
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadUserPosts,
+      child: GridView.builder(
+        padding: EdgeInsets.all(4),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 4,
+          mainAxisSpacing: 4,
+        ),
+        itemCount: postsWithImages.length,
+        itemBuilder: (context, index) {
+          final post = postsWithImages[index];
+          return GestureDetector(
+            onTap: () {
+              // Show full image in a dialog
+              showDialog(
+                context: context,
+                builder: (context) => Dialog(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AppBar(
+                        title: Text(post.authorName),
+                        leading: IconButton(
+                          icon: Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                      Flexible(
+                        child: Image.network(post.image!, fit: BoxFit.contain),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Text(post.content),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            child: Image.network(
+              post.image!,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey[300],
+                  child: Icon(Icons.broken_image, color: Colors.grey),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildAbout() {
+    if (_isLoadingProfile) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Card(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Profile Information',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  _buildInfoRow(Icons.person, 'Name', _userName ?? 'User'),
+                  SizedBox(height: 12),
+                  _buildInfoRow(Icons.email, 'Email', _userEmail ?? 'N/A'),
+                  SizedBox(height: 12),
+                  _buildInfoRow(
+                    Icons.account_circle,
+                    'User ID',
+                    _userId ?? 'N/A',
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Activity',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  _buildInfoRow(
+                    Icons.post_add,
+                    'Total Posts',
+                    '${_userPosts.length}',
+                  ),
+                  SizedBox(height: 12),
+                  _buildInfoRow(
+                    Icons.photo,
+                    'Photos',
+                    '${_userPosts.where((p) => p.image != null && p.image!.isNotEmpty).length}',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Colors.grey[600]),
+        SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              SizedBox(height: 4),
+              Text(
+                value,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
