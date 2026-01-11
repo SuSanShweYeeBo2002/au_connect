@@ -45,7 +45,7 @@ Assumption University of Thailand\\[1cm]
 
 December 2025\\[2cm]
 
-{\small Version 1.0}
+{\small Version 1.1}
 
 \end{flushright}
 \vfill
@@ -64,6 +64,8 @@ December 2025\\[2cm]
 \textbf{Name} & \textbf{Date} & \textbf{Reason for Changes} & \textbf{Version} \\
 \hline
 AU Connect Team & December 2025 & Initial SRS creation & 1.0 \\
+\hline
+AU Connect Team & January 2026 & Updated features: multiple image upload, profile images, display name, report posts, image gallery viewer, Album/About tabs & 1.1 \\
 \hline
 \end{longtable}
 
@@ -334,17 +336,21 @@ The system shall provide a responsive, intuitive, and mobile-first user interfac
     \item \textbf{FR-2.2}: The system shall allow users to create text posts with optional descriptions.
     \item \textbf{FR-2.3}: The system shall allow users to upload up to 5 images per post.
     \item \textbf{FR-2.4}: The system shall support multiple image formats (JPEG, PNG, GIF, WebP).
-    \item \textbf{FR-2.5}: The system shall display post author information (name, profile picture).
+    \item \textbf{FR-2.5}: The system shall display post author information (name, display name, profile picture).
     \item \textbf{FR-2.6}: The system shall display post timestamps.
     \item \textbf{FR-2.7}: The system shall allow users to like posts.
     \item \textbf{FR-2.8}: The system shall allow users to unlike posts.
     \item \textbf{FR-2.9}: The system shall display the number of likes on each post.
-    \item \textbf{FR-2.10}: The system shall allow users to comment on posts.
-    \item \textbf{FR-2.11}: The system shall display all comments on posts.
+    \item \textbf{FR-2.10}: The system shall allow users to comment on posts with optional profile images.
+    \item \textbf{FR-2.11}: The system shall display all comments on posts with author profile pictures.
     \item \textbf{FR-2.12}: The system shall allow users to delete their own posts.
     \item \textbf{FR-2.13}: The system shall allow users to delete their own comments.
-    \item \textbf{FR-2.14}: The system shall display images in a carousel/gallery format.
-    \item \textbf{FR-2.15}: The system shall store images in AWS S3 cloud storage.
+    \item \textbf{FR-2.14}: The system shall display images in a responsive gallery format (Facebook-style: 1 full-width, 2 side-by-side, 3 asymmetric, 4+ grid layout).
+    \item \textbf{FR-2.15}: The system shall store images in AWS S3 cloud storage or compatible backend.
+    \item \textbf{FR-2.16}: The system shall allow users to report inappropriate posts with a reason.
+    \item \textbf{FR-2.17}: The system shall automatically hide posts with more than 1 report from feeds.
+    \item \textbf{FR-2.18}: The system shall provide full-screen image viewer with pinch-to-zoom and swipe navigation.
+    \item \textbf{FR-2.19}: The system shall display image count indicator for multi-image posts.
 \end{itemize}
 
 \subsection{Profile Management}
@@ -355,13 +361,17 @@ The system shall provide a responsive, intuitive, and mobile-first user interfac
 \textbf{Functional Requirements:}
 
 \begin{itemize}
-    \item \textbf{FR-3.1}: The system shall display user profile information including name and email.
+    \item \textbf{FR-3.1}: The system shall display user profile information including display name, email, and profile picture.
     \item \textbf{FR-3.2}: The system shall allow users to update their profile picture.
-    \item \textbf{FR-3.3}: The system shall allow users to update their email address.
-    \item \textbf{FR-3.4}: The system shall allow users to change their password.
-    \item \textbf{FR-3.5}: The system shall require old password verification before changing passwords.
-    \item \textbf{FR-3.6}: The system shall display all posts created by the user on their profile.
-    \item \textbf{FR-3.7}: The system shall display user statistics (number of friends, posts).
+    \item \textbf{FR-3.3}: The system shall allow users to update their display name (max 50 characters).
+    \item \textbf{FR-3.4}: The system shall allow users to update their email address.
+    \item \textbf{FR-3.5}: The system shall allow users to change their password.
+    \item \textbf{FR-3.6}: The system shall require old password verification before changing passwords.
+    \item \textbf{FR-3.7}: The system shall display all posts created by the user on their profile Posts tab.
+    \item \textbf{FR-3.8}: The system shall display user's post images in a grid layout on the Album tab.
+    \item \textbf{FR-3.9}: The system shall display user statistics on the About tab (posts count, friends count, join date).
+    \item \textbf{FR-3.10}: The system shall use display name instead of email-derived username across the application.
+    \item \textbf{FR-3.11}: The system shall display profile pictures in all user interfaces (posts, comments, messages, chat lists).
 \end{itemize}
 
 \subsection{Friends Management}
@@ -397,8 +407,9 @@ The system shall provide a responsive, intuitive, and mobile-first user interfac
     \item \textbf{FR-5.4}: The system shall display message timestamps.
     \item \textbf{FR-5.5}: The system shall indicate message delivery status.
     \item \textbf{FR-5.6}: The system shall maintain persistent WebSocket connections for real-time updates.
-    \item \textbf{FR-5.7}: The system shall display typing indicators (future enhancement).
-    \item \textbf{FR-5.8}: The system shall allow message deletion (future enhancement).
+    \item \textbf{FR-5.7}: The system shall display user profile pictures in chat interface and conversation lists.
+    \item \textbf{FR-5.8}: The system shall display typing indicators (future enhancement).
+    \item \textbf{FR-5.9}: The system shall allow message deletion (future enhancement).
 \end{itemize}
 
 \subsection{Study Sessions}
