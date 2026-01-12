@@ -89,7 +89,7 @@ class UpcomingEventPage extends StatelessWidget {
         'title': 'Graduate Studies',
         'imageUrl': 'assets/images/au_facebook.jpg',
         'isAsset': true,
-        'url': 'https://www.facebook.com/share/17jao9RHpz/',
+        'url': 'https://www.facebook.com/share/16jZrRj3T3/',
         'useWebView': false,
       },
       {
@@ -112,7 +112,8 @@ class UpcomingEventPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Campus Clicks'),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.blue[700],
+        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
