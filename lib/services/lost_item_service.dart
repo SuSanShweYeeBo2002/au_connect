@@ -86,7 +86,8 @@ class LostItem {
 }
 
 class LostItemService {
-  static const String baseUrl = 'https://au-connect-api.onrender.com';
+  static const String baseUrl =
+      'https://auconnectapi-production.up.railway.app';
 
   static Future<String?> _getToken() async {
     return await AuthService.instance.getAuthToken();

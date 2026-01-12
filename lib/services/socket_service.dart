@@ -5,7 +5,7 @@ class SocketService {
   static SocketService? _instance;
   IO.Socket? _socket;
   final String _serverUrl =
-      'https://au-connect-api.onrender.com'; // Production server
+      'https://auconnectapi-production.up.railway.app'; // Production server
   String? _pendingRoomId;
 
   static SocketService get instance {

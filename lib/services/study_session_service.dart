@@ -4,7 +4,8 @@ import 'dart:async';
 import 'auth_service.dart';
 
 class StudySessionService {
-  static const String baseUrl = 'https://au-connect-api.onrender.com';
+  static const String baseUrl =
+      'https://auconnectapi-production.up.railway.app';
   static const String endpoint = '/study-sessions';
 
   static StudySessionService? _instance;
