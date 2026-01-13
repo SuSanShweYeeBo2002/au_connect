@@ -113,6 +113,7 @@ class _ProfilePageState extends State<ProfilePage> {
           authorId: _userPosts[index].authorId,
           authorEmail: _userPosts[index].authorEmail,
           authorName: _userPosts[index].authorName,
+          authorProfileImage: _userPosts[index].authorProfileImage,
           content: _userPosts[index].content,
           image: _userPosts[index].image,
           images: _userPosts[index].images,

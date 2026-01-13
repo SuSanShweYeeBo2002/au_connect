@@ -496,13 +496,18 @@ class _PollCard extends StatelessWidget {
                     return ListTile(
                       leading: CircleAvatar(
                         backgroundColor: Theme.of(context).primaryColor,
-                        child: Text(
-                          voter.initials,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        backgroundImage: voter.profileImage != null
+                            ? NetworkImage(voter.profileImage!)
+                            : null,
+                        child: voter.profileImage == null
+                            ? Text(
+                                voter.initials,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            : null,
                       ),
                       title: Text(voter.displayName),
                       subtitle: voter.email.isNotEmpty
@@ -535,13 +540,18 @@ class _PollCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   backgroundColor: Theme.of(context).primaryColor,
-                  child: Text(
-                    poll.authorName[0].toUpperCase(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  backgroundImage: poll.authorProfileImage != null
+                      ? NetworkImage(poll.authorProfileImage!)
+                      : null,
+                  child: poll.authorProfileImage == null
+                      ? Text(
+                          poll.authorName[0].toUpperCase(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
                 ),
                 SizedBox(width: 12),
                 Expanded(

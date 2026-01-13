@@ -227,17 +227,33 @@ class Voter {
   final String id;
   final String email;
   final String name;
+  final String? profileImage;
 
-  Voter({required this.id, required this.email, required this.name});
+  Voter({
+    required this.id,
+    required this.email,
+    required this.name,
+    this.profileImage,
+  });
 
   factory Voter.fromJson(Map<String, dynamic> json) {
     final email = json['email'] ?? '';
     final name = json['displayName'] ?? json['name'] ?? email.split('@')[0];
-    return Voter(id: json['_id'] ?? json['id'] ?? '', email: email, name: name);
+    return Voter(
+      id: json['_id'] ?? json['id'] ?? '',
+      email: email,
+      name: name,
+      profileImage: json['profileImage'],
+    );
   }
 
   Map<String, dynamic> toJson() {
-    return {'_id': id, 'email': email, 'name': name};
+    return {
+      '_id': id,
+      'email': email,
+      'name': name,
+      'profileImage': profileImage,
+    };
   }
 
   String get displayName {
@@ -273,11 +289,11 @@ class PollOption {
     final voters = votersData.map((voter) {
       // Handle both string IDs and user objects
       if (voter is String) {
-        return Voter(id: voter, email: '', name: '');
+        return Voter(id: voter, email: '', name: '', profileImage: null);
       } else if (voter is Map<String, dynamic>) {
         return Voter.fromJson(voter);
       }
-      return Voter(id: '', email: '', name: '');
+      return Voter(id: '', email: '', name: '', profileImage: null);
     }).toList();
 
     return PollOption(
@@ -301,6 +317,7 @@ class Poll {
   final String authorId;
   final String authorName;
   final String authorEmail;
+  final String? authorProfileImage;
   final String question;
   final List<PollOption> options;
   final int totalVotes;
@@ -315,6 +332,7 @@ class Poll {
     required this.authorId,
     required this.authorName,
     required this.authorEmail,
+    this.authorProfileImage,
     required this.question,
     required this.options,
     required this.totalVotes,
@@ -340,6 +358,7 @@ class Poll {
       authorId: json['author']?['_id'] ?? '',
       authorName: authorName,
       authorEmail: authorEmail,
+      authorProfileImage: json['author']?['profileImage'],
       question: json['question'] ?? '',
       options: options,
       totalVotes: json['totalVotes'] ?? 0,
