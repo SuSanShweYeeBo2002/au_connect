@@ -96,7 +96,7 @@ class UpcomingEventPage extends StatelessWidget {
         'title': 'Weather Forecast',
         'imageUrl': 'assets/images/weather.jpg',
         'isAsset': true,
-        'url': 'http://localhost:5173/',
+        'url': 'https://dynamic-pony-42f64d.netlify.app/',
         'useWebView': true,
       },
     ];
@@ -110,6 +110,7 @@ class UpcomingEventPage extends StatelessWidget {
     }
 
     return Scaffold(
+      backgroundColor: const Color(0xFFE3F2FD),
       appBar: AppBar(
         title: const Text('Campus Clicks'),
         backgroundColor: Colors.blue[700],
@@ -120,15 +121,6 @@ class UpcomingEventPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Tap an image to explore",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
-              ),
-            ),
-            const SizedBox(height: 16),
             Expanded(
               child: GridView.count(
                 crossAxisCount: crossAxisCount,

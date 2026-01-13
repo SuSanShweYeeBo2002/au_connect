@@ -42,9 +42,11 @@ class _WebViewPageState extends State<WebViewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFE3F2FD),
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.blue[700],
+        foregroundColor: Colors.white,
       ),
       body: kIsWeb
           ? HtmlElementView(viewType: _iframeId)

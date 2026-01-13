@@ -115,6 +115,7 @@ class _ProfilePageState extends State<ProfilePage> {
           authorName: _userPosts[index].authorName,
           content: _userPosts[index].content,
           image: _userPosts[index].image,
+          images: _userPosts[index].images,
           likeCount: response.likeCount,
           commentCount: _userPosts[index].commentCount,
           isLikedByUser: response.action == 'liked',
@@ -924,7 +925,61 @@ class _ProfilePageState extends State<ProfilePage> {
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Text(post.content, style: TextStyle(fontSize: 16)),
                 ),
-                if (post.image != null && post.image!.isNotEmpty)
+                // Display images from either 'images' array or singular 'image' field
+                if (post.images != null && post.images!.isNotEmpty)
+                  AspectRatio(
+                    aspectRatio: 1,
+                    child: PageView.builder(
+                      itemCount: post.images!.length,
+                      itemBuilder: (context, imgIndex) {
+                        return Stack(
+                          children: [
+                            Image.network(
+                              post.images![imgIndex],
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey[300],
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.broken_image,
+                                      size: 64,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            if (post.images!.length > 1)
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '${imgIndex + 1}/${post.images!.length}',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  )
+                else if (post.image != null && post.image!.isNotEmpty)
                   AspectRatio(
                     aspectRatio: 1, // Square aspect ratio for profile posts
                     child: Image.network(
@@ -1195,7 +1250,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   _buildInfoRow(
                     Icons.photo,
                     'Photos',
-                    '${_userPosts.where((p) => p.image != null && p.image!.isNotEmpty).length}',
+                    '${_userPosts.fold<int>(0, (sum, p) => sum + ((p.images?.length ?? 0) + ((p.image != null && p.image!.isNotEmpty) ? 1 : 0)))}',
                   ),
                 ],
               ),
