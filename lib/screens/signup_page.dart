@@ -68,7 +68,9 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:8383/users/signup'),
+        Uri.parse(
+          'https://auconnectapi-production.up.railway.app/api/auth/signup',
+        ),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text,

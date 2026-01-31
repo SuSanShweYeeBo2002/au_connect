@@ -80,7 +80,8 @@ class SellItem {
 }
 
 class SellItemService {
-  static const String baseUrl = 'http://localhost:8383';
+  static const String baseUrl =
+      'https://auconnectapi-production.up.railway.app';
 
   static Future<String?> _getToken() async {
     return await AuthService.instance.getAuthToken();

@@ -5,7 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'auth_service.dart';
 
 class UserService {
-  static const String baseUrl = 'http://localhost:8383';
+  static const String baseUrl =
+      'https://auconnectapi-production.up.railway.app';
 
   // Get current authenticated user's profile
   static Future<Map<String, dynamic>> getCurrentUser() async {
