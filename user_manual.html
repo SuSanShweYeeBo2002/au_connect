@@ -284,6 +284,29 @@
         tr:hover {
             background: #f8f9fa;
         }
+         /* ===== PRINT PAGE CONTROL ===== */
+        @media print {
+
+            @page {
+                size: A4;
+                margin: 20mm;
+            }
+
+            body {
+                background: white !important;
+            }
+
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            #introduction {
+                page-break-before: always;
+                break-before: page;
+            }
+        }
+        
     </style>
 </head>
 <body>
