@@ -11,8 +11,7 @@ class AdConfig {
   /// AdSense Publisher ID
   static String get webPublisherId {
     if (useProductionAds) {
-      // TODO: Replace with your real AdSense Publisher ID
-      return 'ca-pub-XXXXXXXXXXXXXXXX'; // Your real ID
+      return 'ca-pub-8464686587467227'; // Your real Publisher ID
     }
     // Test ID (works for development but shows 400 errors on localhost)
     return 'ca-pub-3940256099942544';
@@ -21,8 +20,10 @@ class AdConfig {
   /// AdSense Ad Slot ID
   static String get webAdSlot {
     if (useProductionAds) {
-      // TODO: Replace with your real ad slot ID
-      return 'XXXXXXXXXX'; // Your real slot
+      // TODO: After AdSense approves your site, create an ad unit and paste the slot ID here
+      // Go to: Ads > By ad unit > New ad unit > Display ads > Create
+      // Then paste the data-ad-slot number here
+      return 'XXXXXXXXXX'; // Replace with your ad slot ID from AdSense
     }
     return '1234567890'; // Test slot
   }
