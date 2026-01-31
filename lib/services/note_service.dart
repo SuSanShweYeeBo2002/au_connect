@@ -100,8 +100,7 @@ class NotesPagination {
 }
 
 class NoteService {
-  static const String baseUrl =
-      'https://auconnectapi-production.up.railway.app';
+  static const String baseUrl = 'http://localhost:8383';
 
   // Get the token from AuthService
   static Future<String?> _getToken() async {

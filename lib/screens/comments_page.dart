@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/post_service.dart';
 import '../services/auth_service.dart';
+import '../widgets/simple_image_viewer.dart';
 
 class CommentsPage extends StatefulWidget {
   final Post post;
@@ -125,53 +126,12 @@ class _CommentsPageState extends State<CommentsPage> {
   }
 
   void _showImageViewer(String imageUrl) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.black,
-          child: Stack(
-            children: [
-              Center(
-                child: Image.network(
-                  imageUrl,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      height: 200,
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.broken_image,
-                              color: Colors.white,
-                              size: 64,
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Failed to load image',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              Positioned(
-                top: 20,
-                right: 20,
-                child: IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: Icon(Icons.close, color: Colors.white, size: 30),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            SimpleImageViewer(imageUrl: imageUrl, heroTag: 'comment_image'),
+      ),
     );
   }
 

@@ -6,6 +6,7 @@ import 'screens/signin_page.dart';
 import 'screens/signup_page.dart';
 import 'screens/main_tab_page.dart';
 import 'widgets/auth_guard.dart';
+import 'widgets/global_zoom_wrapper.dart';
 import 'services/auth_service.dart';
 
 void main() {
@@ -119,6 +120,15 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
       ),
+      builder: (context, child) {
+        // Wrap the entire app with global zoom functionality
+        // minScale: 1.0 means no zoom out (like Facebook) - prevents white space
+        return GlobalZoomInteractiveWrapper(
+          minScale: 1.0, // Changed from 0.7 - no zoom out beyond actual size
+          maxScale: 2.5, // Can still zoom in up to 2.5x
+          child: child ?? Container(),
+        );
+      },
       home: FutureBuilder<bool>(
         future: AuthService.instance.isLoggedIn(),
         builder: (context, snapshot) {

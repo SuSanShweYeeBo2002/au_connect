@@ -3,6 +3,8 @@ import 'add_post_page.dart';
 import 'comments_page.dart';
 import '../services/post_service.dart';
 import '../services/auth_service.dart';
+import '../widgets/simple_image_viewer.dart';
+import '../widgets/optimized_image.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -254,42 +256,10 @@ class _HomePageState extends State<HomePage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Scaffold(
-          backgroundColor: Colors.black,
-          appBar: AppBar(
-            backgroundColor: Colors.black,
-            iconTheme: IconThemeData(color: Colors.white),
-            title: Text(
-              '${initialIndex + 1} / ${images.length}',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          body: PageView.builder(
-            controller: PageController(initialPage: initialIndex),
-            itemCount: images.length,
-            onPageChanged: (index) {
-              // Update title with current image index
-            },
-            itemBuilder: (context, index) {
-              return Center(
-                child: InteractiveViewer(
-                  child: Image.network(
-                    images[index],
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Center(
-                        child: Icon(
-                          Icons.broken_image,
-                          color: Colors.white,
-                          size: 64,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              );
-            },
-          ),
+        builder: (context) => SimpleImageGalleryViewer(
+          imageUrls: images,
+          initialIndex: initialIndex,
+          heroTag: 'post_image',
         ),
       ),
     );
@@ -305,17 +275,10 @@ class _HomePageState extends State<HomePage> {
         child: Container(
           height: 300,
           width: double.infinity,
-          child: Image.network(
-            images[0],
+          child: OptimizedImage(
+            imageUrl: images[0],
             fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                color: Colors.grey[300],
-                child: Center(
-                  child: Icon(Icons.broken_image, color: Colors.grey),
-                ),
-              );
-            },
+            heroTag: 'post_image_0',
           ),
         ),
       );
@@ -330,17 +293,10 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: GestureDetector(
                 onTap: () => _showImageGallery(images, 0),
-                child: Image.network(
-                  images[0],
+                child: OptimizedImage(
+                  imageUrl: images[0],
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[300],
-                      child: Center(
-                        child: Icon(Icons.broken_image, color: Colors.grey),
-                      ),
-                    );
-                  },
+                  heroTag: 'post_image_0',
                 ),
               ),
             ),
@@ -348,17 +304,10 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: GestureDetector(
                 onTap: () => _showImageGallery(images, 1),
-                child: Image.network(
-                  images[1],
+                child: OptimizedImage(
+                  imageUrl: images[1],
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[300],
-                      child: Center(
-                        child: Icon(Icons.broken_image, color: Colors.grey),
-                      ),
-                    );
-                  },
+                  heroTag: 'post_image_1',
                 ),
               ),
             ),
@@ -377,17 +326,10 @@ class _HomePageState extends State<HomePage> {
               flex: 2,
               child: GestureDetector(
                 onTap: () => _showImageGallery(images, 0),
-                child: Image.network(
-                  images[0],
+                child: OptimizedImage(
+                  imageUrl: images[0],
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[300],
-                      child: Center(
-                        child: Icon(Icons.broken_image, color: Colors.grey),
-                      ),
-                    );
-                  },
+                  heroTag: 'post_image_0',
                 ),
               ),
             ),
@@ -398,22 +340,11 @@ class _HomePageState extends State<HomePage> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () => _showImageGallery(images, 1),
-                      child: Image.network(
-                        images[1],
+                      child: OptimizedImage(
+                        imageUrl: images[1],
                         fit: BoxFit.cover,
                         width: double.infinity,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.grey[300],
-                            child: Center(
-                              child: Icon(
-                                Icons.broken_image,
-                                color: Colors.grey,
-                                size: 20,
-                              ),
-                            ),
-                          );
-                        },
+                        heroTag: 'post_image_1',
                       ),
                     ),
                   ),
@@ -421,22 +352,11 @@ class _HomePageState extends State<HomePage> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () => _showImageGallery(images, 2),
-                      child: Image.network(
-                        images[2],
+                      child: OptimizedImage(
+                        imageUrl: images[2],
                         fit: BoxFit.cover,
                         width: double.infinity,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.grey[300],
-                            child: Center(
-                              child: Icon(
-                                Icons.broken_image,
-                                color: Colors.grey,
-                                size: 20,
-                              ),
-                            ),
-                          );
-                        },
+                        heroTag: 'post_image_2',
                       ),
                     ),
                   ),
@@ -459,17 +379,10 @@ class _HomePageState extends State<HomePage> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () => _showImageGallery(images, 0),
-                    child: Image.network(
-                      images[0],
+                    child: OptimizedImage(
+                      imageUrl: images[0],
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: Center(
-                            child: Icon(Icons.broken_image, color: Colors.grey),
-                          ),
-                        );
-                      },
+                      heroTag: 'post_image_0',
                     ),
                   ),
                 ),
@@ -477,17 +390,10 @@ class _HomePageState extends State<HomePage> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () => _showImageGallery(images, 1),
-                    child: Image.network(
-                      images[1],
+                    child: OptimizedImage(
+                      imageUrl: images[1],
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: Center(
-                            child: Icon(Icons.broken_image, color: Colors.grey),
-                          ),
-                        );
-                      },
+                      heroTag: 'post_image_1',
                     ),
                   ),
                 ),
@@ -501,17 +407,10 @@ class _HomePageState extends State<HomePage> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () => _showImageGallery(images, 2),
-                    child: Image.network(
-                      images[2],
+                    child: OptimizedImage(
+                      imageUrl: images[2],
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: Center(
-                            child: Icon(Icons.broken_image, color: Colors.grey),
-                          ),
-                        );
-                      },
+                      heroTag: 'post_image_2',
                     ),
                   ),
                 ),
@@ -522,20 +421,10 @@ class _HomePageState extends State<HomePage> {
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        Image.network(
-                          images[3],
+                        OptimizedImage(
+                          imageUrl: images[3],
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey[300],
-                              child: Center(
-                                child: Icon(
-                                  Icons.broken_image,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            );
-                          },
+                          heroTag: 'post_image_3',
                         ),
                         if (images.length > 4)
                           Container(
@@ -616,6 +505,7 @@ class _HomePageState extends State<HomePage> {
     return RefreshIndicator(
       onRefresh: _loadPosts,
       child: ListView.builder(
+        physics: BouncingScrollPhysics(),
         itemCount: posts.length,
         itemBuilder: (context, index) {
           final post = posts[index];
@@ -626,20 +516,9 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    backgroundImage: post.authorProfileImage != null
-                        ? NetworkImage(post.authorProfileImage!)
-                        : null,
-                    child: post.authorProfileImage == null
-                        ? Text(
-                            post.authorName[0].toUpperCase(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )
-                        : null,
+                  leading: OptimizedCircleAvatar(
+                    imageUrl: post.authorProfileImage,
+                    fallbackText: post.authorName,
                   ),
                   title: Text(
                     post.authorName,
@@ -698,21 +577,16 @@ class _HomePageState extends State<HomePage> {
                   _buildImageGallery(post.images!)
                 // Fallback to single image for backward compatibility
                 else if (post.image != null)
-                  Container(
-                    width: double.infinity,
-                    color: Colors.grey[200],
-                    child: Image.network(
-                      post.image!,
-                      fit: BoxFit.contain,
+                  GestureDetector(
+                    onTap: () => _showImageGallery([post.image!], 0),
+                    child: Container(
                       width: double.infinity,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: Center(
-                            child: Icon(Icons.broken_image, color: Colors.grey),
-                          ),
-                        );
-                      },
+                      child: OptimizedImage(
+                        imageUrl: post.image!,
+                        fit: BoxFit.contain,
+                        width: double.infinity,
+                        heroTag: 'post_image_0',
+                      ),
                     ),
                   ),
                 Padding(
