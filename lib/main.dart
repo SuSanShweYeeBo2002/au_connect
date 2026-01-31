@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:async';
 import 'package:uni_links/uni_links.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'screens/signin_page.dart';
 import 'screens/signup_page.dart';
 import 'screens/main_tab_page.dart';
@@ -9,7 +10,14 @@ import 'widgets/auth_guard.dart';
 import 'widgets/global_zoom_wrapper.dart';
 import 'services/auth_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Google Mobile Ads SDK
+  if (!kIsWeb) {
+    await MobileAds.instance.initialize();
+  }
+
   runApp(const MyApp());
 }
 

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'add_post_page.dart';
 import 'comments_page.dart';
+import 'ad_example_screen.dart';
 import '../services/post_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/simple_image_viewer.dart';
 import '../widgets/optimized_image.dart';
+import '../widgets/banner_ad_widget.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -506,7 +508,7 @@ class _HomePageState extends State<HomePage> {
       onRefresh: _loadPosts,
       child: ListView.builder(
         physics: BouncingScrollPhysics(),
-        itemCount: posts.length,
+        itemCount: posts.length, // No ad at bottom
         itemBuilder: (context, index) {
           final post = posts[index];
           return Card(
@@ -678,6 +680,16 @@ class _HomePageState extends State<HomePage> {
         foregroundColor: Colors.black,
         elevation: 1,
         actions: [
+          IconButton(
+            icon: Icon(Icons.ad_units),
+            tooltip: 'View Ad Examples',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AdExampleScreen()),
+              );
+            },
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 16.0, top: 8.0, bottom: 8.0),
             child: FloatingActionButton(
@@ -709,6 +721,67 @@ class _HomePageState extends State<HomePage> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
+          // Wide screen (desktop/tablet) - show sidebar layout
+          if (constraints.maxWidth > 900) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Main content (posts)
+                Expanded(
+                  flex: 7,
+                  child: Center(
+                    child: Container(
+                      constraints: BoxConstraints(maxWidth: 600),
+                      child: _buildContent(),
+                    ),
+                  ),
+                ),
+                // Right sidebar (ads)
+                Container(
+                  width: 300,
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // Sticky sidebar with ads
+                      Container(
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Sponsored',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 12),
+                            Container(height: 250, child: BannerAdWidget()),
+                            SizedBox(height: 16),
+                            Container(height: 250, child: BannerAdWidget()),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }
+
+          // Mobile/narrow screen - original layout
           double maxWidth = constraints.maxWidth > 600
               ? 500
               : constraints.maxWidth * 0.98;
