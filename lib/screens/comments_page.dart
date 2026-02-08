@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/post_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/simple_image_viewer.dart';
+import '../widgets/comment_reaction_picker.dart';
+import '../widgets/comment_replies_widget.dart';
 import 'other_user_profile_page.dart';
 
 class CommentsPage extends StatefulWidget {
@@ -21,6 +23,12 @@ class _CommentsPageState extends State<CommentsPage> {
   bool isSubmitting = false;
   bool _commentsAdded = false; // Track if any comments were added
   String? currentUserId;
+
+  // Reaction state
+  Map<String, String?> userReactions = {}; // commentId -> reactionType
+  Map<String, bool> showReactionPicker = {}; // commentId -> bool
+  Map<String, CommentReactionsResponse?> commentReactions =
+      {}; // commentId -> reactions
 
   @override
   void initState() {
@@ -48,6 +56,12 @@ class _CommentsPageState extends State<CommentsPage> {
         comments = response.comments;
         isLoading = false;
       });
+
+      // Load user reactions and comment reactions for all comments in parallel
+      await Future.wait([
+        ...comments.map((comment) => _loadUserReaction(comment.id)),
+        ...comments.map((comment) => _loadCommentReactions(comment.id)),
+      ]);
     } catch (e) {
       setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -57,6 +71,76 @@ class _CommentsPageState extends State<CommentsPage> {
         ),
       );
     }
+  }
+
+  Future<void> _loadUserReaction(String commentId) async {
+    try {
+      final reaction = await PostService.getUserReaction(commentId);
+      if (mounted) {
+        setState(() {
+          userReactions[commentId] = reaction?.reactionType;
+        });
+      }
+    } catch (e) {
+      print('Error loading user reaction for comment $commentId: $e');
+    }
+  }
+
+  Future<void> _loadCommentReactions(String commentId) async {
+    try {
+      final reactions = await PostService.getReactions(commentId: commentId);
+      print(
+        'Reactions loaded for $commentId: total=${reactions.total}, counts=${reactions.counts}',
+      );
+      if (mounted) {
+        setState(() {
+          commentReactions[commentId] = reactions;
+        });
+      }
+    } catch (e) {
+      print('Error loading reactions for comment $commentId: $e');
+    }
+  }
+
+  Future<void> _handleReaction(String commentId, String reactionType) async {
+    final currentReaction = userReactions[commentId];
+
+    try {
+      if (currentReaction == reactionType) {
+        // Remove reaction if same type clicked
+        await PostService.removeReaction(commentId);
+        setState(() {
+          userReactions[commentId] = null;
+          showReactionPicker[commentId] = false;
+        });
+      } else {
+        // Add or update reaction
+        await PostService.addOrUpdateReaction(
+          commentId: commentId,
+          reactionType: reactionType,
+        );
+        setState(() {
+          userReactions[commentId] = reactionType;
+          showReactionPicker[commentId] = false;
+        });
+      }
+
+      // Reload reactions to get updated counts
+      await _loadCommentReactions(commentId);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update reaction: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _toggleReactionPicker(String commentId) {
+    setState(() {
+      showReactionPicker[commentId] = !(showReactionPicker[commentId] ?? false);
+    });
   }
 
   Future<void> _addComment() async {
@@ -126,12 +210,14 @@ class _CommentsPageState extends State<CommentsPage> {
     }
   }
 
-  void _showImageViewer(String imageUrl) {
+  void _showImageViewer(String imageUrl, String commentId) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            SimpleImageViewer(imageUrl: imageUrl, heroTag: 'comment_image'),
+        builder: (context) => SimpleImageViewer(
+          imageUrl: imageUrl,
+          heroTag: 'comment_image_$commentId',
+        ),
       ),
     );
   }
@@ -469,8 +555,10 @@ class _CommentsPageState extends State<CommentsPage> {
                                 if (comment.image != null) ...[
                                   SizedBox(height: 8),
                                   GestureDetector(
-                                    onTap: () =>
-                                        _showImageViewer(comment.image!),
+                                    onTap: () => _showImageViewer(
+                                      comment.image!,
+                                      comment.id,
+                                    ),
                                     child: Container(
                                       constraints: BoxConstraints(
                                         maxWidth: 200,
@@ -532,6 +620,210 @@ class _CommentsPageState extends State<CommentsPage> {
                                     ),
                                   ),
                                 ],
+
+                                // Reaction and Reply actions
+                                SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    // Reaction button
+                                    InkWell(
+                                      onTap: () =>
+                                          _toggleReactionPicker(comment.id),
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              userReactions[comment.id] != null
+                                              ? Colors.blue.withOpacity(0.1)
+                                              : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                          border: Border.all(
+                                            color:
+                                                userReactions[comment.id] !=
+                                                    null
+                                                ? Colors.blue
+                                                : Colors.grey[400]!,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.thumb_up_outlined,
+                                              size: 14,
+                                              color:
+                                                  userReactions[comment.id] !=
+                                                      null
+                                                  ? Colors.blue
+                                                  : Colors.grey[600],
+                                            ),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              'React',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color:
+                                                    userReactions[comment.id] !=
+                                                        null
+                                                    ? Colors.blue
+                                                    : Colors.grey[600],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+
+                                    // Reaction count badge (Facebook-style)
+                                    if ((commentReactions[comment.id]?.total ??
+                                            comment.reactionCount) >
+                                        0)
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            // Show actual reaction emojis if data is loaded
+                                            if (commentReactions[comment.id] !=
+                                                null) ...[
+                                              ...commentReactions[comment.id]!
+                                                  .counts
+                                                  .entries
+                                                  .where((e) => e.value > 0)
+                                                  .take(3)
+                                                  .map((entry) {
+                                                    final emojis = {
+                                                      'like': '👍',
+                                                      'love': '❤️',
+                                                      'haha': '😄',
+                                                      'wow': '😮',
+                                                      'sad': '😢',
+                                                      'angry': '😠',
+                                                    };
+                                                    return Text(
+                                                      emojis[entry.key] ?? '👍',
+                                                      style: TextStyle(
+                                                        fontSize: 14,
+                                                      ),
+                                                    );
+                                                  }),
+                                            ] else
+                                              // Show default thumbs up if data not loaded yet
+                                              Text(
+                                                '👍',
+                                                style: TextStyle(fontSize: 14),
+                                              ),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              '${commentReactions[comment.id]?.total ?? comment.reactionCount}',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.grey[700],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    SizedBox(width: 12),
+
+                                    // Reply count badge
+                                    if (comment.replyCount > 0)
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[200],
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.comment_outlined,
+                                              size: 12,
+                                              color: Colors.grey[700],
+                                            ),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              '${comment.replyCount}',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.grey[700],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                ),
+
+                                // Reaction picker overlay
+                                if (showReactionPicker[comment.id] == true) ...[
+                                  SizedBox(height: 8),
+                                  CommentReactionPicker(
+                                    currentReaction: userReactions[comment.id],
+                                    onReactionSelected: (reactionType) {
+                                      _handleReaction(comment.id, reactionType);
+                                    },
+                                  ),
+                                ],
+
+                                // Display reactions
+                                if (commentReactions[comment.id] != null &&
+                                    commentReactions[comment.id]!.total >
+                                        0) ...[
+                                  SizedBox(height: 8),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: commentReactions[comment.id]!
+                                        .counts
+                                        .entries
+                                        .where((entry) => entry.value > 0)
+                                        .map((entry) {
+                                          return ReactionDisplay(
+                                            reactionType: entry.key,
+                                            count: entry.value,
+                                            isUserReaction:
+                                                userReactions[comment.id] ==
+                                                entry.key,
+                                            onTap: () {
+                                              _handleReaction(
+                                                comment.id,
+                                                entry.key,
+                                              );
+                                            },
+                                          );
+                                        })
+                                        .toList(),
+                                  ),
+                                ],
+
+                                // Replies widget
+                                CommentRepliesWidget(
+                                  commentId: comment.id,
+                                  initialReplyCount: comment.replyCount,
+                                ),
                               ],
                             ),
                           );

@@ -614,6 +614,385 @@ class PostService {
       throw Exception('Failed to delete comment: $e');
     }
   }
+
+  // ==================== Comment Replies API ====================
+
+  // Add a reply to a comment
+  static Future<CommentReply> addReply({
+    required String commentId,
+    required String content,
+    String? image,
+  }) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final requestBody = <String, dynamic>{'content': content};
+      if (image != null && image.isNotEmpty) {
+        requestBody['image'] = image;
+      }
+
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/comments/$commentId/replies'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: json.encode(requestBody),
+          )
+          .timeout(Duration(seconds: 10));
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success' &&
+            responseJson['data'] != null) {
+          return CommentReply.fromJson(responseJson['data']);
+        } else {
+          throw Exception(
+            'Server error: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        throw Exception(
+          'Failed to add reply: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } on TimeoutException catch (e) {
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      throw Exception(
+        'Network error: Please check your internet connection and try again',
+      );
+    } catch (e) {
+      throw Exception('Failed to add reply: $e');
+    }
+  }
+
+  // Get replies for a comment
+  static Future<CommentRepliesResponse> getReplies({
+    required String commentId,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http
+          .get(
+            Uri.parse(
+              '$baseUrl/comments/$commentId/replies?page=$page&limit=$limit',
+            ),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success') {
+          return CommentRepliesResponse.fromJson(responseJson);
+        } else {
+          throw Exception(
+            'Server error: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        throw Exception('Failed to load replies: ${response.statusCode}');
+      }
+    } on TimeoutException catch (e) {
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      throw Exception(
+        'Network error: Please check your internet connection and try again',
+      );
+    } catch (e) {
+      throw Exception('Failed to load replies: $e');
+    }
+  }
+
+  // Update a reply
+  static Future<CommentReply> updateReply({
+    required String replyId,
+    required String content,
+    String? image,
+  }) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final requestBody = <String, dynamic>{'content': content};
+      if (image != null && image.isNotEmpty) {
+        requestBody['image'] = image;
+      }
+
+      final response = await http
+          .put(
+            Uri.parse('$baseUrl/comments/replies/$replyId'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: json.encode(requestBody),
+          )
+          .timeout(Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success' &&
+            responseJson['data'] != null) {
+          return CommentReply.fromJson(responseJson['data']);
+        } else {
+          throw Exception(
+            'Server error: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        throw Exception(
+          'Failed to update reply: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } on TimeoutException catch (e) {
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      throw Exception(
+        'Network error: Please check your internet connection and try again',
+      );
+    } catch (e) {
+      throw Exception('Failed to update reply: $e');
+    }
+  }
+
+  // Delete a reply
+  static Future<bool> deleteReply(String replyId) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http
+          .delete(
+            Uri.parse('$baseUrl/comments/replies/$replyId'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(Duration(seconds: 10));
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        if (response.body.isNotEmpty) {
+          final responseJson = json.decode(response.body);
+          if (responseJson['status'] == 'success') {
+            return true;
+          } else {
+            throw Exception(
+              'Delete failed: ${responseJson['message'] ?? 'Unknown error'}',
+            );
+          }
+        } else {
+          return true;
+        }
+      } else {
+        throw Exception(
+          'Failed to delete reply: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } on TimeoutException catch (e) {
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      throw Exception(
+        'Network error: Please check your internet connection and try again',
+      );
+    } catch (e) {
+      throw Exception('Failed to delete reply: $e');
+    }
+  }
+
+  // ==================== Comment Reactions API ====================
+
+  // Add or update reaction to a comment
+  static Future<CommentReaction> addOrUpdateReaction({
+    required String commentId,
+    required String reactionType,
+  }) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/comments/$commentId/reactions'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: json.encode({'reactionType': reactionType}),
+          )
+          .timeout(Duration(seconds: 10));
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success' &&
+            responseJson['data'] != null) {
+          return CommentReaction.fromJson(responseJson['data']);
+        } else {
+          throw Exception(
+            'Server error: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        throw Exception(
+          'Failed to add reaction: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } on TimeoutException catch (e) {
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      throw Exception(
+        'Network error: Please check your internet connection and try again',
+      );
+    } catch (e) {
+      throw Exception('Failed to add reaction: $e');
+    }
+  }
+
+  // Remove reaction from a comment
+  static Future<bool> removeReaction(String commentId) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http
+          .delete(
+            Uri.parse('$baseUrl/comments/$commentId/reactions'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(Duration(seconds: 10));
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        if (response.body.isNotEmpty) {
+          final responseJson = json.decode(response.body);
+          if (responseJson['status'] == 'success') {
+            return true;
+          } else {
+            throw Exception(
+              'Remove failed: ${responseJson['message'] ?? 'Unknown error'}',
+            );
+          }
+        } else {
+          return true;
+        }
+      } else {
+        throw Exception(
+          'Failed to remove reaction: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } on TimeoutException catch (e) {
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      throw Exception(
+        'Network error: Please check your internet connection and try again',
+      );
+    } catch (e) {
+      throw Exception('Failed to remove reaction: $e');
+    }
+  }
+
+  // Get all reactions for a comment
+  static Future<CommentReactionsResponse> getReactions({
+    required String commentId,
+    String? reactionType,
+  }) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      String url = '$baseUrl/comments/$commentId/reactions';
+      if (reactionType != null && reactionType.isNotEmpty) {
+        url += '?reactionType=$reactionType';
+      }
+
+      final response = await http
+          .get(
+            Uri.parse(url),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success') {
+          return CommentReactionsResponse.fromJson(responseJson);
+        } else {
+          throw Exception(
+            'Server error: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        throw Exception('Failed to load reactions: ${response.statusCode}');
+      }
+    } on TimeoutException catch (e) {
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      throw Exception(
+        'Network error: Please check your internet connection and try again',
+      );
+    } catch (e) {
+      throw Exception('Failed to load reactions: $e');
+    }
+  }
+
+  // Get current user's reaction for a comment
+  static Future<CommentReaction?> getUserReaction(String commentId) async {
+    try {
+      final token = await _getToken();
+      if (token == null) throw Exception('No authentication token found');
+
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/comments/$commentId/reactions/me'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        if (responseJson['status'] == 'success') {
+          if (responseJson['data'] != null) {
+            return CommentReaction.fromJson(responseJson['data']);
+          } else {
+            return null; // No reaction found
+          }
+        } else {
+          throw Exception(
+            'Server error: ${responseJson['message'] ?? 'Unknown error'}',
+          );
+        }
+      } else {
+        throw Exception('Failed to get user reaction: ${response.statusCode}');
+      }
+    } on TimeoutException catch (e) {
+      throw Exception('Request timeout: Server is taking too long to respond');
+    } on http.ClientException catch (e) {
+      throw Exception(
+        'Network error: Please check your internet connection and try again',
+      );
+    } catch (e) {
+      throw Exception('Failed to get user reaction: $e');
+    }
+  }
 }
 
 class Post {
@@ -736,6 +1115,8 @@ class Comment {
   final String? image;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final int replyCount;
+  final int reactionCount;
 
   Comment({
     required this.id,
@@ -748,6 +1129,8 @@ class Comment {
     this.image,
     required this.createdAt,
     required this.updatedAt,
+    this.replyCount = 0,
+    this.reactionCount = 0,
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
@@ -779,6 +1162,8 @@ class Comment {
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'])
           : DateTime.now(),
+      replyCount: json['replyCount'] ?? 0,
+      reactionCount: json['reactionCount'] ?? 0,
     );
   }
 }
@@ -848,6 +1233,189 @@ class CommentsPagination {
       totalComments: json['totalComments'] ?? 0,
       hasNext: json['hasNext'] ?? false,
       hasPrev: json['hasPrev'] ?? false,
+    );
+  }
+}
+
+// Comment Reply Model
+class CommentReply {
+  final String id;
+  final String commentId;
+  final String authorId;
+  final String authorName;
+  final String? authorProfileImage;
+  final String content;
+  final String? image;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  CommentReply({
+    required this.id,
+    required this.commentId,
+    required this.authorId,
+    required this.authorName,
+    this.authorProfileImage,
+    required this.content,
+    this.image,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory CommentReply.fromJson(Map<String, dynamic> json) {
+    final authorName =
+        json['author']?['displayName'] ??
+        json['author']?['name'] ??
+        json['author']?['email']?.split('@')[0] ??
+        'Unknown';
+
+    return CommentReply(
+      id: json['_id'] ?? json['id'] ?? '',
+      commentId: json['commentId'] ?? '',
+      authorId: json['author']?['_id'] ?? '',
+      authorName: authorName,
+      authorProfileImage: json['author']?['profileImage'],
+      content: json['content'] ?? '',
+      image: json['image'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : DateTime.now(),
+    );
+  }
+}
+
+// Comment Reply Response
+class CommentRepliesResponse {
+  final List<CommentReply> replies;
+  final RepliesPagination pagination;
+  final String message;
+
+  CommentRepliesResponse({
+    required this.replies,
+    required this.pagination,
+    required this.message,
+  });
+
+  factory CommentRepliesResponse.fromJson(Map<String, dynamic> json) {
+    final List<dynamic> data = json['data'] ?? [];
+    final replies = data.map((reply) => CommentReply.fromJson(reply)).toList();
+
+    return CommentRepliesResponse(
+      replies: replies,
+      pagination: RepliesPagination.fromJson(json['pagination'] ?? {}),
+      message: json['message'] ?? '',
+    );
+  }
+}
+
+class RepliesPagination {
+  final int currentPage;
+  final int totalPages;
+  final int totalReplies;
+  final bool hasNext;
+  final bool hasPrev;
+
+  RepliesPagination({
+    required this.currentPage,
+    required this.totalPages,
+    required this.totalReplies,
+    required this.hasNext,
+    required this.hasPrev,
+  });
+
+  factory RepliesPagination.fromJson(Map<String, dynamic> json) {
+    return RepliesPagination(
+      currentPage: json['currentPage'] ?? 1,
+      totalPages: json['totalPages'] ?? 1,
+      totalReplies: json['totalReplies'] ?? 0,
+      hasNext: json['hasNext'] ?? false,
+      hasPrev: json['hasPrev'] ?? false,
+    );
+  }
+}
+
+// Comment Reaction Model
+class CommentReaction {
+  final String id;
+  final String commentId;
+  final String userId;
+  final String userName;
+  final String? userProfileImage;
+  final String reactionType;
+  final DateTime createdAt;
+
+  CommentReaction({
+    required this.id,
+    required this.commentId,
+    required this.userId,
+    required this.userName,
+    this.userProfileImage,
+    required this.reactionType,
+    required this.createdAt,
+  });
+
+  factory CommentReaction.fromJson(Map<String, dynamic> json) {
+    final userName =
+        json['user']?['displayName'] ??
+        json['user']?['name'] ??
+        json['user']?['email']?.split('@')[0] ??
+        'Unknown';
+
+    return CommentReaction(
+      id: json['_id'] ?? json['id'] ?? '',
+      commentId: json['commentId'] ?? '',
+      userId: json['user']?['_id'] ?? '',
+      userName: userName,
+      userProfileImage: json['user']?['profileImage'],
+      reactionType: json['reactionType'] ?? 'like',
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+    );
+  }
+}
+
+// Comment Reactions Response
+class CommentReactionsResponse {
+  final List<CommentReaction> reactions;
+  final Map<String, int> counts;
+  final int total;
+  final String message;
+
+  CommentReactionsResponse({
+    required this.reactions,
+    required this.counts,
+    required this.total,
+    required this.message,
+  });
+
+  factory CommentReactionsResponse.fromJson(Map<String, dynamic> json) {
+    final List<dynamic> reactionsData = json['data']?['reactions'] ?? [];
+    final reactions = reactionsData
+        .map((reaction) => CommentReaction.fromJson(reaction))
+        .toList();
+
+    // Get counts from backend or calculate from reactions if empty
+    Map<String, int> counts = {};
+    final Map<String, dynamic> countsData = json['data']?['counts'] ?? {};
+
+    if (countsData.isEmpty && reactions.isNotEmpty) {
+      // Backend didn't provide counts, calculate from reactions array
+      for (var reaction in reactions) {
+        counts[reaction.reactionType] =
+            (counts[reaction.reactionType] ?? 0) + 1;
+      }
+    } else {
+      counts = countsData.map((key, value) => MapEntry(key, value as int));
+    }
+
+    return CommentReactionsResponse(
+      reactions: reactions,
+      counts: counts,
+      total: json['data']?['total'] ?? 0,
+      message: json['message'] ?? '',
     );
   }
 }
