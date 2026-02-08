@@ -6,12 +6,17 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'screens/signin_page.dart';
 import 'screens/signup_page.dart';
 import 'screens/main_tab_page.dart';
+import 'screens/reset_password_page.dart';
 import 'widgets/auth_guard.dart';
 import 'widgets/global_zoom_wrapper.dart';
 import 'services/auth_service.dart';
+import 'config/api_config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Log API configuration
+  ApiConfig.logConfig();
 
   // Initialize Google Mobile Ads SDK
   if (!kIsWeb) {
@@ -111,6 +116,18 @@ class _MyAppState extends State<MyApp> {
         }
       });
     }
+    // Handle password reset deep link: auconnect://reset-password?token=xxx
+    else if (uri.scheme == 'auconnect' && uri.host == 'reset-password') {
+      final token = uri.queryParameters['token'];
+      if (token != null && token.isNotEmpty) {
+        // Navigate to reset password page
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (context) => ResetPasswordPage(token: token),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -183,6 +200,19 @@ class _MyAppState extends State<MyApp> {
         '/main': (context) => AuthGuardDirect(child: MainTabPage()),
         '/home': (context) =>
             AuthGuardDirect(child: MyHomePage(title: 'Flutter Demo Home Page')),
+      },
+      onGenerateRoute: (settings) {
+        // Handle /reset-password?token=xxx from email links
+        if (settings.name?.startsWith('/reset-password') == true) {
+          final uri = Uri.parse(settings.name!);
+          final token = uri.queryParameters['token'] ?? '';
+          if (token.isNotEmpty) {
+            return MaterialPageRoute(
+              builder: (context) => ResetPasswordPage(token: token),
+            );
+          }
+        }
+        return null;
       },
     );
   }

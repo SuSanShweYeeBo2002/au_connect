@@ -1,10 +1,10 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'auth_service.dart';
+import '../config/api_config.dart';
 
 class ChatService {
-  static const String baseUrl =
-      'https://auconnectapi-production.up.railway.app';
+  static String get baseUrl => ApiConfig.baseUrl;
 
   // Get the token from AuthService
   static Future<String?> _getToken() async {

@@ -3,10 +3,10 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'auth_service.dart';
+import '../config/api_config.dart';
 
 class UserService {
-  static const String baseUrl =
-      'https://auconnectapi-production.up.railway.app';
+  static String get baseUrl => ApiConfig.baseUrl;
 
   // Get current authenticated user's profile
   static Future<Map<String, dynamic>> getCurrentUser() async {
@@ -179,6 +179,43 @@ class UserService {
       throw Exception(
         errorData['message'] ?? 'Failed to resend verification email',
       );
+    }
+  }
+
+  // Request password reset
+  static Future<Map<String, dynamic>> forgotPassword(String email) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/users/forgot-password'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'email': email}),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      final errorData = json.decode(response.body);
+      throw Exception(
+        errorData['message'] ?? 'Failed to send password reset email',
+      );
+    }
+  }
+
+  // Reset password with token
+  static Future<Map<String, dynamic>> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/users/reset-password'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'token': token, 'newPassword': newPassword}),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      final errorData = json.decode(response.body);
+      throw Exception(errorData['message'] ?? 'Failed to reset password');
     }
   }
 }

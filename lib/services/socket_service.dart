@@ -1,10 +1,11 @@
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'auth_service.dart';
+import '../config/api_config.dart';
 
 class SocketService {
   static SocketService? _instance;
   IO.Socket? _socket;
-  final String _serverUrl = 'https://auconnectapi-production.up.railway.app';
+  String get _serverUrl => ApiConfig.socketUrl;
   String? _pendingRoomId;
 
   static SocketService get instance {

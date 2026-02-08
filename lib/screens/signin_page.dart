@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../services/auth_service.dart';
+import '../config/api_config.dart';
 import 'email_verification_page.dart';
+import 'forgot_password_page.dart';
 
 class SignInPage extends StatefulWidget {
   @override
@@ -68,9 +70,7 @@ class _SignInPageState extends State<SignInPage> {
 
     try {
       final response = await http.post(
-        Uri.parse(
-          'https://auconnectapi-production.up.railway.app/users/signin',
-        ),
+        Uri.parse('${ApiConfig.baseUrl}/users/signin'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text,
@@ -266,6 +266,23 @@ class _SignInPageState extends State<SignInPage> {
                           ),
                           Text('Remember me'),
                           Spacer(),
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ForgotPasswordPage(),
+                                ),
+                              );
+                            },
+                            child: Text('Forgot Password?'),
+                          ),
                           TextButton(
                             onPressed: () {
                               Navigator.pushNamed(context, '/signup');
@@ -305,19 +322,6 @@ class _SignInPageState extends State<SignInPage> {
                                   ),
                                 ),
                         ),
-                      ),
-                      SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              'Forgot password',
-                              style: TextStyle(color: Color(0xFF0288D1)),
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ),

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:http_parser/http_parser.dart';
 import 'auth_service.dart';
+import '../config/api_config.dart';
 
 class SellItem {
   final String id;
@@ -80,8 +81,7 @@ class SellItem {
 }
 
 class SellItemService {
-  static const String baseUrl =
-      'https://auconnectapi-production.up.railway.app';
+  static String get baseUrl => ApiConfig.baseUrl;
 
   static Future<String?> _getToken() async {
     return await AuthService.instance.getAuthToken();

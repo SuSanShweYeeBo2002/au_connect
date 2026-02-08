@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config/api_config.dart';
 import 'email_verification_page.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -68,9 +69,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       final response = await http.post(
-        Uri.parse(
-          'https://auconnectapi-production.up.railway.app/users/signup',
-        ),
+        Uri.parse('${ApiConfig.baseUrl}/users/signup'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text,

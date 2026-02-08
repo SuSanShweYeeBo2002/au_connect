@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'auth_service.dart';
+import '../config/api_config.dart';
 
 class StudySessionService {
-  static const String baseUrl =
-      'https://auconnectapi-production.up.railway.app';
+  static String get baseUrl => ApiConfig.baseUrl;
   static const String endpoint = '/study-sessions';
 
   static StudySessionService? _instance;
