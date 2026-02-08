@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/post_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/simple_image_viewer.dart';
+import 'other_user_profile_page.dart';
 
 class CommentsPage extends StatefulWidget {
   final Post post;
@@ -230,29 +231,61 @@ class _CommentsPageState extends State<CommentsPage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    backgroundImage: widget.post.authorProfileImage != null
-                        ? NetworkImage(widget.post.authorProfileImage!)
-                        : null,
-                    child: widget.post.authorProfileImage == null
-                        ? Text(
-                            widget.post.authorName[0].toUpperCase(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                  GestureDetector(
+                    onTap: () {
+                      // Don't navigate to profile if it's the current user
+                      if (currentUserId != widget.post.authorId) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OtherUserProfilePage(
+                              userId: widget.post.authorId,
+                              userName: widget.post.authorName,
                             ),
-                          )
-                        : null,
+                          ),
+                        );
+                      }
+                    },
+                    child: CircleAvatar(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      backgroundImage: widget.post.authorProfileImage != null
+                          ? NetworkImage(widget.post.authorProfileImage!)
+                          : null,
+                      child: widget.post.authorProfileImage == null
+                          ? Text(
+                              widget.post.authorName[0].toUpperCase(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          : null,
+                    ),
                   ),
                   SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          widget.post.authorName,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        GestureDetector(
+                          onTap: () {
+                            // Don't navigate to profile if it's the current user
+                            if (currentUserId != widget.post.authorId) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => OtherUserProfilePage(
+                                    userId: widget.post.authorId,
+                                    userName: widget.post.authorName,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          child: Text(
+                            widget.post.authorName,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
                         SizedBox(height: 4),
                         Text(
@@ -314,25 +347,43 @@ class _CommentsPageState extends State<CommentsPage> {
                               children: [
                                 Row(
                                   children: [
-                                    CircleAvatar(
-                                      radius: 16,
-                                      backgroundColor: Colors.grey[400],
-                                      backgroundImage:
-                                          comment.userProfileImage != null
-                                          ? NetworkImage(
-                                              comment.userProfileImage!,
-                                            )
-                                          : null,
-                                      child: comment.userProfileImage == null
-                                          ? Text(
-                                              comment.userName[0].toUpperCase(),
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            )
-                                          : null,
+                                    GestureDetector(
+                                      onTap: () {
+                                        // Don't navigate to profile if it's the current user
+                                        if (currentUserId != comment.userId) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  OtherUserProfilePage(
+                                                    userId: comment.userId,
+                                                    userName: comment.userName,
+                                                  ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: CircleAvatar(
+                                        radius: 16,
+                                        backgroundColor: Colors.grey[400],
+                                        backgroundImage:
+                                            comment.userProfileImage != null
+                                            ? NetworkImage(
+                                                comment.userProfileImage!,
+                                              )
+                                            : null,
+                                        child: comment.userProfileImage == null
+                                            ? Text(
+                                                comment.userName[0]
+                                                    .toUpperCase(),
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              )
+                                            : null,
+                                      ),
                                     ),
                                     SizedBox(width: 8),
                                     Expanded(
@@ -340,10 +391,30 @@ class _CommentsPageState extends State<CommentsPage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Text(
-                                            comment.userName,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
+                                          GestureDetector(
+                                            onTap: () {
+                                              // Don't navigate to profile if it's the current user
+                                              if (currentUserId !=
+                                                  comment.userId) {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        OtherUserProfilePage(
+                                                          userId:
+                                                              comment.userId,
+                                                          userName:
+                                                              comment.userName,
+                                                        ),
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                            child: Text(
+                                              comment.userName,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
                                           ),
                                           Text(

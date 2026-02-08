@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'add_post_page.dart';
 import 'comments_page.dart';
 import 'ad_example_screen.dart';
+import 'other_user_profile_page.dart';
 import '../services/post_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/simple_image_viewer.dart';
@@ -518,13 +519,45 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ListTile(
-                  leading: OptimizedCircleAvatar(
-                    imageUrl: post.authorProfileImage,
-                    fallbackText: post.authorName,
+                  leading: GestureDetector(
+                    onTap: () {
+                      // Don't navigate to profile if it's the current user
+                      if (currentUserId != post.authorId) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OtherUserProfilePage(
+                              userId: post.authorId,
+                              userName: post.authorName,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    child: OptimizedCircleAvatar(
+                      imageUrl: post.authorProfileImage,
+                      fallbackText: post.authorName,
+                    ),
                   ),
-                  title: Text(
-                    post.authorName,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  title: GestureDetector(
+                    onTap: () {
+                      // Don't navigate to profile if it's the current user
+                      if (currentUserId != post.authorId) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OtherUserProfilePage(
+                              userId: post.authorId,
+                              userName: post.authorName,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    child: Text(
+                      post.authorName,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                   subtitle: Text(_formatTime(post.createdAt)),
                   trailing: PopupMenuButton<String>(
