@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/post_service.dart';
 import '../services/auth_service.dart';
 import 'simple_image_viewer.dart';
@@ -8,12 +9,14 @@ class CommentRepliesWidget extends StatefulWidget {
   final String commentId;
   final int initialReplyCount;
   final bool autoExpand;
+  final VoidCallback? onReplyAdded;
 
   const CommentRepliesWidget({
     Key? key,
     required this.commentId,
     this.initialReplyCount = 0,
     this.autoExpand = false,
+    this.onReplyAdded,
   }) : super(key: key);
 
   @override
@@ -31,7 +34,8 @@ class _CommentRepliesWidgetState extends State<CommentRepliesWidget> {
   bool hasMore = false;
 
   final TextEditingController _replyController = TextEditingController();
-  final TextEditingController _imageController = TextEditingController();
+  XFile? _selectedImage;
+  final ImagePicker _imagePicker = ImagePicker();
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -62,7 +66,6 @@ class _CommentRepliesWidgetState extends State<CommentRepliesWidget> {
   @override
   void dispose() {
     _replyController.dispose();
-    _imageController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -168,7 +171,6 @@ class _CommentRepliesWidgetState extends State<CommentRepliesWidget> {
 
   Future<void> _addReply() async {
     final content = _replyController.text.trim();
-    final image = _imageController.text.trim();
 
     if (content.isEmpty) {
       ScaffoldMessenger.of(
@@ -183,17 +185,20 @@ class _CommentRepliesWidgetState extends State<CommentRepliesWidget> {
       final newReply = await PostService.addReply(
         commentId: widget.commentId,
         content: content,
-        image: image.isNotEmpty ? image : null,
+        imageFile: _selectedImage,
       );
 
       _replyController.clear();
-      _imageController.clear();
+      setState(() => _selectedImage = null);
 
       setState(() {
         replies.insert(0, newReply);
         isSubmitting = false;
         showReplies = true;
       });
+
+      // Notify parent to refresh comment data
+      widget.onReplyAdded?.call();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -333,27 +338,73 @@ class _CommentRepliesWidgetState extends State<CommentRepliesWidget> {
               margin: EdgeInsets.only(left: 16, top: 8, bottom: 8),
               child: Column(
                 children: [
-                  // Image URL input (optional)
-                  TextField(
-                    controller: _imageController,
-                    decoration: InputDecoration(
-                      hintText: 'Image URL (optional)',
-                      border: OutlineInputBorder(
+                  // Image preview
+                  if (_selectedImage != null) ...[
+                    Container(
+                      height: 80,
+                      decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[300]!),
                       ),
-                      prefixIcon: Icon(Icons.image, size: 18),
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
+                      child: Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              _selectedImage!.path,
+                              width: double.infinity,
+                              height: 80,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey[200],
+                                  child: Icon(Icons.image, size: 30),
+                                );
+                              },
+                            ),
+                          ),
+                          Positioned(
+                            top: 2,
+                            right: 2,
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.black54,
+                                padding: EdgeInsets.all(2),
+                                minimumSize: Size(24, 24),
+                              ),
+                              onPressed: () {
+                                setState(() => _selectedImage = null);
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    style: TextStyle(fontSize: 14),
-                  ),
-                  SizedBox(height: 8),
+                    SizedBox(height: 8),
+                  ],
                   // Reply input
                   Row(
                     children: [
+                      // Image picker button
+                      IconButton(
+                        icon: Icon(Icons.image, size: 20),
+                        padding: EdgeInsets.all(8),
+                        constraints: BoxConstraints(),
+                        onPressed: () async {
+                          final image = await _imagePicker.pickImage(
+                            source: ImageSource.gallery,
+                          );
+                          if (image != null) {
+                            setState(() => _selectedImage = image);
+                          }
+                        },
+                      ),
+                      SizedBox(width: 4),
                       Expanded(
                         child: TextField(
                           controller: _replyController,

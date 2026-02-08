@@ -445,27 +445,47 @@ class PostService {
   static Future<Comment> addComment({
     required String postId,
     required String content,
-    String? image,
+    XFile? imageFile,
   }) async {
     try {
       final token = await _getToken();
       if (token == null) throw Exception('No authentication token found');
 
-      final requestBody = <String, dynamic>{'content': content};
-      if (image != null && image.isNotEmpty) {
-        requestBody['image'] = image;
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/comments/post/$postId'),
+      );
+
+      request.headers['Authorization'] = 'Bearer $token';
+      request.fields['content'] = content;
+
+      if (imageFile != null) {
+        final bytes = await imageFile.readAsBytes();
+        String fileName = imageFile.name;
+        String extension = fileName.split('.').last.toLowerCase();
+
+        String mimeType = 'image/jpeg';
+        if (extension == 'png') {
+          mimeType = 'image/png';
+        } else if (extension == 'gif') {
+          mimeType = 'image/gif';
+        } else if (extension == 'webp') {
+          mimeType = 'image/webp';
+        }
+
+        final multipartFile = http.MultipartFile.fromBytes(
+          'image',
+          bytes,
+          filename: fileName,
+          contentType: MediaType.parse(mimeType),
+        );
+        request.files.add(multipartFile);
       }
 
-      final response = await http
-          .post(
-            Uri.parse('$baseUrl/comments/post/$postId'),
-            headers: {
-              'Authorization': 'Bearer $token',
-              'Content-Type': 'application/json',
-            },
-            body: json.encode(requestBody),
-          )
-          .timeout(Duration(seconds: 10));
+      final streamedResponse = await request.send().timeout(
+        Duration(seconds: 10),
+      );
+      final response = await http.Response.fromStream(streamedResponse);
 
       print('Add comment response status: ${response.statusCode}');
       print('Add comment response body: ${response.body}');
@@ -621,27 +641,47 @@ class PostService {
   static Future<CommentReply> addReply({
     required String commentId,
     required String content,
-    String? image,
+    XFile? imageFile,
   }) async {
     try {
       final token = await _getToken();
       if (token == null) throw Exception('No authentication token found');
 
-      final requestBody = <String, dynamic>{'content': content};
-      if (image != null && image.isNotEmpty) {
-        requestBody['image'] = image;
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/comments/$commentId/replies'),
+      );
+
+      request.headers['Authorization'] = 'Bearer $token';
+      request.fields['content'] = content;
+
+      if (imageFile != null) {
+        final bytes = await imageFile.readAsBytes();
+        String fileName = imageFile.name;
+        String extension = fileName.split('.').last.toLowerCase();
+
+        String mimeType = 'image/jpeg';
+        if (extension == 'png') {
+          mimeType = 'image/png';
+        } else if (extension == 'gif') {
+          mimeType = 'image/gif';
+        } else if (extension == 'webp') {
+          mimeType = 'image/webp';
+        }
+
+        final multipartFile = http.MultipartFile.fromBytes(
+          'image',
+          bytes,
+          filename: fileName,
+          contentType: MediaType.parse(mimeType),
+        );
+        request.files.add(multipartFile);
       }
 
-      final response = await http
-          .post(
-            Uri.parse('$baseUrl/comments/$commentId/replies'),
-            headers: {
-              'Authorization': 'Bearer $token',
-              'Content-Type': 'application/json',
-            },
-            body: json.encode(requestBody),
-          )
-          .timeout(Duration(seconds: 10));
+      final streamedResponse = await request.send().timeout(
+        Duration(seconds: 10),
+      );
+      final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseJson = json.decode(response.body);

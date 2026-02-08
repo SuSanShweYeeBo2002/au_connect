@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/post_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/simple_image_viewer.dart';
@@ -17,7 +18,8 @@ class CommentsPage extends StatefulWidget {
 
 class _CommentsPageState extends State<CommentsPage> {
   final TextEditingController _commentController = TextEditingController();
-  final TextEditingController _imageController = TextEditingController();
+  XFile? _selectedImage;
+  final ImagePicker _imagePicker = ImagePicker();
   List<Comment> comments = [];
   bool isLoading = false;
   bool isSubmitting = false;
@@ -146,7 +148,6 @@ class _CommentsPageState extends State<CommentsPage> {
 
   Future<void> _addComment() async {
     final content = _commentController.text.trim();
-    final image = _imageController.text.trim();
 
     if (content.isEmpty) {
       ScaffoldMessenger.of(
@@ -161,12 +162,12 @@ class _CommentsPageState extends State<CommentsPage> {
       await PostService.addComment(
         postId: widget.post.id,
         content: content,
-        image: image.isNotEmpty ? image : null,
+        imageFile: _selectedImage,
       );
 
       // Clear the input fields
       _commentController.clear();
-      _imageController.clear();
+      setState(() => _selectedImage = null);
 
       setState(() => isSubmitting = false);
 
@@ -883,6 +884,7 @@ class _CommentsPageState extends State<CommentsPage> {
                                   commentId: comment.id,
                                   initialReplyCount: comment.replyCount,
                                   autoExpand: showReplies[comment.id] ?? false,
+                                  onReplyAdded: _loadComments,
                                 ),
                               ],
                             ),
@@ -901,23 +903,67 @@ class _CommentsPageState extends State<CommentsPage> {
               ),
               child: Column(
                 children: [
-                  // Image URL input (optional)
-                  TextField(
-                    controller: _imageController,
-                    decoration: InputDecoration(
-                      hintText: 'Image URL (optional)',
-                      border: OutlineInputBorder(
+                  // Image preview
+                  if (_selectedImage != null) ...[
+                    Container(
+                      height: 120,
+                      decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[300]!),
                       ),
-                      prefixIcon: Icon(Icons.image),
-                      isDense: true,
+                      child: Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              _selectedImage!.path,
+                              width: double.infinity,
+                              height: 120,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey[200],
+                                  child: Icon(Icons.image, size: 40),
+                                );
+                              },
+                            ),
+                          ),
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: IconButton(
+                              icon: Icon(Icons.close, color: Colors.white),
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.black54,
+                                padding: EdgeInsets.all(4),
+                              ),
+                              onPressed: () {
+                                setState(() => _selectedImage = null);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 8),
+                    SizedBox(height: 8),
+                  ],
 
                   // Comment input
                   Row(
                     children: [
+                      // Image picker button
+                      IconButton(
+                        icon: Icon(Icons.image, color: Colors.grey[700]),
+                        onPressed: () async {
+                          final image = await _imagePicker.pickImage(
+                            source: ImageSource.gallery,
+                          );
+                          if (image != null) {
+                            setState(() => _selectedImage = image);
+                          }
+                        },
+                      ),
+                      SizedBox(width: 8),
                       Expanded(
                         child: TextField(
                           controller: _commentController,
@@ -971,7 +1017,6 @@ class _CommentsPageState extends State<CommentsPage> {
   @override
   void dispose() {
     _commentController.dispose();
-    _imageController.dispose();
     super.dispose();
   }
 }
