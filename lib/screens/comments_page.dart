@@ -29,6 +29,7 @@ class _CommentsPageState extends State<CommentsPage> {
   Map<String, bool> showReactionPicker = {}; // commentId -> bool
   Map<String, CommentReactionsResponse?> commentReactions =
       {}; // commentId -> reactions
+  Map<String, bool> showReplies = {}; // commentId -> bool
 
   @override
   void initState() {
@@ -680,6 +681,64 @@ class _CommentsPageState extends State<CommentsPage> {
                                     ),
                                     SizedBox(width: 12),
 
+                                    // Reply button
+                                    InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          showReplies[comment.id] =
+                                              !(showReplies[comment.id] ??
+                                                  false);
+                                        });
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: showReplies[comment.id] == true
+                                              ? Colors.grey.withOpacity(0.1)
+                                              : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                          border: Border.all(
+                                            color:
+                                                showReplies[comment.id] == true
+                                                ? Colors.grey[700]!
+                                                : Colors.grey[400]!,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.reply_outlined,
+                                              size: 14,
+                                              color:
+                                                  showReplies[comment.id] ==
+                                                      true
+                                                  ? Colors.grey[700]
+                                                  : Colors.grey[600],
+                                            ),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              'Reply',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color:
+                                                    showReplies[comment.id] ==
+                                                        true
+                                                    ? Colors.grey[700]
+                                                    : Colors.grey[600],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+
                                     // Reaction count badge (Facebook-style)
                                     if ((commentReactions[comment.id]?.total ??
                                             comment.reactionCount) >
@@ -823,6 +882,7 @@ class _CommentsPageState extends State<CommentsPage> {
                                 CommentRepliesWidget(
                                   commentId: comment.id,
                                   initialReplyCount: comment.replyCount,
+                                  autoExpand: showReplies[comment.id] ?? false,
                                 ),
                               ],
                             ),

@@ -7,11 +7,13 @@ import '../screens/other_user_profile_page.dart';
 class CommentRepliesWidget extends StatefulWidget {
   final String commentId;
   final int initialReplyCount;
+  final bool autoExpand;
 
   const CommentRepliesWidget({
     Key? key,
     required this.commentId,
     this.initialReplyCount = 0,
+    this.autoExpand = false,
   }) : super(key: key);
 
   @override
@@ -23,7 +25,7 @@ class _CommentRepliesWidgetState extends State<CommentRepliesWidget> {
   bool isLoading = false;
   bool isLoadingMore = false;
   bool isSubmitting = false;
-  bool showReplies = false;
+  late bool showReplies;
   String? currentUserId;
   int currentPage = 1;
   bool hasMore = false;
@@ -35,8 +37,26 @@ class _CommentRepliesWidgetState extends State<CommentRepliesWidget> {
   @override
   void initState() {
     super.initState();
+    showReplies = widget.autoExpand;
     _loadCurrentUser();
     _scrollController.addListener(_onScroll);
+    if (showReplies) {
+      _loadReplies();
+    }
+  }
+
+  @override
+  void didUpdateWidget(CommentRepliesWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // React to autoExpand changes from parent
+    if (widget.autoExpand != oldWidget.autoExpand && widget.autoExpand) {
+      setState(() {
+        showReplies = true;
+      });
+      if (replies.isEmpty) {
+        _loadReplies();
+      }
+    }
   }
 
   @override
