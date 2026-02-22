@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import '../widgets/web_interstitial_ad.dart';
+import '../widgets/web_interstitial_ad_stub.dart'
+    if (dart.library.html) '../widgets/web_interstitial_ad.dart';
 
 class AdService {
   static final AdService _instance = AdService._internal();

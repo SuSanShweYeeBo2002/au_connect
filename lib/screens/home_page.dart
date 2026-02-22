@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'add_post_page.dart';
 import 'comments_page.dart';
-import 'ad_example_screen.dart';
 import 'other_user_profile_page.dart';
 import '../services/post_service.dart';
 import '../services/auth_service.dart';
@@ -713,16 +712,6 @@ class _HomePageState extends State<HomePage> {
         foregroundColor: Colors.black,
         elevation: 1,
         actions: [
-          IconButton(
-            icon: Icon(Icons.ad_units),
-            tooltip: 'View Ad Examples',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AdExampleScreen()),
-              );
-            },
-          ),
           Padding(
             padding: const EdgeInsets.only(right: 16.0, top: 8.0, bottom: 8.0),
             child: FloatingActionButton(
@@ -769,47 +758,48 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-                // Right sidebar (ads)
-                Container(
-                  width: 300,
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      // Sticky sidebar with ads
-                      Container(
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Sponsored',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
+                // Right sidebar (ads) - only show when there are posts
+                if (!isLoading && posts.isNotEmpty)
+                  Container(
+                    width: 300,
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        // Sticky sidebar with ads
+                        Container(
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
                               ),
-                            ),
-                            SizedBox(height: 12),
-                            Container(height: 250, child: BannerAdWidget()),
-                            SizedBox(height: 16),
-                            Container(height: 250, child: BannerAdWidget()),
-                          ],
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Sponsored',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              SizedBox(height: 12),
+                              Container(height: 250, child: BannerAdWidget()),
+                              SizedBox(height: 16),
+                              Container(height: 250, child: BannerAdWidget()),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
               ],
             );
           }

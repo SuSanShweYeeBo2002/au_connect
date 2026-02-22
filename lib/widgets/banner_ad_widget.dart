@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/ad_service.dart';
-import 'web_banner_ad.dart';
+import 'web_banner_ad_stub.dart' if (dart.library.html) 'web_banner_ad.dart';
 
 /// Universal banner ad widget that works on both mobile and web
 /// - On mobile (Android/iOS): Shows Google AdMob ads
@@ -49,7 +49,7 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   Widget build(BuildContext context) {
     // Web platform - use AdSense
     if (kIsWeb) {
-      return const ResponsiveWebBannerAd();
+      return const WebBannerAd();
     }
 
     // Mobile platform - use AdMob

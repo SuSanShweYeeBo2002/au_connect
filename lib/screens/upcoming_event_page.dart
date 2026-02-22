@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'webview_page.dart';
+import 'webview_page_stub.dart' if (dart.library.html) 'webview_page.dart';
 
 class UpcomingEventPage extends StatelessWidget {
   const UpcomingEventPage({super.key});

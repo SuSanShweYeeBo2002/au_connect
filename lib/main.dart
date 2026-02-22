@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:async';
-import 'package:uni_links/uni_links.dart';
+import 'package:app_links/app_links.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'screens/signin_page.dart';
 import 'screens/signup_page.dart';
@@ -35,6 +35,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  late AppLinks _appLinks;
   StreamSubscription? _deepLinkSubscription;
 
   @override
@@ -50,8 +51,10 @@ class _MyAppState extends State<MyApp> {
       return;
     }
 
+    _appLinks = AppLinks();
+
     // Handle deep links when app is already running
-    _deepLinkSubscription = uriLinkStream.listen(
+    _deepLinkSubscription = _appLinks.uriLinkStream.listen(
       (Uri? uri) {
         if (uri != null) {
           _handleDeepLink(uri);
@@ -68,7 +71,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _handleInitialDeepLink() async {
     try {
-      final initialUri = await getInitialUri();
+      final initialUri = await _appLinks.getInitialLink();
       if (initialUri != null) {
         _handleDeepLink(initialUri);
       }
