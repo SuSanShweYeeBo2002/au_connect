@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/user_service.dart';
+import '../config/theme_config.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   @override
@@ -52,10 +53,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Forgot Password'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
+      appBar: AppBar(title: Text('Forgot Password')),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -198,22 +196,26 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         Container(
           padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.blue.shade50,
+            color: AppTheme.secondaryBeige,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue.shade200),
+            border: Border.all(color: AppTheme.darkBeige),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                  Icon(
+                    Icons.info_outline,
+                    color: AppTheme.brownPrimary,
+                    size: 20,
+                  ),
                   SizedBox(width: 8),
                   Text(
                     'Next Steps:',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue.shade900,
+                      color: AppTheme.textPrimary,
                     ),
                   ),
                 ],
@@ -227,7 +229,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 style: TextStyle(
                   fontSize: 14,
                   height: 1.5,
-                  color: Colors.blue.shade900,
+                  color: AppTheme.textSecondary,
                 ),
               ),
             ],

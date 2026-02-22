@@ -5,6 +5,7 @@ import 'package:image_cropper/image_cropper.dart';
 import '../services/auth_service.dart';
 import '../services/post_service.dart';
 import '../services/user_service.dart';
+import '../config/theme_config.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -686,7 +687,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFE3F2FD),
+      backgroundColor: AppTheme.primaryBeige,
       body: LayoutBuilder(
         builder: (context, constraints) {
           double maxWidth = constraints.maxWidth > 600

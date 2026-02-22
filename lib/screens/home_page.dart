@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import '../widgets/simple_image_viewer.dart';
 import '../widgets/optimized_image.dart';
 import '../widgets/banner_ad_widget.dart';
+import '../config/theme_config.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -706,11 +707,10 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.primaryBeige,
       appBar: AppBar(
         title: Text('AU CONNECT'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 1,
+        elevation: 0,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0, top: 8.0, bottom: 8.0),
@@ -813,7 +813,6 @@ class _HomePageState extends State<HomePage> {
           );
         },
       ),
-      backgroundColor: Color(0xFFE3F2FD),
     );
   }
 }

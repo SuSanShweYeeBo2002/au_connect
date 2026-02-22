@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'webview_page_stub.dart' if (dart.library.html) 'webview_page.dart';
+import '../config/theme_config.dart';
 
 class UpcomingEventPage extends StatelessWidget {
   const UpcomingEventPage({super.key});
@@ -110,12 +111,8 @@ class UpcomingEventPage extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE3F2FD),
-      appBar: AppBar(
-        title: const Text('Campus Clicks'),
-        backgroundColor: Colors.blue[700],
-        foregroundColor: Colors.white,
-      ),
+      backgroundColor: AppTheme.primaryBeige,
+      appBar: AppBar(title: const Text('Campus Clicks')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

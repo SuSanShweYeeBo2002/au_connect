@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/poll_service.dart';
 import '../services/auth_service.dart';
+import '../config/theme_config.dart';
 
 class AuPollPage extends StatefulWidget {
   @override
@@ -370,12 +371,8 @@ class _AuPollPageState extends State<AuPollPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE3F2FD),
-      appBar: AppBar(
-        title: Text('AU Poll'),
-        backgroundColor: Colors.blue[700],
-        foregroundColor: Colors.white,
-      ),
+      backgroundColor: AppTheme.primaryBeige,
+      appBar: AppBar(title: Text('AU Poll')),
       body: _isLoading && _polls.isEmpty
           ? Center(child: CircularProgressIndicator())
           : _error != null && _polls.isEmpty
@@ -419,7 +416,7 @@ class _AuPollPageState extends State<AuPollPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _showCreatePollDialog,
         child: Icon(Icons.add),
-        backgroundColor: Colors.blue[700],
+        backgroundColor: AppTheme.brownPrimary,
         tooltip: 'Create Poll',
       ),
     );
@@ -647,10 +644,14 @@ class _PollCard extends StatelessWidget {
                       : null,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isUserVote ? Colors.blue[100] : Colors.grey[100],
+                      color: isUserVote
+                          ? AppTheme.secondaryBeige
+                          : Colors.grey[100],
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: isUserVote ? Colors.blue : Colors.grey[300]!,
+                        color: isUserVote
+                            ? AppTheme.brownPrimary
+                            : Colors.grey[300]!,
                         width: isUserVote ? 2 : 1,
                       ),
                     ),
@@ -663,8 +664,8 @@ class _PollCard extends StatelessWidget {
                               height: 48,
                               decoration: BoxDecoration(
                                 color: isUserVote
-                                    ? Colors.blue.withOpacity(0.4)
-                                    : Colors.blue.withOpacity(0.3),
+                                    ? AppTheme.brownPrimary.withOpacity(0.3)
+                                    : AppTheme.darkBeige.withOpacity(0.3),
                                 borderRadius: BorderRadius.circular(7),
                               ),
                             ),
@@ -687,7 +688,7 @@ class _PollCard extends StatelessWidget {
                                         ),
                                         child: Icon(
                                           Icons.check_circle,
-                                          color: Colors.blue[700],
+                                          color: AppTheme.brownPrimary,
                                           size: 20,
                                         ),
                                       ),
@@ -722,7 +723,7 @@ class _PollCard extends StatelessWidget {
                                         '${percentage.toStringAsFixed(0)}% • ${option.votes}',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.blue[700],
+                                          color: AppTheme.brownPrimary,
                                           fontSize: 14,
                                         ),
                                       ),
@@ -731,7 +732,7 @@ class _PollCard extends StatelessWidget {
                                     Icon(
                                       Icons.people,
                                       size: 16,
-                                      color: Colors.blue[700],
+                                      color: AppTheme.brownPrimary,
                                     ),
                                   ],
                                 ),

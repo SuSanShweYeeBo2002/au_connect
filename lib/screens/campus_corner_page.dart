@@ -6,6 +6,7 @@ import 'au_poll_page.dart';
 import 'study_sessions_page_simple.dart';
 import 'shop_and_lost_found_page.dart';
 import '../services/user_service.dart';
+import '../config/theme_config.dart';
 
 class CampusCornerPage extends StatefulWidget {
   @override
@@ -53,7 +54,7 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE3F2FD),
+      backgroundColor: AppTheme.primaryBeige,
       body: LayoutBuilder(
         builder: (context, constraints) {
           double maxWidth = constraints.maxWidth > 600
@@ -75,7 +76,7 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                         children: [
                           CircleAvatar(
                             radius: 32,
-                            backgroundColor: Colors.blue[300],
+                            backgroundColor: AppTheme.brownLight,
                             backgroundImage: _profileImageUrl != null
                                 ? NetworkImage(_profileImageUrl!)
                                 : null,
@@ -107,14 +108,16 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
+                                    color: AppTheme.textPrimary,
+                                    letterSpacing: 0.3,
                                   ),
                                 ),
                                 SizedBox(height: 4),
                                 Text(
                                   _userEmail,
                                   style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[700],
+                                    fontSize: 15,
+                                    color: AppTheme.textSecondary,
                                   ),
                                 ),
                               ],
@@ -142,7 +145,7 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                             },
                             child: _CampusTile(
                               title: 'Shop & Lost Found',
-                              color: Colors.blue[100],
+                              color: AppTheme.cardBackground,
                               icon: Icons.shopping_bag,
                             ),
                           ),
@@ -157,7 +160,7 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                             },
                             child: _CampusTile(
                               title: 'Pomodoro Study Timer',
-                              color: Colors.blue[100],
+                              color: AppTheme.secondaryBeige,
                               icon: Icons.timer,
                             ),
                           ),
@@ -172,7 +175,7 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                             },
                             child: _CampusTile(
                               title: 'Events & Notices',
-                              color: Colors.white,
+                              color: AppTheme.cardBackground,
                               icon: Icons.event,
                             ),
                           ),
@@ -187,7 +190,7 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                             },
                             child: _CampusTile(
                               title: 'AU Poll',
-                              color: Colors.white,
+                              color: AppTheme.cardBackground,
                               icon: Icons.poll,
                             ),
                           ),
@@ -202,7 +205,7 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                             },
                             child: _CampusTile(
                               title: 'Idea Cloud',
-                              color: Colors.blue[100],
+                              color: AppTheme.secondaryBeige,
                               icon: Icons.cloud,
                             ),
                           ),
@@ -217,7 +220,7 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                             },
                             child: _CampusTile(
                               title: 'Study Buddy',
-                              color: Colors.blue[100],
+                              color: AppTheme.secondaryBeige,
                               icon: Icons.groups,
                             ),
                           ),
@@ -230,17 +233,19 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                           height: 52,
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.blue,
+                              backgroundColor: AppTheme.brownPrimary,
+                              foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              elevation: 0,
                             ),
-                            icon: Icon(Icons.logout, size: 28),
+                            icon: Icon(Icons.logout, size: 24),
                             label: Text(
                               'Logout',
-                              style: TextStyle(fontSize: 18),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             onPressed: () {
                               Navigator.pushReplacementNamed(
@@ -280,25 +285,35 @@ class _CampusTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: color ?? Colors.white,
+        color: color ?? AppTheme.cardBackground,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
         ],
       ),
       padding: EdgeInsets.all(16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (icon != null) Icon(icon, color: Colors.grey[800]),
-          if (icon != null) SizedBox(width: 8),
+          if (icon != null) Icon(icon, color: AppTheme.brownPrimary, size: 28),
+          if (icon != null) SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   title,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: AppTheme.textPrimary,
+                    letterSpacing: 0.2,
+                  ),
                 ),
                 // ...existing code...
               ],

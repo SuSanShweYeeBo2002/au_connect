@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../config/api_config.dart';
+import '../config/theme_config.dart';
 import 'email_verification_page.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -173,116 +174,151 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFE3F2FD),
+      backgroundColor: AppTheme.primaryBeige,
       body: LayoutBuilder(
         builder: (context, constraints) {
           double maxWidth = constraints.maxWidth > 500
-              ? 400
+              ? 420
               : constraints.maxWidth * 0.9;
           return Center(
             child: SingleChildScrollView(
               child: Container(
                 width: maxWidth,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 32.0),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 40.0,
+                    horizontal: 20.0,
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.school, size: 64, color: Color(0xFF0288D1)),
-                      SizedBox(height: 16),
+                      // Logo and Title
+                      Icon(
+                        Icons.school,
+                        size: 72,
+                        color: AppTheme.brownPrimary,
+                      ),
+                      SizedBox(height: 20),
                       Text(
-                        'AU Connect',
+                        'AU CONNECT',
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
+                          color: AppTheme.textPrimary,
+                          letterSpacing: 2.5,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 32),
-                      TextField(
-                        controller: _emailController,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.mail_outline),
-                          hintText: 'Email',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
+                      SizedBox(height: 48),
+
+                      // Sign Up Card
+                      Container(
+                        decoration: AppTheme.cardDecoration(elevation: 6),
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          children: [
+                            // Email Field
+                            TextField(
+                              controller: _emailController,
+                              decoration: InputDecoration(
+                                prefixIcon: Icon(
+                                  Icons.mail_outline,
+                                  color: AppTheme.brownPrimary,
+                                ),
+                                hintText: 'Email',
+                              ),
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                            SizedBox(height: 20),
+
+                            // Password Field
+                            TextField(
+                              controller: _passwordController,
+                              decoration: InputDecoration(
+                                prefixIcon: Icon(
+                                  Icons.lock_outline,
+                                  color: AppTheme.brownPrimary,
+                                ),
+                                hintText: 'Password',
+                              ),
+                              obscureText: true,
+                            ),
+                            SizedBox(height: 20),
+
+                            // Confirm Password Field
+                            TextField(
+                              controller: _confirmPasswordController,
+                              decoration: InputDecoration(
+                                prefixIcon: Icon(
+                                  Icons.lock_outline,
+                                  color: AppTheme.brownPrimary,
+                                ),
+                                hintText: 'Confirm Password',
+                              ),
+                              obscureText: true,
+                            ),
+                            SizedBox(height: 28),
+
+                            // Sign Up Button
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: ElevatedButton(
+                                onPressed: _isLoading ? null : _signUp,
+                                child: _isLoading
+                                    ? SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                        ),
+                                      )
+                                    : Text(
+                                        'Sign Up',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 16),
-                      TextField(
-                        controller: _passwordController,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.lock_outline),
-                          hintText: 'password',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                        ),
-                        obscureText: true,
-                      ),
-                      SizedBox(height: 16),
-                      TextField(
-                        controller: _confirmPasswordController,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.lock_outline),
-                          hintText: 'confirm password',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                        ),
-                        obscureText: true,
-                      ),
-                      SizedBox(height: 8),
+
+                      SizedBox(height: 20),
+
+                      // Action Links
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Text(
+                            'Already have an account?',
+                            style: TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: 13,
+                            ),
+                          ),
                           TextButton(
                             onPressed: () {
                               Navigator.pushNamed(context, '/signin');
                             },
-                            child: Text('Already have an account?'),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 48,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF0288D1),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24),
+                            child: Text(
+                              'Sign In',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                          onPressed: _isLoading ? null : _signUp,
-                          child: _isLoading
-                              ? SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                  ),
-                                )
-                              : Text(
-                                  'Sign Up',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                        ),
+                        ],
                       ),
                     ],
                   ),

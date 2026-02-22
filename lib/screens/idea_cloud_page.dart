@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/note_service.dart';
+import '../config/theme_config.dart';
 
 class IdeaCloudPage extends StatefulWidget {
   @override
@@ -154,14 +155,14 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.edit_note, color: Colors.blue[700], size: 28),
+                  Icon(Icons.edit_note, color: AppTheme.brownPrimary, size: 28),
                   SizedBox(width: 12),
                   Text(
                     'Edit Note',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue[900],
+                      color: AppTheme.textPrimary,
                     ),
                   ),
                 ],
@@ -183,7 +184,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: Colors.blue,
+                              color: AppTheme.brownPrimary,
                               width: 2,
                             ),
                           ),
@@ -208,7 +209,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: Colors.blue,
+                              color: AppTheme.brownPrimary,
                               width: 2,
                             ),
                           ),
@@ -249,7 +250,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                   ElevatedButton(
                     onPressed: () => _performUpdate(note),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[700],
+                      backgroundColor: AppTheme.brownPrimary,
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(
                         horizontal: 32,
@@ -364,7 +365,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                 children: [
                   Icon(
                     Icons.add_circle_outline,
-                    color: Colors.blue[700],
+                    color: AppTheme.brownPrimary,
                     size: 28,
                   ),
                   SizedBox(width: 12),
@@ -373,7 +374,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue[900],
+                      color: AppTheme.textPrimary,
                     ),
                   ),
                 ],
@@ -395,7 +396,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: Colors.blue,
+                              color: AppTheme.brownPrimary,
                               width: 2,
                             ),
                           ),
@@ -420,7 +421,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: Colors.blue,
+                              color: AppTheme.brownPrimary,
                               width: 2,
                             ),
                           ),
@@ -457,7 +458,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                   ElevatedButton(
                     onPressed: _addNote,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[700],
+                      backgroundColor: AppTheme.brownPrimary,
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(
                         horizontal: 32,
@@ -502,7 +503,11 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.description, color: Colors.blue[700], size: 28),
+                  Icon(
+                    Icons.description,
+                    color: AppTheme.brownPrimary,
+                    size: 28,
+                  ),
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -510,7 +515,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blue[900],
+                        color: AppTheme.textPrimary,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -539,7 +544,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                       Container(
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.blue[50],
+                          color: AppTheme.secondaryBeige,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Column(
@@ -550,14 +555,14 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                                 Icon(
                                   Icons.access_time,
                                   size: 16,
-                                  color: Colors.blue[700],
+                                  color: AppTheme.brownPrimary,
                                 ),
                                 SizedBox(width: 6),
                                 Text(
                                   'Created: ${_formatDate(note.createdAt)}',
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: Colors.blue[900],
+                                    color: AppTheme.textPrimary,
                                   ),
                                 ),
                               ],
@@ -570,14 +575,14 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                                   Icon(
                                     Icons.update,
                                     size: 16,
-                                    color: Colors.blue[700],
+                                    color: AppTheme.brownPrimary,
                                   ),
                                   SizedBox(width: 6),
                                   Text(
                                     'Updated: ${_formatDate(note.updatedAt)}',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Colors.blue[900],
+                                      color: AppTheme.textPrimary,
                                     ),
                                   ),
                                 ],
@@ -618,7 +623,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[700],
+                      backgroundColor: AppTheme.brownPrimary,
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(
                         horizontal: 24,
@@ -665,11 +670,8 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Idea Cloud'),
-        backgroundColor: Colors.blue[300],
-      ),
-      backgroundColor: const Color(0xFFE3F2FD),
+      appBar: AppBar(title: Text('Idea Cloud')),
+      backgroundColor: AppTheme.primaryBeige,
       body: _isLoading && _notes.isEmpty
           ? Center(child: CircularProgressIndicator())
           : _errorMessage != null && _notes.isEmpty
@@ -732,7 +734,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                   return Card(
                     margin: EdgeInsets.only(bottom: 16),
                     elevation: 3,
-                    shadowColor: Colors.blue.withOpacity(0.2),
+                    shadowColor: AppTheme.brownPrimary.withOpacity(0.2),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -744,7 +746,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           gradient: LinearGradient(
-                            colors: [Colors.white, Colors.blue[50]!],
+                            colors: [Colors.white, AppTheme.secondaryBeige],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -757,12 +759,12 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                                 Container(
                                   padding: EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue[100],
+                                    color: AppTheme.secondaryBeige,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(
                                     Icons.lightbulb_outline,
-                                    color: Colors.blue[700],
+                                    color: AppTheme.brownPrimary,
                                     size: 20,
                                   ),
                                 ),
@@ -773,7 +775,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.blue[900],
+                                      color: AppTheme.textPrimary,
                                     ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
@@ -782,7 +784,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                                 PopupMenuButton(
                                   icon: Icon(
                                     Icons.more_vert,
-                                    color: Colors.blue[700],
+                                    color: AppTheme.brownPrimary,
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
@@ -794,7 +796,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                                           Icon(
                                             Icons.edit,
                                             size: 20,
-                                            color: Colors.blue,
+                                            color: AppTheme.brownPrimary,
                                           ),
                                           SizedBox(width: 12),
                                           Text(
@@ -860,14 +862,14 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                                 Icon(
                                   Icons.access_time,
                                   size: 14,
-                                  color: Colors.blue[600],
+                                  color: AppTheme.brownPrimary,
                                 ),
                                 SizedBox(width: 6),
                                 Text(
                                   _formatDate(note.createdAt),
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: Colors.blue[700],
+                                    color: AppTheme.brownPrimary,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -888,7 +890,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
           'Add Note',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.blue[700],
+        backgroundColor: AppTheme.brownPrimary,
         foregroundColor: Colors.white,
         elevation: 6,
         tooltip: 'Add Note',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import '../config/theme_config.dart';
 
 class PomodoroTimerPage extends StatefulWidget {
   @override
@@ -64,9 +65,9 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: isWork ? Color(0xFFFFF3E0) : Color(0xFFE3F2FD),
+      backgroundColor: isWork ? Color(0xFFFFF3E0) : AppTheme.primaryBeige,
       appBar: AppBar(
-        backgroundColor: isWork ? Colors.orange : Colors.blue,
+        backgroundColor: isWork ? Colors.orange : AppTheme.brownPrimary,
         elevation: 0,
       ),
       body: Center(
@@ -78,7 +79,7 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
               Container(
                 padding: EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: isWork ? Colors.orange[100] : Colors.blue[100],
+                  color: isWork ? Colors.orange[100] : AppTheme.secondaryBeige,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Column(
@@ -104,7 +105,7 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
                             strokeWidth: 10,
                             backgroundColor: Colors.grey[300],
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              isWork ? Colors.orange : Colors.blue,
+                              isWork ? Colors.orange : AppTheme.brownPrimary,
                             ),
                           ),
                         ),
@@ -180,14 +181,14 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
               Container(
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isWork ? Colors.orange[50] : Colors.blue[50],
+                  color: isWork ? Colors.orange[50] : AppTheme.secondaryBeige,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       isWork ? Icons.edit : Icons.coffee,
-                      color: isWork ? Colors.orange : Colors.blue,
+                      color: isWork ? Colors.orange : AppTheme.brownPrimary,
                     ),
                     SizedBox(width: 12),
                     Expanded(
@@ -221,7 +222,7 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
               else
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: AppTheme.brownPrimary,
                     foregroundColor: Colors.white,
                     minimumSize: Size(180, 48),
                   ),
@@ -253,7 +254,7 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
               ? Icons.pause
               : Icons.play_arrow,
         ),
-        backgroundColor: isWork ? Colors.orange : Colors.blue,
+        backgroundColor: isWork ? Colors.orange : AppTheme.brownPrimary,
         onPressed: () {
           if (timer == null || !timer!.isActive || isPaused) {
             startTimer();

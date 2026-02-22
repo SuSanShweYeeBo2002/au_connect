@@ -11,6 +11,7 @@ import 'widgets/auth_guard.dart';
 import 'widgets/global_zoom_wrapper.dart';
 import 'services/auth_service.dart';
 import 'config/api_config.dart';
+import 'config/theme_config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -145,9 +146,7 @@ class _MyAppState extends State<MyApp> {
       navigatorKey: navigatorKey,
       title: 'AU Connect',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
-      ),
+      theme: AppTheme.lightTheme,
       builder: (context, child) {
         // Wrap the entire app with global zoom functionality
         // minScale: 1.0 means no zoom out (like Facebook) - prevents white space
@@ -163,24 +162,26 @@ class _MyAppState extends State<MyApp> {
           // Show loading while checking auth status
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
-              backgroundColor: Color(0xFFE3F2FD),
+              backgroundColor: AppTheme.primaryBeige,
               body: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.school, size: 64, color: Color(0xFF0288D1)),
+                    Icon(Icons.school, size: 64, color: AppTheme.brownPrimary),
                     SizedBox(height: 16),
                     Text(
-                      'AU Connect',
+                      'AU CONNECT',
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
+                        letterSpacing: 2,
                       ),
                     ),
                     SizedBox(height: 32),
                     CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        Color(0xFF0288D1),
+                        AppTheme.brownPrimary,
                       ),
                     ),
                   ],

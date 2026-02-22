@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/friend_service.dart';
+import '../config/theme_config.dart';
 import 'friend_requests_page.dart';
 import 'blocked_users_page.dart';
 
@@ -147,6 +148,7 @@ class _FriendPageState extends State<FriendPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.primaryBeige,
       appBar: AppBar(
         title: Text('Friends'),
         elevation: 0,
@@ -228,7 +230,6 @@ class _FriendPageState extends State<FriendPage> {
           );
         },
       ),
-      backgroundColor: Color(0xFFE3F2FD),
     );
   }
 

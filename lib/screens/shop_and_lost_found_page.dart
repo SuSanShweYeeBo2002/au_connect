@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import '../services/sell_item_service.dart';
 import '../services/lost_item_service.dart';
 import '../services/auth_service.dart';
+import '../config/theme_config.dart';
 
 class ShopAndLostFoundPage extends StatefulWidget {
   @override
@@ -35,7 +36,6 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
     return Scaffold(
       appBar: AppBar(
         title: Text('Shop & Lost Found', style: TextStyle(fontSize: 22)),
-        backgroundColor: Colors.blue,
         toolbarHeight: 80,
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(48),
@@ -43,9 +43,9 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
             color: Colors.white,
             child: TabBar(
               controller: _tabController,
-              labelColor: Colors.blue,
+              labelColor: AppTheme.brownPrimary,
               unselectedLabelColor: Colors.grey,
-              indicatorColor: Colors.blue,
+              indicatorColor: AppTheme.brownPrimary,
               indicatorWeight: 3,
               tabs: [
                 Tab(icon: Icon(Icons.shopping_bag), text: 'Sell Items'),
@@ -72,7 +72,7 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
         },
         icon: Icon(Icons.add),
         label: Text(_tabController.index == 0 ? 'Sell Item' : 'Report Item'),
-        backgroundColor: Colors.blue,
+        backgroundColor: AppTheme.brownPrimary,
       ),
     );
   }
@@ -100,7 +100,7 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
             ),
             title: Row(
               children: [
-                Icon(Icons.shopping_bag, color: Colors.blue),
+                Icon(Icons.shopping_bag, color: AppTheme.brownPrimary),
                 SizedBox(width: 12),
                 Text('Create Sell Item'),
               ],
@@ -366,7 +366,9 @@ class _ShopAndLostFoundPageState extends State<ShopAndLostFoundPage>
                     setState(() => errorMessage = 'Error: $e');
                   }
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.brownPrimary,
+                ),
                 child: Text('Create'),
               ),
             ],
@@ -851,7 +853,9 @@ class _SellItemsTabState extends State<SellItemsTab> {
             Icon(Icons.arrow_drop_down, size: 18),
           ],
         ),
-        backgroundColor: selected != null ? Colors.blue[100] : Colors.white,
+        backgroundColor: selected != null
+            ? AppTheme.secondaryBeige
+            : Colors.white,
       ),
       onSelected: (value) {
         setState(() {
@@ -920,7 +924,7 @@ class _SellItemsTabState extends State<SellItemsTab> {
                       '฿${item.price.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 18,
-                        color: Colors.blue,
+                        color: AppTheme.brownPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1118,14 +1122,14 @@ class _SellItemsTabState extends State<SellItemsTab> {
                   '฿${item.price.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontSize: 28,
-                    color: Colors.blue,
+                    color: AppTheme.brownPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 SizedBox(height: 16),
                 Row(
                   children: [
-                    _buildTag(item.category, Colors.blue),
+                    _buildTag(item.category, AppTheme.brownPrimary),
                     SizedBox(width: 8),
                     _buildTag(item.condition, Colors.orange),
                     SizedBox(width: 8),
@@ -1146,12 +1150,12 @@ class _SellItemsTabState extends State<SellItemsTab> {
                 ),
                 SizedBox(height: 8),
                 ListTile(
-                  leading: Icon(Icons.phone, color: Colors.blue),
+                  leading: Icon(Icons.phone, color: AppTheme.brownPrimary),
                   title: Text(item.contactInfo['phone'] ?? 'N/A'),
                   dense: true,
                 ),
                 ListTile(
-                  leading: Icon(Icons.email, color: Colors.blue),
+                  leading: Icon(Icons.email, color: AppTheme.brownPrimary),
                   title: Text(item.contactInfo['email'] ?? 'N/A'),
                   dense: true,
                 ),
@@ -1176,7 +1180,7 @@ class _SellItemsTabState extends State<SellItemsTab> {
                           icon: Icon(Icons.edit),
                           label: Text('Edit'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: AppTheme.brownPrimary,
                             foregroundColor: Colors.white,
                             padding: EdgeInsets.symmetric(vertical: 12),
                           ),
@@ -1325,7 +1329,7 @@ class _SellItemsTabState extends State<SellItemsTab> {
                 Container(
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.blue,
+                    color: AppTheme.brownPrimary,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20),
@@ -1482,7 +1486,7 @@ class _SellItemsTabState extends State<SellItemsTab> {
                                           border: Border.all(
                                             color:
                                                 keptImageUrls.contains(imageUrl)
-                                                ? Colors.blue
+                                                ? AppTheme.brownPrimary
                                                 : Colors.red.shade300,
                                             width: 2,
                                           ),
@@ -1752,7 +1756,7 @@ class _SellItemsTabState extends State<SellItemsTab> {
                           },
                           child: Text('Update'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: AppTheme.brownPrimary,
                             foregroundColor: Colors.white,
                           ),
                         ),
@@ -1936,7 +1940,9 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
             Icon(Icons.arrow_drop_down, size: 18),
           ],
         ),
-        backgroundColor: selected != null ? Colors.blue[100] : Colors.white,
+        backgroundColor: selected != null
+            ? AppTheme.secondaryBeige
+            : Colors.white,
       ),
       onSelected: (value) {
         setState(() {
@@ -2056,7 +2062,7 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Active':
-        return Colors.blue;
+        return AppTheme.brownPrimary;
       case 'Resolved':
         return Colors.green;
       case 'Closed':
@@ -2209,7 +2215,7 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
                 ],
                 Row(
                   children: [
-                    _buildTag(item.category, Colors.blue),
+                    _buildTag(item.category, AppTheme.brownPrimary),
                     SizedBox(width: 8),
                     _buildTag(item.type, _getTypeColor(item.type)),
                     SizedBox(width: 8),
@@ -2251,12 +2257,12 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
                 ),
                 SizedBox(height: 8),
                 ListTile(
-                  leading: Icon(Icons.phone, color: Colors.blue),
+                  leading: Icon(Icons.phone, color: AppTheme.brownPrimary),
                   title: Text(item.contactInfo['phone'] ?? 'N/A'),
                   dense: true,
                 ),
                 ListTile(
-                  leading: Icon(Icons.email, color: Colors.blue),
+                  leading: Icon(Icons.email, color: AppTheme.brownPrimary),
                   title: Text(item.contactInfo['email'] ?? 'N/A'),
                   dense: true,
                 ),
@@ -2281,7 +2287,7 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
                           icon: Icon(Icons.edit),
                           label: Text('Edit'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: AppTheme.brownPrimary,
                             foregroundColor: Colors.white,
                             padding: EdgeInsets.symmetric(vertical: 12),
                           ),
@@ -2431,7 +2437,7 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
                 Container(
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.blue,
+                    color: AppTheme.brownPrimary,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20),
@@ -2881,7 +2887,7 @@ class _LostAndFoundTabState extends State<LostAndFoundTab> {
                           },
                           child: Text('Update'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: AppTheme.brownPrimary,
                             foregroundColor: Colors.white,
                           ),
                         ),
