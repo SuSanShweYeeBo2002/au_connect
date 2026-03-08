@@ -1172,7 +1172,7 @@ class _ChatPageState extends State<ChatPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Color(0xFF64B5F6),
+          backgroundColor: Color(0xFF8D6E63),
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {

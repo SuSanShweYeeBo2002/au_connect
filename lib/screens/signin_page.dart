@@ -88,6 +88,7 @@ class _SignInPageState extends State<SignInPage> {
           final responseData = json.decode(response.body);
           final token = responseData['token'];
           final userId = responseData['userId'] ?? responseData['user']?['_id'];
+          final isAdmin = responseData['isAdmin'] ?? false;
 
           if (token == null) {
             throw Exception('No token received from server');
@@ -101,6 +102,7 @@ class _SignInPageState extends State<SignInPage> {
             rememberMe: _rememberMe,
             authToken: token,
             userId: userId,
+            isAdmin: isAdmin,
           );
 
           // Remove the success message snackbar and proceed directly to navigation

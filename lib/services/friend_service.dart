@@ -752,7 +752,7 @@ class FriendUser {
       id: json['_id'] ?? json['id'] ?? '',
       email: email,
       name: json['displayName'] ?? json['name'] ?? email.split('@')[0],
-      avatar: json['avatar'],
+      avatar: json['profileImage'] ?? json['avatar'],
     );
   }
 }

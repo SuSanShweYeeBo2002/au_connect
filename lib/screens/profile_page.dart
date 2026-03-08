@@ -6,6 +6,7 @@ import '../services/auth_service.dart';
 import '../services/post_service.dart';
 import '../services/user_service.dart';
 import '../config/theme_config.dart';
+import 'create_sponsor_ad_page.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -23,6 +24,7 @@ class _ProfilePageState extends State<ProfilePage> {
   int _currentPage = 1;
   bool _hasMorePosts = true;
   final ImagePicker _picker = ImagePicker();
+  bool _isAdmin = false;
 
   @override
   void initState() {
@@ -38,6 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       final response = await UserService.getCurrentUser();
       final userData = response['data'];
+      final isAdmin = await AuthService.instance.isAdmin();
 
       setState(() {
         _userId = userData['_id'];
@@ -47,6 +50,7 @@ class _ProfilePageState extends State<ProfilePage> {
             'User';
         _userEmail = userData['email'];
         _profileImageUrl = userData['profileImage'];
+        _isAdmin = isAdmin;
         _isLoadingProfile = false;
       });
 
@@ -217,7 +221,7 @@ class _ProfilePageState extends State<ProfilePage> {
           builder: (context, setState) => AlertDialog(
             title: Row(
               children: [
-                Icon(Icons.edit, color: Colors.blue),
+                Icon(Icons.edit, color: Color(0xFF8D6E63)),
                 SizedBox(width: 12),
                 Text('Edit Display Name'),
               ],
@@ -311,7 +315,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     });
                   }
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF8D6E63),
+                ),
                 child: Text('Save', style: TextStyle(color: Colors.white)),
               ),
             ],
@@ -335,7 +341,7 @@ class _ProfilePageState extends State<ProfilePage> {
           builder: (context, setState) => AlertDialog(
             title: Row(
               children: [
-                Icon(Icons.edit, color: Colors.blue),
+                Icon(Icons.edit, color: Color(0xFF8D6E63)),
                 SizedBox(width: 12),
                 Text('Edit Profile'),
               ],
@@ -458,7 +464,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     setState(() => errorMessage = 'Error: $e');
                   }
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF8D6E63),
+                ),
                 child: Text('Save'),
               ),
             ],
@@ -497,7 +505,7 @@ class _ProfilePageState extends State<ProfilePage> {
           uiSettings: [
             AndroidUiSettings(
               toolbarTitle: 'Crop Profile Image',
-              toolbarColor: Colors.blue,
+              toolbarColor: Color(0xFF8D6E63),
               toolbarWidgetColor: Colors.white,
               initAspectRatio: CropAspectRatioPreset.square,
               lockAspectRatio: true,
@@ -706,14 +714,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         Container(
                           height: 120,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: NetworkImage(
-                                "https://i.pinimg.com/originals/49/73/5b/49735b38c27ca67787e201a8f4b0fd6d.jpg",
-                              ),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                          decoration: BoxDecoration(color: Color(0xFF8D6E63)),
                         ),
                         Positioned(
                           bottom: -40,
@@ -751,7 +752,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             icon: Icon(
                               Icons.edit,
                               size: 20,
-                              color: Colors.blue,
+                              color: Color(0xFF8D6E63),
                             ),
                             onPressed: _showEditDisplayNameDialog,
                             tooltip: 'Edit display name',
@@ -786,6 +787,31 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
 
+                    // Admin Only - Create Sponsor Ad Button
+                    if (_isAdmin) ...[
+                      const SizedBox(height: 10),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CreateSponsorAdPage(),
+                            ),
+                          );
+                        },
+                        icon: Icon(Icons.campaign),
+                        label: Text('Create Sponsor Ad'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+
                     const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -793,7 +819,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         Expanded(
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
+                              backgroundColor: Color(0xFF8D6E63),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
@@ -811,8 +837,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         Expanded(
                           child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.blue,
-                              side: BorderSide(color: Colors.blue),
+                              foregroundColor: Color(0xFF8D6E63),
+                              side: BorderSide(color: Color(0xFF8D6E63)),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
@@ -829,7 +855,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Column(
                         children: [
                           TabBar(
-                            labelColor: Colors.blue,
+                            labelColor: Color(0xFF8D6E63),
                             tabs: [
                               Tab(text: "Posts"),
                               Tab(text: "Album"),
@@ -1210,7 +1236,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      color: Color(0xFF8D6E63),
                     ),
                   ),
                   SizedBox(height: 16),
@@ -1239,7 +1265,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      color: Color(0xFF8D6E63),
                     ),
                   ),
                   SizedBox(height: 16),

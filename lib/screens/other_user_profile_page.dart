@@ -150,10 +150,10 @@ class _OtherUserProfilePageState extends State<OtherUserProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFE3F2FD),
+      backgroundColor: Color(0xFFE8DDD0),
       appBar: AppBar(
         title: Text(_userName ?? widget.userName ?? 'Profile'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF8D6E63),
         foregroundColor: Colors.white,
       ),
       body: LayoutBuilder(
@@ -174,14 +174,7 @@ class _OtherUserProfilePageState extends State<OtherUserProfilePage> {
                       children: [
                         Container(
                           height: 120,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: NetworkImage(
-                                "https://i.pinimg.com/originals/49/73/5b/49735b38c27ca67787e201a8f4b0fd6d.jpg",
-                              ),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                          decoration: BoxDecoration(color: Color(0xFF8D6E63)),
                         ),
                         Positioned(
                           bottom: -40,
@@ -222,7 +215,7 @@ class _OtherUserProfilePageState extends State<OtherUserProfilePage> {
                       child: Column(
                         children: [
                           TabBar(
-                            labelColor: Colors.blue,
+                            labelColor: Color(0xFF8D6E63),
                             tabs: [
                               Tab(text: "Posts"),
                               Tab(text: "Album"),
@@ -567,7 +560,7 @@ class _OtherUserProfilePageState extends State<OtherUserProfilePage> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      color: Color(0xFF8D6E63),
                     ),
                   ),
                   SizedBox(height: 16),
@@ -592,7 +585,7 @@ class _OtherUserProfilePageState extends State<OtherUserProfilePage> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      color: Color(0xFF8D6E63),
                     ),
                   ),
                   SizedBox(height: 16),

@@ -7,6 +7,7 @@ class AuthService {
   static const String _keyAuthToken = 'auth_token';
   static const String _keySavedEmail = 'saved_email';
   static const String _keyRememberMe = 'remember_me';
+  static const String _keyIsAdmin = 'is_admin';
 
   static AuthService? _instance;
   static AuthService get instance {
@@ -40,12 +41,19 @@ class AuthService {
     return prefs.getString(_keyAuthToken);
   }
 
+  // Check if user is admin
+  Future<bool> isAdmin() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyIsAdmin) ?? false;
+  }
+
   // Login user and store credentials
   Future<void> login({
     required String email,
     String? authToken,
     String? userId,
     bool rememberMe = false,
+    bool isAdmin = false,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyIsLoggedIn, true);
@@ -56,6 +64,7 @@ class AuthService {
     if (userId != null) {
       await prefs.setString(_keyUserId, userId);
     }
+    await prefs.setBool(_keyIsAdmin, isAdmin);
 
     // Handle remember me
     await prefs.setBool(_keyRememberMe, rememberMe);
@@ -76,6 +85,7 @@ class AuthService {
     await prefs.remove(_keyUserEmail);
     await prefs.remove(_keyUserId);
     await prefs.remove(_keyAuthToken);
+    await prefs.remove(_keyIsAdmin);
 
     // Keep remember me settings if enabled
     if (!rememberMe) {

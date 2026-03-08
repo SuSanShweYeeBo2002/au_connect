@@ -129,6 +129,11 @@ class _FriendPageState extends State<FriendPage> {
     return otherUser?.id ?? '';
   }
 
+  String? _getFriendAvatar(Friend friend) {
+    final otherUser = friend.requester ?? friend.recipient;
+    return otherUser?.avatar;
+  }
+
   Future<void> _blockUser(Friend friend) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -559,14 +564,21 @@ class _FriendPageState extends State<FriendPage> {
               leading: CircleAvatar(
                 radius: 28,
                 backgroundColor: Colors.blue[100],
-                child: Text(
-                  friendName.isNotEmpty ? friendName[0].toUpperCase() : '?',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[800],
-                  ),
-                ),
+                backgroundImage: _getFriendAvatar(friend) != null
+                    ? NetworkImage(_getFriendAvatar(friend)!)
+                    : null,
+                child: _getFriendAvatar(friend) == null
+                    ? Text(
+                        friendName.isNotEmpty
+                            ? friendName[0].toUpperCase()
+                            : '?',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[800],
+                        ),
+                      )
+                    : null,
               ),
               title: Text(
                 friendName,
