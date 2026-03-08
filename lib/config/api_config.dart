@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 /// API configuration that manages backend URLs
 class ApiConfig {
   // Set this to true when deploying to production
-  static const bool useProduction = false;
+  static const bool useProduction = true;
 
   /// Base URL for the backend API
   static String get baseUrl {
