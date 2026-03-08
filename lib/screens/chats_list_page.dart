@@ -67,11 +67,19 @@ class _ChatsListPageState extends State<ChatsListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF64B5F6),
-        title: Text('Chat'),
+        backgroundColor: Color(0xFF8D6E63),
+        foregroundColor: Colors.white,
+        title: Text(
+          'Chat',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon: Icon(Icons.add, color: Colors.white),
             onPressed: () {
               Navigator.push(
                 context,
@@ -79,7 +87,10 @@ class _ChatsListPageState extends State<ChatsListPage> {
               );
             },
           ),
-          IconButton(icon: Icon(Icons.refresh), onPressed: _loadConversations),
+          IconButton(
+            icon: Icon(Icons.refresh, color: Colors.white),
+            onPressed: _loadConversations,
+          ),
         ],
       ),
       body: Column(

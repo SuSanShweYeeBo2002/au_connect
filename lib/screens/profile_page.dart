@@ -691,7 +691,7 @@ class _ProfilePageState extends State<ProfilePage> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           double maxWidth = constraints.maxWidth > 600
-              ? 500
+              ? 600
               : constraints.maxWidth * 0.98;
           return Center(
             child: Container(

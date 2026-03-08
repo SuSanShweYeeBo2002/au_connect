@@ -195,7 +195,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                     padding: EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Colors.blue[700]!, Colors.blue[500]!],
+                        colors: [Colors.brown[700]!, Colors.brown[500]!],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -354,7 +354,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                                         return Theme(
                                           data: Theme.of(context).copyWith(
                                             colorScheme: ColorScheme.light(
-                                              primary: Colors.blue[700]!,
+                                              primary: Colors.brown[700]!,
                                             ),
                                           ),
                                           child: child!,
@@ -383,7 +383,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                                         return Theme(
                                           data: Theme.of(context).copyWith(
                                             colorScheme: ColorScheme.light(
-                                              primary: Colors.blue[700]!,
+                                              primary: Colors.brown[700]!,
                                             ),
                                           ),
                                           child: child!,
@@ -430,7 +430,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                           icon: Icon(Icons.add_circle_outline),
                           label: Text('Create Session'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue[700],
+                            backgroundColor: Colors.brown[700],
                             foregroundColor: Colors.white,
                             padding: EdgeInsets.symmetric(
                               horizontal: 24,
@@ -570,7 +570,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
               Container(
                 padding: EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.blue[700],
+                  color: Colors.brown[700],
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
@@ -645,7 +645,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                             margin: EdgeInsets.only(bottom: 8),
                             child: ListTile(
                               leading: CircleAvatar(
-                                backgroundColor: Colors.blue[700],
+                                backgroundColor: Colors.brown[700],
                                 child: Text(
                                   participant.user.email[0].toUpperCase(),
                                   style: TextStyle(color: Colors.white),
@@ -668,14 +668,14 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                                         vertical: 2,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Colors.blue[100],
+                                        color: Colors.brown[100],
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Text(
                                         'Creator',
                                         style: TextStyle(
                                           fontSize: 10,
-                                          color: Colors.blue[900],
+                                          color: Colors.brown[900],
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -763,7 +763,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.blue[700]!, Colors.blue[500]!],
+                      colors: [Colors.brown[700]!, Colors.brown[500]!],
                     ),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(16),
@@ -950,7 +950,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
                       SizedBox(width: 12),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[700],
+                          backgroundColor: Colors.brown[700],
                           padding: EdgeInsets.symmetric(
                             horizontal: 32,
                             vertical: 12,
@@ -1054,14 +1054,14 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
   Widget _buildSectionLabel(String label, IconData icon) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.blue[700]),
+        Icon(icon, size: 20, color: Colors.brown[700]),
         SizedBox(width: 8),
         Text(
           label,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.blue[700],
+            color: Colors.brown[700],
           ),
         ),
       ],
@@ -1083,7 +1083,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixIcon: Icon(icon, color: Colors.blue[700]),
+        prefixIcon: Icon(icon, color: Colors.brown[700]),
         filled: true,
         fillColor: Colors.grey[50],
         border: OutlineInputBorder(
@@ -1092,7 +1092,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.blue[700]!, width: 2),
+          borderSide: BorderSide(color: Colors.brown[700]!, width: 2),
         ),
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
@@ -1108,7 +1108,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
   }) {
     return InputDecorator(
       decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: Colors.blue[700]),
+        prefixIcon: Icon(icon, color: Colors.brown[700]),
         filled: true,
         fillColor: Colors.grey[50],
         border: OutlineInputBorder(
@@ -1117,7 +1117,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.blue[700]!, width: 2),
+          borderSide: BorderSide(color: Colors.brown[700]!, width: 2),
         ),
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
@@ -1142,12 +1142,12 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
     required VoidCallback onPressed,
   }) {
     return OutlinedButton.icon(
-      icon: Icon(icon, color: Colors.blue[700]),
+      icon: Icon(icon, color: Colors.brown[700]),
       label: Text(label),
       style: OutlinedButton.styleFrom(
         padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        side: BorderSide(color: Colors.blue[300]!, width: 1.5),
+        side: BorderSide(color: Colors.brown[300]!, width: 1.5),
       ),
       onPressed: onPressed,
     );
@@ -1156,11 +1156,19 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE3F2FD),
+      backgroundColor: const Color(0xFFEFEBE9),
       appBar: AppBar(
-        title: Text('Study Buddy'),
-        backgroundColor: Colors.blue[700],
+        title: Text(
+          'Study Buddy',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.brown[700],
         foregroundColor: Colors.white,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: _isLoading && _sessions.isEmpty
           ? Center(child: CircularProgressIndicator())
@@ -1237,7 +1245,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _showCreateDialog,
         child: Icon(Icons.add),
-        backgroundColor: Colors.blue[700],
+        backgroundColor: Colors.brown[700],
       ),
     );
   }
@@ -1263,7 +1271,7 @@ class _SessionCard extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Scheduled':
-        return Colors.blue;
+        return Colors.brown;
       case 'Ongoing':
         return Colors.green;
       case 'Completed':
@@ -1367,7 +1375,7 @@ class _SessionCard extends StatelessWidget {
                             value: 'edit',
                             child: Row(
                               children: [
-                                Icon(Icons.edit, color: Colors.blue),
+                                Icon(Icons.edit, color: Colors.brown),
                                 SizedBox(width: 8),
                                 Text('Edit'),
                               ],
@@ -1441,13 +1449,13 @@ class _SessionCard extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.blue[100],
+                color: Colors.brown[100],
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 session.subject,
                 style: TextStyle(
-                  color: Colors.blue[900],
+                  color: Colors.brown[900],
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
@@ -1480,7 +1488,7 @@ class _SessionCard extends StatelessWidget {
               SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.link, size: 16, color: Colors.blue[700]),
+                  Icon(Icons.link, size: 16, color: Colors.brown[700]),
                   SizedBox(width: 4),
                   Expanded(
                     child: GestureDetector(
@@ -1500,7 +1508,7 @@ class _SessionCard extends StatelessWidget {
                         session.platformLink!,
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.blue[700],
+                          color: Colors.brown[700],
                           decoration: TextDecoration.underline,
                         ),
                         maxLines: 1,
@@ -1536,13 +1544,13 @@ class _SessionCard extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                     child: Row(
                       children: [
-                        Icon(Icons.people, size: 16, color: Colors.blue[700]),
+                        Icon(Icons.people, size: 16, color: Colors.brown[700]),
                         SizedBox(width: 4),
                         Text(
                           '${session.currentParticipants}${session.maxParticipants != null ? '/${session.maxParticipants}' : ''}',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.blue[700],
+                            color: Colors.brown[700],
                             fontWeight: FontWeight.w500,
                           ),
                         ),

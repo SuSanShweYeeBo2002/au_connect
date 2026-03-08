@@ -43,9 +43,9 @@ Myat Phone Kyaw\\[1cm]
 Faculty of Engineering\\
 Assumption University of Thailand\\[1cm]
 
-December 2025\\[2cm]
+February 2026\\[2cm]
 
-{\small Version 1.1}
+{\small Version 1.2}
 
 \end{flushright}
 \vfill
@@ -66,6 +66,8 @@ December 2025\\[2cm]
 AU Connect Team & December 2025 & Initial SRS creation & 1.0 \\
 \hline
 AU Connect Team & January 2026 & Updated features: multiple image upload, profile images, display name, report posts, image gallery viewer, Album/About tabs & 1.1 \\
+\hline
+AU Connect Team & February 2026 & Enhanced UI: Friends page aesthetic sidebar with rotating motivational quotes, logo display, improved profile page layout for better post viewing & 1.2 \\
 \hline
 \end{longtable}
 
@@ -242,10 +244,12 @@ The system shall provide a responsive, intuitive, and mobile-first user interfac
 
 \textbf{Visual Design:}
 \begin{itemize}
-    \item Consistent color scheme (Blue primary theme)
+    \item Consistent color scheme (Blue primary theme with gradient accents: blue, orange-pink, teal-cyan)
     \item Material Design principles
     \item Responsive layouts adapting to screen sizes
     \item Touch-optimized controls (minimum 48x48 dp touch targets)
+    \item Aesthetic sidebar elements on wide screens (>900px) for Friends page
+    \item Centered content layout with optimal reading width (600px for profile, posts)
 \end{itemize}
 
 \textbf{Accessibility:}
@@ -372,6 +376,7 @@ The system shall provide a responsive, intuitive, and mobile-first user interfac
     \item \textbf{FR-3.9}: The system shall display user statistics on the About tab (posts count, friends count, join date).
     \item \textbf{FR-3.10}: The system shall use display name instead of email-derived username across the application.
     \item \textbf{FR-3.11}: The system shall display profile pictures in all user interfaces (posts, comments, messages, chat lists).
+    \item \textbf{FR-3.12}: The system shall provide an optimized layout for profile page with 600px maximum width on desktop for improved post readability.
 \end{itemize}
 
 \subsection{Friends Management}
@@ -391,6 +396,10 @@ The system shall provide a responsive, intuitive, and mobile-first user interfac
     \item \textbf{FR-4.7}: The system shall display pending friend requests separately.
     \item \textbf{FR-4.8}: The system shall allow users to unfriend other users.
     \item \textbf{FR-4.9}: The system shall update friend lists in real-time.
+    \item \textbf{FR-4.10}: The system shall display an aesthetic sidebar on wide screens (>900px) containing friend statistics, motivational quotes, and institutional logo.
+    \item \textbf{FR-4.11}: The system shall rotate motivational quotes randomly each time the Friends page is opened (client-side, no backend required).
+    \item \textbf{FR-4.12}: The system shall display friend network statistics including total friends count and pending requests count with gradient-styled cards.
+    \item \textbf{FR-4.13}: The system shall display the VMES institutional logo in a clean, aesthetic card layout.
 \end{itemize}
 
 \subsection{Real-Time Messaging}

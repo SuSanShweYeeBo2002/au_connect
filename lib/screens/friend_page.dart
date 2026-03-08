@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../services/friend_service.dart';
 import '../config/theme_config.dart';
@@ -14,12 +15,32 @@ class _FriendPageState extends State<FriendPage> {
   bool _isLoading = false;
   String? _errorMessage;
   int _pendingRequestsCount = 0;
+  late String _currentQuote;
+
+  final List<String> _quotes = [
+    'Believe you can and you\'re halfway there.',
+    'The only way to do great work is to love what you do.',
+    'Success is not final, failure is not fatal: it is the courage to continue that counts.',
+    'Your limitation—it\'s only your imagination.',
+    'Push yourself, because no one else is going to do it for you.',
+    'Great things never come from comfort zones.',
+    'Dream it. Wish it. Do it.',
+    'Success doesn\'t just find you. You have to go out and get it.',
+    'The harder you work for something, the greater you\'ll feel when you achieve it.',
+    'Don\'t stop when you\'re tired. Stop when you\'re done.',
+  ];
 
   @override
   void initState() {
     super.initState();
+    _selectRandomQuote();
     _loadFriends();
     _loadPendingRequestsCount();
+  }
+
+  void _selectRandomQuote() {
+    final random = Random();
+    _currentQuote = _quotes[random.nextInt(_quotes.length)];
   }
 
   Future<void> _loadFriends() async {
@@ -222,6 +243,32 @@ class _FriendPageState extends State<FriendPage> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
+          // Wide screen (desktop/tablet) - show sidebar layout
+          if (constraints.maxWidth > 900) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Main content (friends list)
+                Expanded(
+                  flex: 7,
+                  child: Center(
+                    child: Container(
+                      constraints: BoxConstraints(maxWidth: 600),
+                      child: _buildBody(),
+                    ),
+                  ),
+                ),
+                // Right sidebar (aesthetic elements)
+                Container(
+                  width: 300,
+                  padding: EdgeInsets.all(16),
+                  child: _buildAestheticSidebar(),
+                ),
+              ],
+            );
+          }
+
+          // Mobile/narrow screen - original layout
           double maxWidth = constraints.maxWidth > 600
               ? 500
               : constraints.maxWidth * 0.98;
@@ -230,6 +277,165 @@ class _FriendPageState extends State<FriendPage> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildAestheticSidebar() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Friend Statistics Card
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blue[400]!, Colors.blue[600]!],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.blue.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.people, color: Colors.white, size: 28),
+                    SizedBox(width: 12),
+                    Text(
+                      'Your Network',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                _buildStatRow(
+                  'Friends',
+                  _friends.length.toString(),
+                  Icons.group,
+                ),
+                SizedBox(height: 12),
+                _buildStatRow(
+                  'Pending',
+                  _pendingRequestsCount.toString(),
+                  Icons.schedule,
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 20),
+
+          // Decorative Quote Card
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.orange[300]!, Colors.pink[400]!],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.orange.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Icon(Icons.format_quote, size: 40, color: Colors.white),
+                SizedBox(height: 12),
+                Text(
+                  _currentQuote,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.white,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 20),
+
+          // Logo Display
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  'assets/images/VMES-Logo-BG-White.png',
+                  height: 120,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatRow(String label, String value, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+        SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              value,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

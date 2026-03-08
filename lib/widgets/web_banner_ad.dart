@@ -2,21 +2,13 @@ import 'package:flutter/material.dart';
 import 'dart:html' as html;
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:ui_web' as ui_web;
-import '../config/ad_config.dart';
 
-/// Web-specific banner ad widget using Google AdSense
-/// This widget creates an AdSense ad unit for Flutter web
+/// Web-specific banner ad widget using Adcash
 class WebBannerAd extends StatefulWidget {
-  final String? adSlot;
   final double width;
   final double height;
 
-  const WebBannerAd({
-    super.key,
-    this.adSlot, // Uses AdConfig if not provided
-    this.width = 728,
-    this.height = 90,
-  });
+  const WebBannerAd({super.key, this.width = 300, this.height = 250});
 
   @override
   State<WebBannerAd> createState() => _WebBannerAdState();
@@ -24,7 +16,7 @@ class WebBannerAd extends StatefulWidget {
 
 class _WebBannerAdState extends State<WebBannerAd> {
   final String viewType =
-      'adsense-banner-${DateTime.now().millisecondsSinceEpoch}';
+      'adcash-banner-${DateTime.now().millisecondsSinceEpoch}';
 
   @override
   void initState() {
@@ -36,30 +28,53 @@ class _WebBannerAdState extends State<WebBannerAd> {
     // Register the view factory for the ad
     ui_web.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
       final adContainer = html.DivElement()
+        ..id = 'adcash-container-$viewId'
         ..style.width = '${widget.width}px'
         ..style.height = '${widget.height}px'
-        ..style.border = '0';
+        ..style.border = '0'
+        ..style.display = 'block'
+        ..style.overflow = 'hidden';
 
-      // Create the INS element programmatically (bypasses Flutter's HTML sanitizer)
-      final adElement = html.Element.tag('ins')
-        ..className = 'adsbygoogle'
-        ..setAttribute('data-ad-client', AdConfig.webPublisherId)
-        ..setAttribute('data-ad-slot', widget.adSlot ?? AdConfig.webAdSlot)
-        ..style.display = 'inline-block'
-        ..style.width = '${widget.width}px'
-        ..style.height = '${widget.height}px';
+      // Create container div for banner
+      final bannerDiv = html.DivElement()..id = 'adcash-banner-$viewId';
+      adContainer.append(bannerDiv);
 
-      adContainer.append(adElement);
-
-      // Push ad after a short delay to ensure it's in the DOM
-      Future.delayed(const Duration(milliseconds: 100), () {
+      // Load Adcash library and run banner
+      Future.delayed(const Duration(milliseconds: 500), () {
         try {
-          // Trigger AdSense ad loading
-          final script = html.ScriptElement()
-            ..text = '(adsbygoogle = window.adsbygoogle || []).push({});';
-          adContainer.append(script);
+          // Load aclib.js
+          final aclibScript = html.ScriptElement()
+            ..id = 'aclib'
+            ..type = 'text/javascript'
+            ..src = '//acdcdn.com/script/aclib.js';
+
+          // Only add if not already added
+          if (html.document.getElementById('aclib') == null) {
+            html.document.head!.append(aclibScript);
+          }
+
+          // Run Banner after library loads
+          Future.delayed(const Duration(milliseconds: 800), () {
+            final bannerScript = html.ScriptElement()
+              ..type = 'text/javascript'
+              ..text = '''
+                try {
+                  if (typeof aclib !== 'undefined') {
+                    aclib.runBanner({
+                      zoneId: '11025390'
+                    });
+                    console.log('Adcash Banner loaded for zone 11025390');
+                  } else {
+                    console.error('aclib not loaded');
+                  }
+                } catch (e) {
+                  console.error('Adcash Banner error:', e);
+                }
+              ''';
+            bannerDiv.append(bannerScript);
+          });
         } catch (e) {
-          print('AdSense error: $e');
+          print('Adcash setup error: $e');
         }
       });
 
@@ -92,7 +107,7 @@ class _WebBannerAdState extends State<WebBannerAd> {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'Loading...',
+                  'Powered by Adcash',
                   style: TextStyle(color: Colors.grey[500], fontSize: 10),
                 ),
               ],
