@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:async';
 import '../models/sponsor_ad.dart';
 import '../services/sponsor_ad_service.dart';
 import '../widgets/optimized_image.dart';
@@ -19,12 +20,19 @@ class _SponsorAdWidgetState extends State<SponsorAdWidget> {
   List<SponsorAd> _ads = [];
   int _currentIndex = 0;
   bool _isLoading = true;
-  bool _hasTrackedImpression = false;
+  Timer? _rotationTimer;
+  Set<String> _trackedImpressions = {};
 
   @override
   void initState() {
     super.initState();
     _loadAds();
+  }
+
+  @override
+  void dispose() {
+    _rotationTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadAds() async {
@@ -37,8 +45,13 @@ class _SponsorAdWidgetState extends State<SponsorAdWidget> {
         });
 
         // Track impression for first ad
-        if (_ads.isNotEmpty && !_hasTrackedImpression) {
+        if (_ads.isNotEmpty) {
           _trackImpression();
+        }
+
+        // Start auto-rotation if there are multiple ads
+        if (_ads.length > 1) {
+          _startRotation();
         }
       }
     } catch (e) {
@@ -51,10 +64,25 @@ class _SponsorAdWidgetState extends State<SponsorAdWidget> {
     }
   }
 
+  void _startRotation() {
+    _rotationTimer?.cancel();
+    _rotationTimer = Timer.periodic(Duration(seconds: 15), (timer) {
+      if (mounted && _ads.isNotEmpty) {
+        setState(() {
+          _currentIndex = (_currentIndex + 1) % _ads.length;
+        });
+        _trackImpression();
+      }
+    });
+  }
+
   void _trackImpression() {
-    if (_ads.isNotEmpty && !_hasTrackedImpression) {
-      SponsorAdService.trackImpression(_ads[_currentIndex].id);
-      _hasTrackedImpression = true;
+    if (_ads.isNotEmpty) {
+      final adId = _ads[_currentIndex].id;
+      if (!_trackedImpressions.contains(adId)) {
+        SponsorAdService.trackImpression(adId);
+        _trackedImpressions.add(adId);
+      }
     }
   }
 
@@ -167,6 +195,28 @@ class _SponsorAdWidgetState extends State<SponsorAdWidget> {
                 ),
               ),
             ),
+            // Page indicators (only show if multiple ads)
+            if (_ads.length > 1)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Row(
+                  children: List.generate(
+                    _ads.length,
+                    (index) => Container(
+                      margin: EdgeInsets.only(left: 4),
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: index == _currentIndex
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.4),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             // Bottom info overlay
             Positioned(
               bottom: 0,
