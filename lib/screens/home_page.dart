@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import '../widgets/simple_image_viewer.dart';
 import '../widgets/optimized_image.dart';
 import '../widgets/banner_ad_widget.dart';
+import '../widgets/sponsor_ad_widget.dart';
 import '../config/theme_config.dart';
 
 class HomePage extends StatefulWidget {
@@ -765,7 +766,48 @@ class _HomePageState extends State<HomePage> {
                     padding: EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        // Sticky sidebar with ads
+                        // Sponsor Ad Card
+                        Container(
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.star,
+                                    size: 14,
+                                    color: Colors.amber,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'Sponsored',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[700],
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 12),
+                              SponsorAdWidget(width: 276, height: 200),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        // Adcash Banner Card
                         Container(
                           padding: EdgeInsets.all(12),
                           decoration: BoxDecoration(
@@ -783,7 +825,7 @@ class _HomePageState extends State<HomePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Sponsored',
+                                'Advertisement',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey[600],
@@ -791,17 +833,7 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                               SizedBox(height: 12),
-                              Container(
-                                width: 300,
-                                height: 250,
-                                child: BannerAdWidget(),
-                              ),
-                              SizedBox(height: 16),
-                              Container(
-                                width: 300,
-                                height: 250,
-                                child: BannerAdWidget(),
-                              ),
+                              BannerAdWidget(width: 276, height: 250),
                             ],
                           ),
                         ),

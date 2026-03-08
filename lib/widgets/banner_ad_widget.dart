@@ -8,7 +8,10 @@ import 'web_banner_ad_stub.dart' if (dart.library.html) 'web_banner_ad.dart';
 /// - On mobile (Android/iOS): Shows Google AdMob ads
 /// - On web: Shows Google AdSense ads
 class BannerAdWidget extends StatefulWidget {
-  const BannerAdWidget({super.key});
+  final double width;
+  final double height;
+
+  const BannerAdWidget({super.key, this.width = 276, this.height = 200});
 
   @override
   State<BannerAdWidget> createState() => _BannerAdWidgetState();
@@ -49,7 +52,7 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   Widget build(BuildContext context) {
     // Web platform - use AdSense
     if (kIsWeb) {
-      return const WebBannerAd();
+      return WebBannerAd(width: widget.width, height: widget.height);
     }
 
     // Mobile platform - use AdMob
