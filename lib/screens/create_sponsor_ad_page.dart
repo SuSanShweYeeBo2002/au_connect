@@ -52,34 +52,65 @@ class _CreateSponsorAdPageState extends State<CreateSponsorAdPage> {
   }
 
   Future<void> _selectStartDate() async {
-    final DateTime? picked = await showDatePicker(
+    final now = DateTime.now();
+    final initial = _startDate ?? now;
+
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: _startDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(Duration(days: 365)),
+      initialDate: initial,
+      firstDate: now,
+      lastDate: now.add(Duration(days: 365)),
     );
 
-    if (picked != null) {
-      setState(() {
-        _startDate = picked;
-      });
-    }
+    if (pickedDate == null) return;
+
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(initial),
+    );
+
+    if (pickedTime == null) return;
+
+    setState(() {
+      _startDate = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+    });
   }
 
   Future<void> _selectEndDate() async {
-    final DateTime? picked = await showDatePicker(
+    final now = DateTime.now();
+    final baseEnd = _endDate ?? (_startDate ?? now).add(Duration(days: 30));
+
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate:
-          _endDate ?? (_startDate ?? DateTime.now()).add(Duration(days: 30)),
-      firstDate: _startDate ?? DateTime.now(),
-      lastDate: DateTime.now().add(Duration(days: 365)),
+      initialDate: baseEnd,
+      firstDate: _startDate ?? now,
+      lastDate: now.add(Duration(days: 365)),
     );
 
-    if (picked != null) {
-      setState(() {
-        _endDate = picked;
-      });
-    }
+    if (pickedDate == null) return;
+
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(baseEnd),
+    );
+
+    if (pickedTime == null) return;
+
+    setState(() {
+      _endDate = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+    });
   }
 
   Future<void> _submitForm() async {
@@ -91,7 +122,7 @@ class _CreateSponsorAdPageState extends State<CreateSponsorAdPage> {
     }
 
     if (_startDate == null || _endDate == null) {
-      _showErrorSnackBar('Please select start and end dates');
+      _showErrorSnackBar('Please select start and end date & time');
       return;
     }
 
@@ -137,6 +168,15 @@ class _CreateSponsorAdPageState extends State<CreateSponsorAdPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    final year = dateTime.year.toString().padLeft(4, '0');
+    final month = dateTime.month.toString().padLeft(2, '0');
+    final day = dateTime.day.toString().padLeft(2, '0');
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    return '$year-$month-$day $hour:$minute';
   }
 
   @override
@@ -305,8 +345,8 @@ class _CreateSponsorAdPageState extends State<CreateSponsorAdPage> {
                     children: [
                       Text(
                         _startDate == null
-                            ? 'Select Start Date *'
-                            : 'Start: ${_startDate!.toString().split(' ')[0]}',
+                            ? 'Select Start Date & Time *'
+                            : 'Start: ${_formatDateTime(_startDate!)}',
                         style: TextStyle(
                           fontSize: 16,
                           color: _startDate == null
@@ -336,8 +376,8 @@ class _CreateSponsorAdPageState extends State<CreateSponsorAdPage> {
                     children: [
                       Text(
                         _endDate == null
-                            ? 'Select End Date *'
-                            : 'End: ${_endDate!.toString().split(' ')[0]}',
+                            ? 'Select End Date & Time *'
+                            : 'End: ${_formatDateTime(_endDate!)}',
                         style: TextStyle(
                           fontSize: 16,
                           color: _endDate == null

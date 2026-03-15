@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../services/user_service.dart';
+import '../config/theme_config.dart';
 
 class EmailVerificationPage extends StatefulWidget {
   final String email;
@@ -111,12 +112,12 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFE3F2FD),
+      backgroundColor: AppTheme.primaryBeige,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xFF0288D1)),
+          icon: Icon(Icons.arrow_back, color: AppTheme.brownPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -131,7 +132,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                 Container(
                   padding: EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppTheme.cardBackground,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -144,7 +145,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                   child: Icon(
                     Icons.email_outlined,
                     size: 80,
-                    color: Color(0xFF0288D1),
+                    color: AppTheme.brownPrimary,
                   ),
                 ),
                 SizedBox(height: 32),
@@ -155,7 +156,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0288D1),
+                    color: AppTheme.brownPrimary,
                   ),
                 ),
                 SizedBox(height: 16),
@@ -164,7 +165,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                 Container(
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppTheme.cardBackground,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
@@ -187,7 +188,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF0288D1),
+                          color: AppTheme.brownPrimary,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -206,9 +207,9 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                 Container(
                   padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.blue[50],
+                    color: AppTheme.secondaryBeige,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue[200]!),
+                    border: Border.all(color: AppTheme.darkBeige),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,7 +218,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                         children: [
                           Icon(
                             Icons.info_outline,
-                            color: Color(0xFF0288D1),
+                            color: AppTheme.brownPrimary,
                             size: 20,
                           ),
                           SizedBox(width: 8),
@@ -226,7 +227,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF0288D1),
+                              color: AppTheme.brownPrimary,
                             ),
                           ),
                         ],
@@ -257,7 +258,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                         ? _resendVerificationEmail
                         : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF0288D1),
+                      backgroundColor: AppTheme.brownPrimary,
                       disabledBackgroundColor: Colors.grey[300],
                       padding: EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -298,7 +299,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                     'Back to Sign In',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Color(0xFF0288D1),
+                      color: AppTheme.brownPrimary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -320,7 +321,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              color: Color(0xFF0288D1),
+              color: AppTheme.brownPrimary,
               shape: BoxShape.circle,
             ),
             child: Center(

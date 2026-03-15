@@ -46,7 +46,7 @@ class _WebBannerAdState extends State<WebBannerAd> {
           final aclibScript = html.ScriptElement()
             ..id = 'aclib'
             ..type = 'text/javascript'
-            ..src = '//acdcdn.com/script/aclib.js';
+            ..src = '//acscdn.com/script/aclib.js';
 
           // Only add if not already added
           if (html.document.getElementById('aclib') == null) {
@@ -61,9 +61,9 @@ class _WebBannerAdState extends State<WebBannerAd> {
                 try {
                   if (typeof aclib !== 'undefined') {
                     aclib.runBanner({
-                      zoneId: '11025390'
+                      zoneId: '11073730'
                     });
-                    console.log('Adcash Banner loaded for zone 11025390');
+                    console.log('Adcash Banner loaded for zone 11073730');
                   } else {
                     console.error('aclib not loaded');
                   }
