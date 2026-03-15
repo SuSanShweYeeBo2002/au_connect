@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../services/auth_service.dart';
@@ -17,11 +18,13 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _rememberMe = false;
+  bool _showVerificationBanner = false;
 
   @override
   void initState() {
     super.initState();
     _checkSavedCredentials();
+    _checkVerificationFromUrl();
   }
 
   Future<void> _checkSavedCredentials() async {
@@ -38,6 +41,44 @@ class _SignInPageState extends State<SignInPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         FocusScope.of(context).requestFocus(FocusNode());
       });
+    }
+  }
+
+  // Handle web email verification redirect: /#/signin?verification=success[&email=...]
+  Future<void> _checkVerificationFromUrl() async {
+    if (!kIsWeb) return;
+
+    final baseUri = Uri.base;
+    final fragment =
+        baseUri.fragment; // e.g. "/signin?verification=success&email=..."
+
+    if (fragment.isEmpty) return;
+
+    Uri routeUri;
+    try {
+      // Ensure we have a leading slash so Uri.parse treats it as a path with query
+      final normalized = fragment.startsWith('/') ? fragment : '/$fragment';
+      routeUri = Uri.parse(normalized);
+    } catch (_) {
+      return;
+    }
+
+    final verification = routeUri.queryParameters['verification'];
+    if (verification == 'success') {
+      // Clear any existing session so we don't auto-use a previous account
+      await AuthService.instance.logout();
+
+      // Optional: backend can pass the verified email as a query param
+      final verifiedEmail = routeUri.queryParameters['email'];
+      if (verifiedEmail != null && verifiedEmail.isNotEmpty) {
+        _emailController.text = verifiedEmail;
+      }
+
+      if (mounted) {
+        setState(() {
+          _showVerificationBanner = true;
+        });
+      }
     }
   }
 
@@ -239,6 +280,37 @@ class _SignInPageState extends State<SignInPage> {
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 48),
+
+                      // Email verification success banner (web)
+                      if (_showVerificationBanner)
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.green[50],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.green[300]!),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.check_circle_outline,
+                                color: Colors.green[700],
+                              ),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Email verified successfully! Please sign in to continue.',
+                                  style: TextStyle(
+                                    color: Colors.green[800],
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
 
                       // Login Card
                       Container(
