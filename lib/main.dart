@@ -140,6 +140,23 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
+  // Determine initial auth state, with special handling for web email verification links
+  Future<bool> _getInitialAuthState() async {
+    // On web, if the URL contains verification=success (from email link),
+    // clear any existing session so we don't auto-sign in a previous account.
+    if (kIsWeb) {
+      final uri = Uri.base;
+      final fragment = uri.fragment; // e.g. "/signin?verification=success"
+
+      if (fragment.isNotEmpty && fragment.contains('verification=success')) {
+        await AuthService.instance.logout();
+        return false;
+      }
+    }
+
+    return await AuthService.instance.isLoggedIn();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -157,7 +174,7 @@ class _MyAppState extends State<MyApp> {
         );
       },
       home: FutureBuilder<bool>(
-        future: AuthService.instance.isLoggedIn(),
+        future: _getInitialAuthState(),
         builder: (context, snapshot) {
           // Show loading while checking auth status
           if (snapshot.connectionState == ConnectionState.waiting) {
