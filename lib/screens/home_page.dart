@@ -833,7 +833,8 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                               SizedBox(height: 12),
-                              BannerAdWidget(width: 276, height: 250),
+                              // Slightly smaller height to avoid overflow
+                              BannerAdWidget(width: 276, height: 200),
                             ],
                           ),
                         ),
