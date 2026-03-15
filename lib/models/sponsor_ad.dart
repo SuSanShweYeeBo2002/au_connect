@@ -33,8 +33,9 @@ class SponsorAd {
       image: json['image'] ?? '',
       link: json['link'] ?? '',
       description: json['description'],
-      startDate: DateTime.parse(json['startDate']),
-      endDate: DateTime.parse(json['endDate']),
+      // Convert from UTC (Mongo) to local time for display/logic
+      startDate: DateTime.parse(json['startDate']).toLocal(),
+      endDate: DateTime.parse(json['endDate']).toLocal(),
       status: json['status'] ?? 'pending',
       clickCount: json['clickCount'] ?? 0,
       impressionCount: json['impressionCount'] ?? 0,

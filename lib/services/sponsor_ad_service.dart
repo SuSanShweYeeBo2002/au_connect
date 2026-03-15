@@ -76,6 +76,7 @@ class SponsorAdService {
       );
 
       request.headers['Authorization'] = 'Bearer $token';
+      request.headers['Accept'] = 'application/json';
 
       // Add image
       String fileName = imageFile.name;
@@ -107,8 +108,13 @@ class SponsorAdService {
       if (description != null) {
         request.fields['description'] = description;
       }
-      request.fields['startDate'] = startDate.toIso8601String();
-      request.fields['endDate'] = endDate.toIso8601String();
+
+      // Convert local times to UTC before sending so Mongo stores
+      // proper UTC timestamps (e.g. 2026-03-20T00:00:00.000Z).
+      final startUtc = startDate.toUtc();
+      final endUtc = endDate.toUtc();
+      request.fields['startDate'] = startUtc.toIso8601String();
+      request.fields['endDate'] = endUtc.toIso8601String();
       request.fields['status'] = status;
 
       final streamedResponse = await request.send().timeout(
