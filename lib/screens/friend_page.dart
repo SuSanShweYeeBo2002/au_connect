@@ -174,7 +174,7 @@ class _FriendPageState extends State<FriendPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.primaryBeige,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text('Friends'),
         elevation: 0,
@@ -501,7 +501,7 @@ class _FriendPageState extends State<FriendPage> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
+                  color: Theme.of(context).textTheme.titleMedium?.color,
                 ),
               ),
               SizedBox(height: 12),
@@ -510,7 +510,7 @@ class _FriendPageState extends State<FriendPage> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
-                  color: Colors.grey[600],
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
                   height: 1.5,
                 ),
               ),
@@ -582,13 +582,19 @@ class _FriendPageState extends State<FriendPage> {
               ),
               title: Text(
                 friendName,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
               ),
               subtitle: Padding(
                 padding: EdgeInsets.only(top: 4),
                 child: Text(
                   friendEmail,
-                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  ),
                 ),
               ),
               trailing: IconButton(

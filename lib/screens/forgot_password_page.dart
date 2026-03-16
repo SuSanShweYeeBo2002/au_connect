@@ -215,7 +215,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     'Next Steps:',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary,
+                      color: Theme.of(context).textTheme.titleMedium?.color,
                     ),
                   ),
                 ],
@@ -229,7 +229,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 style: TextStyle(
                   fontSize: 14,
                   height: 1.5,
-                  color: AppTheme.textSecondary,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),
             ],

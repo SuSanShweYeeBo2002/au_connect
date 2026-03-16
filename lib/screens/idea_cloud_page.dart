@@ -162,7 +162,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary,
+                      color: Theme.of(context).textTheme.titleLarge?.color,
                     ),
                   ),
                 ],
@@ -374,7 +374,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary,
+                      color: Theme.of(context).textTheme.titleLarge?.color,
                     ),
                   ),
                 ],
@@ -515,7 +515,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -562,7 +562,9 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                                   'Created: ${_formatDate(note.createdAt)}',
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: AppTheme.textPrimary,
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall?.color,
                                   ),
                                 ),
                               ],
@@ -582,7 +584,9 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                                     'Updated: ${_formatDate(note.updatedAt)}',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: AppTheme.textPrimary,
+                                      color: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall?.color,
                                     ),
                                   ),
                                 ],
@@ -671,7 +675,7 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Idea Cloud')),
-      backgroundColor: AppTheme.primaryBeige,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: _isLoading && _notes.isEmpty
           ? Center(child: CircularProgressIndicator())
           : _errorMessage != null && _notes.isEmpty
@@ -775,7 +779,9 @@ class _IdeaCloudPageState extends State<IdeaCloudPage> {
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      color: AppTheme.textPrimary,
+                                      color: Theme.of(
+                                        context,
+                                      ).textTheme.titleMedium?.color,
                                     ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,

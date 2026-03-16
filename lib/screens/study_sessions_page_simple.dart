@@ -1156,7 +1156,7 @@ class _StudySessionsPageState extends State<StudySessionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEFEBE9),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Study Buddy',

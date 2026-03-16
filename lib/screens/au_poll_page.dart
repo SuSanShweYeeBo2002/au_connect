@@ -371,7 +371,7 @@ class _AuPollPageState extends State<AuPollPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.primaryBeige,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: Text('AU Poll')),
       body: _isLoading && _polls.isEmpty
           ? Center(child: CircularProgressIndicator())
@@ -522,6 +522,8 @@ class _PollCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bool isDark = theme.brightness == Brightness.dark;
     final hasVoted = poll.hasVoted;
     final isExpired = poll.isExpired;
 
@@ -625,13 +627,32 @@ class _PollCard extends StatelessWidget {
             SizedBox(height: 16),
             Text(
               poll.question,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: theme.textTheme.titleMedium?.color,
+              ),
             ),
             SizedBox(height: 16),
             ...List.generate(poll.options.length, (index) {
               final option = poll.options[index];
               final percentage = poll.getOptionPercentage(index);
               final isUserVote = hasVoted && poll.userVotedIndex == index;
+
+              // Background and text colors adapt to dark/light theme
+              final Color optionBackground = isUserVote
+                  ? (isDark
+                        ? AppTheme.darkCardBackground
+                        : AppTheme.secondaryBeige)
+                  : (isDark ? AppTheme.darkSurface : Colors.grey[100]!);
+
+              final Color optionBorderColor = isUserVote
+                  ? (isDark ? AppTheme.brownLight : AppTheme.brownPrimary)
+                  : (isDark ? Colors.grey[700]! : Colors.grey[300]!);
+
+              final Color optionTextColor = isDark
+                  ? AppTheme.darkTextPrimary
+                  : AppTheme.textPrimary;
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
@@ -644,14 +665,10 @@ class _PollCard extends StatelessWidget {
                       : null,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isUserVote
-                          ? AppTheme.secondaryBeige
-                          : Colors.grey[100],
+                      color: optionBackground,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: isUserVote
-                            ? AppTheme.brownPrimary
-                            : Colors.grey[300]!,
+                        color: optionBorderColor,
                         width: isUserVote ? 2 : 1,
                       ),
                     ),
@@ -700,6 +717,7 @@ class _PollCard extends StatelessWidget {
                                           fontWeight: isUserVote
                                               ? FontWeight.bold
                                               : FontWeight.normal,
+                                          color: optionTextColor,
                                         ),
                                       ),
                                     ),

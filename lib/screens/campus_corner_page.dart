@@ -54,7 +54,7 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.primaryBeige,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: LayoutBuilder(
         builder: (context, constraints) {
           double maxWidth = constraints.maxWidth > 600
@@ -108,7 +108,9 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
-                                    color: AppTheme.textPrimary,
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.titleLarge?.color,
                                     letterSpacing: 0.3,
                                   ),
                                 ),
@@ -117,11 +119,24 @@ class _CampusCornerPageState extends State<CampusCornerPage> {
                                   _userEmail,
                                   style: TextStyle(
                                     fontSize: 15,
-                                    color: AppTheme.textSecondary,
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium?.color,
                                   ),
                                 ),
                               ],
                             ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Icons.dark_mode
+                                  : Icons.light_mode,
+                              color: AppTheme.brownPrimary,
+                            ),
+                            onPressed: () {
+                              ThemeController.toggleTheme();
+                            },
                           ),
                         ],
                       ),
@@ -283,9 +298,21 @@ class _CampusTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bool isDark = theme.brightness == Brightness.dark;
+    final Color effectiveColor = isDark
+        ? AppTheme.darkCardBackground
+        : (color ?? AppTheme.cardBackground);
+    final Color effectiveTextColor = isDark
+        ? AppTheme.darkTextPrimary
+        : theme.textTheme.titleMedium?.color ?? AppTheme.textPrimary;
+    final Color effectiveIconColor = isDark
+        ? AppTheme.brownLight
+        : AppTheme.brownPrimary;
+
     return Container(
       decoration: BoxDecoration(
-        color: color ?? AppTheme.cardBackground,
+        color: effectiveColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -299,7 +326,7 @@ class _CampusTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (icon != null) Icon(icon, color: AppTheme.brownPrimary, size: 28),
+          if (icon != null) Icon(icon, color: effectiveIconColor, size: 28),
           if (icon != null) SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -311,7 +338,7 @@ class _CampusTile extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
-                    color: AppTheme.textPrimary,
+                    color: effectiveTextColor,
                     letterSpacing: 0.2,
                   ),
                 ),

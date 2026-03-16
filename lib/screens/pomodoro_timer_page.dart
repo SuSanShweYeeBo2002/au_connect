@@ -65,7 +65,9 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: isWork ? Color(0xFFFFF3E0) : AppTheme.primaryBeige,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.black
+          : (isWork ? Color(0xFFFFF3E0) : AppTheme.primaryBeige),
       appBar: AppBar(
         backgroundColor: isWork ? Colors.orange : AppTheme.brownPrimary,
         elevation: 0,
@@ -89,6 +91,9 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.black
+                            : null,
                       ),
                     ),
                     SizedBox(height: 16),
@@ -114,6 +119,10 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
                           style: TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.bold,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.black
+                                : null,
                           ),
                         ),
                       ],
@@ -126,7 +135,14 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
                           children: [
                             Text(
                               'Work',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.black
+                                    : null,
+                              ),
                             ),
                             SizedBox(
                               width: 80,
@@ -151,7 +167,14 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
                           children: [
                             Text(
                               'Break',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.black
+                                    : null,
+                              ),
                             ),
                             SizedBox(
                               width: 80,
@@ -196,7 +219,12 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
                         isWork
                             ? 'This is your work time\nLet\'s focus on getting things done'
                             : 'This is your break time\nLet\'s breathe and relax for a bit',
-                        style: TextStyle(fontSize: 16),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.black
+                              : null,
+                        ),
                       ),
                     ),
                   ],

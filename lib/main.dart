@@ -159,81 +159,94 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      title: 'AU Connect',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      builder: (context, child) {
-        // Wrap the entire app with global zoom functionality
-        // minScale: 1.0 means no zoom out (like Facebook) - prevents white space
-        return GlobalZoomInteractiveWrapper(
-          minScale: 1.0, // Changed from 0.7 - no zoom out beyond actual size
-          maxScale: 2.5, // Can still zoom in up to 2.5x
-          child: child ?? Container(),
-        );
-      },
-      home: FutureBuilder<bool>(
-        future: _getInitialAuthState(),
-        builder: (context, snapshot) {
-          // Show loading while checking auth status
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Scaffold(
-              backgroundColor: AppTheme.primaryBeige,
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.school, size: 64, color: AppTheme.brownPrimary),
-                    SizedBox(height: 16),
-                    Text(
-                      'AU CONNECT',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                    SizedBox(height: 32),
-                    CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        AppTheme.brownPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeController.themeModeNotifier,
+      builder: (context, themeMode, _) {
+        return MaterialApp(
+          navigatorKey: navigatorKey,
+          title: 'AU Connect',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          builder: (context, child) {
+            // Wrap the entire app with global zoom functionality
+            // minScale: 1.0 means no zoom out (like Facebook) - prevents white space
+            return GlobalZoomInteractiveWrapper(
+              minScale:
+                  1.0, // Changed from 0.7 - no zoom out beyond actual size
+              maxScale: 2.5, // Can still zoom in up to 2.5x
+              child: child ?? Container(),
             );
-          }
+          },
+          home: FutureBuilder<bool>(
+            future: _getInitialAuthState(),
+            builder: (context, snapshot) {
+              // Show loading while checking auth status
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Scaffold(
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  body: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.school,
+                          size: 64,
+                          color: AppTheme.brownPrimary,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'AU CONNECT',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                        SizedBox(height: 32),
+                        CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.brownPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
 
-          // If user is logged in, go to main page, otherwise go to signin
-          if (snapshot.hasData && snapshot.data == true) {
-            return MainTabPage();
-          } else {
-            return SignInPage();
-          }
-        },
-      ),
-      routes: {
-        '/signin': (context) => SignInPage(),
-        '/signup': (context) => SignUpPage(),
-        '/main': (context) => AuthGuardDirect(child: MainTabPage()),
-        '/home': (context) =>
-            AuthGuardDirect(child: MyHomePage(title: 'Flutter Demo Home Page')),
-      },
-      onGenerateRoute: (settings) {
-        // Handle /reset-password?token=xxx from email links
-        if (settings.name?.startsWith('/reset-password') == true) {
-          final uri = Uri.parse(settings.name!);
-          final token = uri.queryParameters['token'] ?? '';
-          if (token.isNotEmpty) {
-            return MaterialPageRoute(
-              builder: (context) => ResetPasswordPage(token: token),
-            );
-          }
-        }
-        return null;
+              // If user is logged in, go to main page, otherwise go to signin
+              if (snapshot.hasData && snapshot.data == true) {
+                return MainTabPage();
+              } else {
+                return SignInPage();
+              }
+            },
+          ),
+          routes: {
+            '/signin': (context) => SignInPage(),
+            '/signup': (context) => SignUpPage(),
+            '/main': (context) => AuthGuardDirect(child: MainTabPage()),
+            '/home': (context) => AuthGuardDirect(
+              child: MyHomePage(title: 'Flutter Demo Home Page'),
+            ),
+          },
+          onGenerateRoute: (settings) {
+            // Handle /reset-password?token=xxx from email links
+            if (settings.name?.startsWith('/reset-password') == true) {
+              final uri = Uri.parse(settings.name!);
+              final token = uri.queryParameters['token'] ?? '';
+              if (token.isNotEmpty) {
+                return MaterialPageRoute(
+                  builder: (context) => ResetPasswordPage(token: token),
+                );
+              }
+            }
+            return null;
+          },
+        );
       },
     );
   }

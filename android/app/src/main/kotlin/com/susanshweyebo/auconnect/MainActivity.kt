@@ -1,4 +1,4 @@
-package com.example.au_connect
+package com.susanshweyebo.auconnect
 
 import io.flutter.embedding.android.FlutterActivity
 

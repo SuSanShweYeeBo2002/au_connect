@@ -149,13 +149,11 @@ class _OtherUserProfilePageState extends State<OtherUserProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Color(0xFFE8DDD0),
-      appBar: AppBar(
-        title: Text(_userName ?? widget.userName ?? 'Profile'),
-        backgroundColor: Color(0xFF8D6E63),
-        foregroundColor: Colors.white,
-      ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(title: Text(_userName ?? widget.userName ?? 'Profile')),
       body: LayoutBuilder(
         builder: (context, constraints) {
           double maxWidth = constraints.maxWidth > 600
@@ -200,12 +198,26 @@ class _OtherUserProfilePageState extends State<OtherUserProfilePage> {
                     if (_isLoadingProfile)
                       CircularProgressIndicator()
                     else ...[
-                      Text(_userName ?? "User", style: TextStyle(fontSize: 22)),
+                      Text(
+                        _userName ?? "User",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                          color:
+                              theme.textTheme.titleLarge?.color ??
+                              theme.colorScheme.onBackground,
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         _userEmail ?? "",
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color:
+                              theme.textTheme.bodyMedium?.color ??
+                              Colors.grey[600],
+                        ),
                       ),
                     ],
 
@@ -215,7 +227,9 @@ class _OtherUserProfilePageState extends State<OtherUserProfilePage> {
                       child: Column(
                         children: [
                           TabBar(
-                            labelColor: Color(0xFF8D6E63),
+                            labelColor: theme.colorScheme.primary,
+                            unselectedLabelColor:
+                                theme.textTheme.bodyMedium?.color,
                             tabs: [
                               Tab(text: "Posts"),
                               Tab(text: "Album"),

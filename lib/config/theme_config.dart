@@ -1,5 +1,21 @@
 import 'package:flutter/material.dart';
 
+class ThemeController {
+  static final ValueNotifier<ThemeMode> themeModeNotifier =
+      ValueNotifier<ThemeMode>(ThemeMode.system);
+
+  static void toggleTheme() {
+    final current = themeModeNotifier.value;
+    if (current == ThemeMode.light) {
+      themeModeNotifier.value = ThemeMode.dark;
+    } else if (current == ThemeMode.dark) {
+      themeModeNotifier.value = ThemeMode.light;
+    } else {
+      themeModeNotifier.value = ThemeMode.dark;
+    }
+  }
+}
+
 class AppTheme {
   // Primary color palette matching the design
   static const Color primaryBeige = Color(0xFFE8DDD0);
@@ -12,6 +28,13 @@ class AppTheme {
   static const Color textPrimary = Color(0xFF4A3F35);
   static const Color textSecondary = Color(0xFF6B5D52);
 
+  // Dark mode palette
+  static const Color darkBackground = Colors.black;
+  static const Color darkSurface = Color(0xFF121212);
+  static const Color darkCardBackground = Color(0xFF22201E);
+  static const Color darkTextPrimary = Colors.white;
+  static const Color darkTextSecondary = Colors.white70;
+
   // Gradient colors for enhanced visuals
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [primaryBeige, secondaryBeige],
@@ -19,7 +42,7 @@ class AppTheme {
     end: Alignment.bottomRight,
   );
 
-  // App Theme
+  // Light theme
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -192,6 +215,173 @@ class AppTheme {
       // Divider Theme
       dividerTheme: DividerThemeData(
         color: darkBeige.withOpacity(0.3),
+        thickness: 1,
+        space: 1,
+      ),
+    );
+  }
+
+  // Dark theme
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: brownPrimary,
+        brightness: Brightness.dark,
+        primary: brownPrimary,
+        secondary: brownLight,
+        surface: darkSurface,
+        background: darkBackground,
+      ),
+      scaffoldBackgroundColor: darkBackground,
+
+      appBarTheme: const AppBarTheme(
+        backgroundColor: darkBackground,
+        foregroundColor: darkTextPrimary,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          color: darkTextPrimary,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1.2,
+        ),
+      ),
+
+      cardTheme: CardThemeData(
+        color: darkCardBackground,
+        elevation: 4,
+        shadowColor: Colors.black.withOpacity(0.4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      ),
+
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: brownPrimary,
+          foregroundColor: Colors.white,
+          elevation: 2,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
+
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: brownLight,
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        ),
+      ),
+
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: darkSurface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: darkBeige),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: darkBeige, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: brownPrimary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.redAccent),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        hintStyle: const TextStyle(color: darkTextSecondary, fontSize: 14),
+      ),
+
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: darkSurface,
+        selectedItemColor: brownPrimary,
+        unselectedItemColor: darkTextSecondary,
+        selectedLabelStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+        ),
+        type: BottomNavigationBarType.fixed,
+        elevation: 8,
+      ),
+
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: brownPrimary,
+        foregroundColor: Colors.white,
+        elevation: 6,
+      ),
+
+      iconTheme: const IconThemeData(color: brownLight, size: 24),
+
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: darkTextPrimary,
+          letterSpacing: 0.5,
+        ),
+        displayMedium: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: darkTextPrimary,
+        ),
+        displaySmall: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w600,
+          color: darkTextPrimary,
+        ),
+        headlineMedium: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: darkTextPrimary,
+          letterSpacing: 0.3,
+        ),
+        titleLarge: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: darkTextPrimary,
+        ),
+        titleMedium: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: darkTextPrimary,
+        ),
+        bodyLarge: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.normal,
+          color: darkTextPrimary,
+        ),
+        bodyMedium: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.normal,
+          color: darkTextSecondary,
+        ),
+        labelLarge: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: darkTextPrimary,
+        ),
+      ),
+
+      dividerTheme: DividerThemeData(
+        color: Colors.white.withOpacity(0.12),
         thickness: 1,
         space: 1,
       ),

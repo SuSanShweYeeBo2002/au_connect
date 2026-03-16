@@ -242,8 +242,11 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppTheme.primaryBeige,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: LayoutBuilder(
         builder: (context, constraints) {
           double maxWidth = constraints.maxWidth > 500
@@ -274,7 +277,7 @@ class _SignInPageState extends State<SignInPage> {
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary,
+                          color: Theme.of(context).textTheme.titleLarge?.color,
                           letterSpacing: 2.5,
                         ),
                         textAlign: TextAlign.center,
@@ -314,7 +317,19 @@ class _SignInPageState extends State<SignInPage> {
 
                       // Login Card
                       Container(
-                        decoration: AppTheme.cardDecoration(elevation: 6),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppTheme.darkCardBackground
+                              : AppTheme.cardBackground,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 12,
+                              offset: Offset(0, 6),
+                            ),
+                          ],
+                        ),
                         padding: const EdgeInsets.all(24),
                         child: Column(
                           children: [
@@ -361,7 +376,9 @@ class _SignInPageState extends State<SignInPage> {
                                 Text(
                                   'Remember me',
                                   style: TextStyle(
-                                    color: AppTheme.textSecondary,
+                                    color: isDark
+                                        ? Colors.white
+                                        : theme.textTheme.bodyMedium?.color,
                                     fontSize: 14,
                                   ),
                                 ),
@@ -427,7 +444,11 @@ class _SignInPageState extends State<SignInPage> {
                           ),
                           Text(
                             ' • ',
-                            style: TextStyle(color: AppTheme.textSecondary),
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color,
+                            ),
                           ),
                           Flexible(
                             child: TextButton(

@@ -182,7 +182,7 @@ class _CreateSponsorAdPageState extends State<CreateSponsorAdPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.primaryBeige,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: Text('Create Sponsor Ad'), elevation: 0),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),

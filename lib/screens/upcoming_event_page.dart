@@ -111,7 +111,7 @@ class UpcomingEventPage extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: AppTheme.primaryBeige,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('Campus Clicks')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

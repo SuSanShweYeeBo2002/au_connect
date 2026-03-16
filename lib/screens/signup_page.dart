@@ -174,7 +174,7 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.primaryBeige,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: LayoutBuilder(
         builder: (context, constraints) {
           double maxWidth = constraints.maxWidth > 500
@@ -205,7 +205,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary,
+                          color: Theme.of(context).textTheme.titleLarge?.color,
                           letterSpacing: 2.5,
                         ),
                         textAlign: TextAlign.center,
@@ -302,7 +302,9 @@ class _SignUpPageState extends State<SignUpPage> {
                           Text(
                             'Already have an account?',
                             style: TextStyle(
-                              color: AppTheme.textSecondary,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color,
                               fontSize: 13,
                             ),
                           ),
